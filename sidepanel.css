@@ -1,0 +1,451 @@
+/* Sizes are in rem/em so the panel follows Chrome's font-size setting. */
+
+:root {
+  color-scheme: light dark;
+  --paper: #edf1f5;
+  --field: #ffffff;
+  --ink: #18222e;
+  --muted: #586472;
+  --rule: #d2d9e1;
+  --hover: #e0e6ed;
+  --mark: #ffe45c;
+  --mark-ink: #18222e;
+  --focus: #2f6feb;
+  --warn: #e8590c;
+  --tint-mix: 30%;
+  --target: 1.5rem; /* 24 CSS px at the default size: WCAG 2.5.8 */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #161b22;
+    --field: #0f1419;
+    --ink: #e3e8ee;
+    --muted: #97a3b0;
+    --rule: #29313b;
+    --hover: #212932;
+    --mark: #5e5114;
+    --mark-ink: #fff6c2;
+    --focus: #7aa7ff;
+    --tint-mix: 36%;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* The font size goes on body, not :root, so 1rem stays the user's own setting. */
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 0.8125rem/1.35 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Toolbar */
+
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.75rem 0.75rem 0.375rem;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+}
+
+.search {
+  position: relative;
+}
+
+.search svg {
+  position: absolute;
+  top: 50%;
+  left: 0.625rem;
+  width: 0.875rem;
+  height: 0.875rem;
+  translate: 0 -50%;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.search input {
+  width: 100%;
+  min-height: 2rem;
+  padding: 0 0.625rem 0 1.9rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.5rem;
+  background: var(--field);
+  color: inherit;
+  font: inherit;
+}
+
+.search input:focus-visible {
+  border-color: transparent;
+}
+
+.views {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(4.5rem, 1fr));
+  gap: 0.125rem;
+  margin: 0;
+  padding: 0.125rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: var(--hover);
+}
+
+.views label {
+  position: relative;
+}
+
+.views input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+}
+
+.views span {
+  display: grid;
+  place-items: center;
+  min-height: var(--target);
+  padding: 0.25rem 0;
+  border-radius: 0.375rem;
+  color: var(--muted);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.views input:checked + span {
+  background: var(--field);
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgb(24 34 46 / 0.14);
+}
+
+.views input:focus-visible + span {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-height: var(--target);
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.summary p {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.text-button {
+  min-height: var(--target);
+  padding: 0.125rem 0.5rem;
+  border: 0;
+  border-radius: 0.3125rem;
+  background: none;
+  color: var(--focus);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.text-button:hover {
+  background: var(--hover);
+}
+
+/* Folders: one per website, window, time span or tab group */
+
+main {
+  padding: 0.875rem 0.5rem 2rem;
+}
+
+.folder {
+  --base: var(--muted);
+  --tint: color-mix(in oklab, var(--base) var(--tint-mix), var(--paper));
+  margin-bottom: 1rem;
+}
+
+.folder-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-left: 0.125rem;
+  border-bottom: 2px solid var(--tint);
+}
+
+.folder-head h2 {
+  display: flex;
+  min-width: 0;
+  margin: 0;
+  font: inherit;
+}
+
+.folder-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4375rem;
+  min-width: 0;
+  min-height: var(--target);
+  padding: 0.3125rem 0.625rem 0.25rem 0.5rem;
+  border: 0;
+  border-radius: 0.4375rem 0.4375rem 0 0;
+  background: var(--tint);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.folder-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.folder-count {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.62;
+}
+
+.chevron {
+  flex: none;
+  width: 0.5625rem;
+  height: 0.5625rem;
+  opacity: 0.7;
+  transition: rotate 0.15s ease;
+}
+
+.folder[data-collapsed] .chevron {
+  rotate: -90deg;
+}
+
+.close-all {
+  flex: none;
+  margin-bottom: 0.125rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+  opacity: 0;
+}
+
+.folder-head:hover .close-all,
+.close-all:focus-visible {
+  opacity: 1;
+}
+
+/* Touch screens and keyboards have no hover, so keep the button visible. */
+@media (hover: none) {
+  .close-all {
+    opacity: 1;
+  }
+}
+
+.folder ul {
+  margin: 0;
+  padding: 0.25rem 0 0;
+  list-style: none;
+}
+
+.folder[data-collapsed] ul {
+  display: none;
+}
+
+/* Tab rows */
+
+.tab {
+  display: flex;
+  align-items: center;
+  border-radius: 0.375rem;
+}
+
+.tab:hover {
+  background: var(--hover);
+}
+
+.tab-main {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 0.5625rem;
+  min-width: 0;
+  min-height: 2.25rem;
+  padding: 0.3125rem 0.25rem 0.3125rem 0.4375rem;
+  border: 0;
+  border-radius: 0.375rem;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.favicon {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 0.1875rem;
+}
+
+.favicon-letter {
+  display: grid;
+  place-items: center;
+  background: color-mix(in oklab, var(--base) 40%, var(--paper));
+  font-size: 0.625rem;
+  font-weight: 700;
+}
+
+.tab-text {
+  display: grid;
+  min-width: 0;
+}
+
+.tab-title,
+.tab-detail {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tab-detail {
+  color: var(--muted);
+  font-size: 0.7188rem;
+}
+
+/* The tab you are looking at right now gets a highlighter stroke. */
+.tab-main[aria-current] .tab-title span {
+  padding: 0 0.1875rem;
+  margin-left: -0.1875rem;
+  border-radius: 0.1875rem;
+  background: var(--mark);
+  color: var(--mark-ink);
+  box-decoration-break: clone;
+}
+
+.badge {
+  display: inline-block;
+  margin-left: 0.375rem;
+  padding: 0 0.3125rem;
+  border-radius: 0.25rem;
+  background: var(--hover);
+  color: var(--ink);
+  font-size: 0.6563rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.badge-duplicate {
+  background: color-mix(in oklab, var(--warn) 22%, var(--paper));
+}
+
+.tab:hover .badge {
+  background: var(--paper);
+}
+
+.tab:hover .badge-duplicate {
+  background: color-mix(in oklab, var(--warn) 30%, var(--paper));
+}
+
+.tab-close {
+  display: grid;
+  flex: none;
+  place-items: center;
+  min-width: var(--target);
+  min-height: var(--target);
+  margin-right: 0.1875rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0.3125rem;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  opacity: 0;
+}
+
+.tab-close svg {
+  width: 0.625rem;
+  height: 0.625rem;
+}
+
+.tab:hover .tab-close,
+.tab:focus-within .tab-close {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .tab-close {
+    opacity: 1;
+  }
+}
+
+.tab-close:hover {
+  background: var(--rule);
+  color: var(--ink);
+}
+
+/* Empty search */
+
+.empty {
+  padding: 2rem 0.75rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+.empty p {
+  margin: 0 0 0.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chevron {
+    transition: none;
+  }
+}
+
+/* High contrast mode drops background colours, so mark state with borders. */
+@media (forced-colors: active) {
+  .tab-main[aria-current] {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+
+  .folder-head {
+    border-bottom-color: CanvasText;
+  }
+
+  .folder-tab {
+    border: 1px solid CanvasText;
+    border-bottom: 0;
+  }
+
+  .views input:checked + span {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+
+  .badge {
+    border: 1px solid CanvasText;
+  }
+}

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BetterTabs</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <header class="bar">
+    <h1 class="visually-hidden">Open tabs</h1>
+    <div class="search">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.75" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m10.5 10.5 3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <input id="search" type="search" placeholder="Search tabs" aria-label="Search tabs" aria-keyshortcuts="/" autocomplete="off" spellcheck="false">
+    </div>
+    <fieldset class="views">
+      <legend class="visually-hidden">Organise tabs by</legend>
+      <label><input type="radio" name="view" value="site" checked><span>Sites</span></label>
+      <label><input type="radio" name="view" value="window"><span>Windows</span></label>
+      <label><input type="radio" name="view" value="recent"><span>Recent</span></label>
+      <label><input type="radio" name="view" value="group"><span>Groups</span></label>
+    </fieldset>
+    <div class="summary">
+      <p id="count"></p>
+      <button id="close-dupes" class="text-button" type="button" hidden></button>
+    </div>
+  </header>
+  <main id="list"></main>
+  <!-- Announces search results and closed tabs. Kept separate so routine tab updates stay silent. -->
+  <p id="status" class="visually-hidden" role="status"></p>
+  <script src="sidepanel.js"></script>
+</body>
+</html>
