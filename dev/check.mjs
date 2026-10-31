@@ -56,6 +56,10 @@ for (const permission of requested) {
   if (!(permission in usage)) fail(`permission ${permission} has no usage check in dev/check.mjs`);
 }
 
+// The changelog covers the current version
+const changelog = readFileSync(join(root, 'CHANGELOG.md'), 'utf8');
+if (!changelog.includes(`## ${manifest.version}\n`)) fail(`CHANGELOG.md has no "## ${manifest.version}" entry`);
+
 // Every permission needs a store justification
 const store = readFileSync(join(root, 'CHROMEWEBSTORE.md'), 'utf8');
 for (const permission of requested) {

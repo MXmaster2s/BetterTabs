@@ -110,7 +110,8 @@ npx modern-web-guidance@latest install --choose
 - Group colours for sites are derived from the hostname (`hueOf`). Tab group colours come from Chrome (`GROUP_COLOURS`).
 - Copy is plain, sentence case, active voice ("Close all", "Search tabs"). Errors say what happened and how to fix it.
 - When you add or remove a permission, update `manifest.json`, `CHROMEWEBSTORE.md` and `docs/SPEC.md` together.
-- Bump `version` in `manifest.json` for any user-visible change, and add a line to `CHANGELOG.md`.
+- Bump `version` in `manifest.json` for any user-visible change, and add a line to `CHANGELOG.md` under the same version.
+- **Every new or changed feature updates the docs in the same change.** `README.md` (the **Features** list, and the **Keyboard** table if keys changed) is what people read first on GitHub, so it must describe what the extension does today. Also update `docs/SPEC.md` (behaviour) and, when users see it, the description in `CHROMEWEBSTORE.md`. `node dev/check.mjs` fails if `CHANGELOG.md` has no entry for the manifest version.
 
 ## Things to leave alone
 

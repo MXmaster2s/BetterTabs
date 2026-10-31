@@ -1,16 +1,34 @@
 # BetterTabs
 
-A Chrome extension that shows all your open tabs in the side panel, grouped by website.
-
-- **Sites** groups tabs by website, busiest first. **Windows**, **Recent** and **Groups** organise the same tabs by window, by when you last used them, or by Chrome tab group.
-- Search by title or address.
-- **Rename any tab**: right-click it and choose **Edit name** (or press `F2`). The name lasts until Chrome closes.
-- **Show current tab** (the target button next to the search box) scrolls the list to the tab you're on.
-- Tabs with exactly the same address are marked **Duplicate**, and **Close duplicates** keeps one copy of each.
-- Click a tab to switch to it, even in another window. Close one tab, or every tab on a site, in one click. Closing happens straight away.
-- Updates live as you browse. Keyboard friendly, with light, dark and high-contrast modes.
+A Chrome extension that puts every open tab in Chrome's side panel and organises them so you can find the one you want. Click the toolbar icon and the panel opens on the right, staying open while you browse.
 
 Nothing leaves your browser. There is no server, account or analytics.
+
+## Features
+
+**Organise**
+- **Sites** (the default) groups tabs by website, busiest first, each site in its own colour. Chrome's own pages and local files get their own folders at the end.
+- **Windows**, **Recent** and **Groups** show the same tabs by window, by when you last used them (last hour, earlier today, this week, older), or by Chrome tab group with Chrome's group colours.
+- Folders collapse, and BetterTabs remembers which ones you collapsed and which view you chose.
+- Pinned and playing tabs are labelled.
+
+**Find**
+- Search by name, page title or address as you type.
+- **Show current tab**: the target button next to the search box scrolls the list to the tab you're on. It clears a search or expands a folder if either is hiding it.
+- Click any tab to switch to it, even if it's in another window.
+
+**Rename**
+- Right-click a tab and choose **Edit name** (or select it and press `F2`) to give it a name you'll recognise. Renamed tabs are badged, and **Reset name** brings the original back. Names last until Chrome closes.
+
+**Clean up**
+- Tabs with exactly the same address are marked **Duplicate**. **Close duplicates** keeps one copy of each, preferring the tab you're looking at.
+- Close a tab with its × button, or close every tab in a folder with **Close all**. Closing happens straight away, and Chrome's **Reopen closed tab** (`Ctrl/Cmd+Shift+T`) undoes it.
+
+**Comfortable**
+- Updates live as you open, close and switch tabs.
+- Works with the keyboard alone, with screen readers, in light and dark mode, in high-contrast mode, and with Chrome's font-size setting.
+
+See [CHANGELOG.md](CHANGELOG.md) for what changed in each version. The current version is in [manifest.json](manifest.json).
 
 ## Install
 
@@ -85,7 +103,7 @@ dev/                checks, preview page, mock Chrome APIs, icon script
 
 ## Contributing
 
-Issues and pull requests are welcome. Run `node dev/check.mjs` first, keep the no-build, no-dependency rule, and update `docs/SPEC.md` when behaviour changes.
+Issues and pull requests are welcome. Run `node dev/check.mjs` first and keep the no-build, no-dependency rule. When you add or change a feature, update the **Features** list above, `docs/SPEC.md` and `CHANGELOG.md` in the same pull request.
 
 ## License
 
