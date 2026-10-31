@@ -9,9 +9,14 @@
 <body>
   <header class="bar">
     <h1 class="visually-hidden">Open tabs</h1>
-    <div class="search">
-      <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.75" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m10.5 10.5 3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-      <input id="search" type="search" placeholder="Search tabs" aria-label="Search tabs" aria-keyshortcuts="/" autocomplete="off" spellcheck="false">
+    <div class="finder">
+      <div class="search">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.75" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m10.5 10.5 3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <input id="search" type="search" placeholder="Search tabs" aria-label="Search tabs" aria-keyshortcuts="/" autocomplete="off" spellcheck="false">
+      </div>
+      <button id="locate" class="icon-button" type="button" aria-label="Show current tab" title="Show current tab">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.5v3M8 11.5v3M1.5 8h3M11.5 8h3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
     </div>
     <fieldset class="views">
       <legend class="visually-hidden">Organise tabs by</legend>
@@ -26,6 +31,10 @@
     </div>
   </header>
   <main id="list"></main>
+  <div id="menu" popover role="menu" aria-label="Tab actions">
+    <button type="button" role="menuitem" data-action="rename">Edit name</button>
+    <button type="button" role="menuitem" data-action="reset" hidden>Reset name</button>
+  </div>
   <!-- Announces search results and closed tabs. Kept separate so routine tab updates stay silent. -->
   <p id="status" class="visually-hidden" role="status"></p>
   <script src="sidepanel.js"></script>

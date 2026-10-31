@@ -4,6 +4,8 @@ A Chrome extension that shows all your open tabs in the side panel, grouped by w
 
 - **Sites** groups tabs by website, busiest first. **Windows**, **Recent** and **Groups** organise the same tabs by window, by when you last used them, or by Chrome tab group.
 - Search by title or address.
+- **Rename any tab**: right-click it and choose **Edit name** (or press `F2`). The name lasts until Chrome closes.
+- **Show current tab** (the target button next to the search box) scrolls the list to the tab you're on.
 - Tabs with exactly the same address are marked **Duplicate**, and **Close duplicates** keeps one copy of each.
 - Click a tab to switch to it, even in another window. Close one tab, or every tab on a site, in one click. Closing happens straight away.
 - Updates live as you browse. Keyboard friendly, with light, dark and high-contrast modes.
@@ -29,6 +31,7 @@ After changing a file, click the reload arrow on the extension's card.
 | `Esc` | Clear the search |
 | `↓` / `↑` | Move through tabs |
 | `Enter` | Switch to the tab (from search: the first match) |
+| `F2` | Rename the tab (or right-click it and choose **Edit name**) |
 | `Delete` | Close the tab |
 
 ## Build it with your coding agent

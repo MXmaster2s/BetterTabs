@@ -25,6 +25,9 @@ const state = {
   windowId: null,
   duplicates: new Set(),
   extraCopies: [],
+  names: new Map(), // tab id -> name typed by the user
+  editing: null, // id of the tab whose name is being edited
+  menuTab: null, // id of the tab the context menu is open for
 };
 
 const list = document.getElementById('list');
@@ -32,6 +35,9 @@ const search = document.getElementById('search');
 const count = document.getElementById('count');
 const liveStatus = document.getElementById('status');
 const closeDupes = document.getElementById('close-dupes');
+const locate = document.getElementById('locate');
+const menu = document.getElementById('menu');
+const resetName = menu.querySelector('[data-action="reset"]');
 
 let pendingFocus = null;
 
@@ -68,6 +74,15 @@ function plural(n, word) {
 
 function urlOf(tab) {
   return tab.url || tab.pendingUrl || '';
+}
+
+// What the page calls itself, and what the list shows: the user's name wins.
+function originalTitle(tab) {
+  return tab.title || urlOf(tab) || 'New tab';
+}
+
+function labelOf(tab) {
+  return state.names.get(tab.id) || originalTitle(tab);
 }
 
 function siteOf(url) {
@@ -139,18 +154,39 @@ async function load() {
     chrome.tabGroups.query({}),
     chrome.windows.getCurrent(),
   ]);
+  // A name was opened for editing while these were loading: redrawing now would
+  // throw away the text box. Try again once editing finishes.
+  if (state.editing != null) {
+    stale = true;
+    return;
+  }
   state.windowId = current.id;
   state.groups = new Map(groups.map((g) => [g.id, g]));
   state.tabs = sortTabs(tabs);
+  forgetClosedNames();
   findDuplicates();
   render();
+}
+
+// A name belongs to its tab and goes when the tab does.
+function forgetClosedNames() {
+  const open = new Set(state.tabs.map((t) => t.id));
+  let changed = false;
+  for (const id of state.names.keys()) {
+    if (!open.has(id)) {
+      state.names.delete(id);
+      changed = true;
+    }
+  }
+  if (changed) saveNames();
 }
 
 let refreshTimer;
 let stale = false;
 function refresh() {
-  // A hidden panel can't be seen, so skip the work and catch up when it returns.
-  if (document.hidden) {
+  // A hidden panel can't be seen, and a half-typed name must not be redrawn away.
+  // Both catch up later through the same flag.
+  if (document.hidden || state.editing != null) {
     stale = true;
     return;
   }
@@ -298,7 +334,7 @@ function render() {
   const words = state.query.toLowerCase().split(/\s+/).filter(Boolean);
   const shown = words.length
     ? state.tabs.filter((t) => {
-        const text = `${t.title ?? ''} ${urlOf(t)}`.toLowerCase();
+        const text = `${state.names.get(t.id) ?? ''} ${t.title ?? ''} ${urlOf(t)}`.toLowerCase();
         return words.every((w) => text.includes(w));
       })
     : state.tabs;
@@ -332,6 +368,7 @@ function renderFolder(folder) {
     'section',
     {
       class: 'folder',
+      'data-folder': id,
       'data-collapsed': collapsed,
       style: folder.colour ? `--base: ${folder.colour}` : null,
     },
@@ -367,8 +404,16 @@ function renderFolder(folder) {
 
 function renderTab(tab) {
   const url = urlOf(tab);
-  const title = tab.title || url || 'New tab';
+  const title = labelOf(tab);
+  const renamed = state.names.has(tab.id);
   const current = tab.active && tab.windowId === state.windowId;
+  const rowProps = {
+    class: 'tab',
+    'data-id': tab.id,
+    style: state.view === 'site' ? null : `--base: hsl(${hueOf(siteOf(url).key)} 62% 50%)`,
+  };
+
+  if (state.editing === tab.id) return renderEditor(tab, rowProps);
 
   let detail;
   if (state.view === 'site') detail = pathOf(url);
@@ -377,18 +422,15 @@ function renderTab(tab) {
 
   return h(
     'li',
-    {
-      class: 'tab',
-      'data-id': tab.id,
-      style: state.view === 'site' ? null : `--base: hsl(${hueOf(siteOf(url).key)} 62% 50%)`,
-    },
+    rowProps,
     h(
       'button',
       {
         class: 'tab-main',
         type: 'button',
-        title: url,
+        title: renamed ? `${title}\nOriginal name: ${originalTitle(tab)}\n${url}` : url,
         'aria-current': current ? 'true' : null,
+        'aria-keyshortcuts': 'F2',
         onclick: () => activate(tab),
       },
       favicon(url),
@@ -400,6 +442,7 @@ function renderTab(tab) {
           'span',
           { class: 'tab-detail' },
           detail,
+          renamed && h('span', { class: 'badge' }, 'Renamed'),
           state.duplicates.has(tab.id) && h('span', { class: 'badge badge-duplicate' }, 'Duplicate'),
           tab.pinned && h('span', { class: 'badge' }, 'Pinned'),
           tab.audible && h('span', { class: 'badge' }, 'Playing'),
@@ -420,6 +463,48 @@ function renderTab(tab) {
   );
 }
 
+// The row while its name is being edited: a text box in place of the title.
+function renderEditor(tab, rowProps) {
+  const input = h('input', {
+    class: 'rename-input',
+    type: 'text',
+    value: labelOf(tab),
+    placeholder: originalTitle(tab),
+    maxlength: 120,
+    'aria-label': 'Tab name',
+    'aria-describedby': 'rename-hint',
+    autocomplete: 'off',
+    spellcheck: 'false',
+  });
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      finishEdit(tab.id, input.value, { refocus: true });
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      finishEdit(tab.id, null, { refocus: true });
+    }
+  });
+  // Clicking away keeps what was typed.
+  input.addEventListener('blur', () => finishEdit(tab.id, input.value));
+
+  return h(
+    'li',
+    { ...rowProps, class: 'tab tab-editing' },
+    h(
+      'div',
+      { class: 'tab-main' },
+      favicon(urlOf(tab)),
+      h(
+        'span',
+        { class: 'tab-text' },
+        input,
+        h('span', { class: 'tab-detail', id: 'rename-hint' }, 'Enter to save, Esc to cancel. Empty restores the original.'),
+      ),
+    ),
+  );
+}
+
 function renderEmpty() {
   if (!state.query) return h('div', { class: 'empty' }, h('p', null, 'No tabs are open.'));
   return h(
@@ -431,7 +516,7 @@ function renderEmpty() {
 }
 
 function visibleRows() {
-  return [...list.querySelectorAll('.folder:not([data-collapsed]) .tab-main')];
+  return [...list.querySelectorAll('.folder:not([data-collapsed]) button.tab-main')];
 }
 
 // ---------- Actions ----------
@@ -439,6 +524,99 @@ function visibleRows() {
 async function activate(tab) {
   await chrome.tabs.update(tab.id, { active: true });
   if (tab.windowId !== state.windowId) await chrome.windows.update(tab.windowId, { focused: true });
+}
+
+// ----- Renaming -----
+
+function startEdit(id) {
+  if (!state.tabs.some((t) => t.id === id)) return;
+  state.editing = id;
+  render();
+  const input = list.querySelector('.rename-input');
+  input?.focus();
+  input?.select();
+}
+
+// `value` null means cancel. An empty or unchanged-from-original name clears the custom name.
+function finishEdit(id, value, { refocus = false } = {}) {
+  if (state.editing !== id) return; // already finished; removing the input fires blur again
+  state.editing = null;
+
+  const tab = state.tabs.find((t) => t.id === id);
+  if (value !== null && tab) {
+    const name = value.trim();
+    if (!name || name === originalTitle(tab)) state.names.delete(id);
+    else state.names.set(id, name);
+    saveNames();
+  }
+
+  render();
+  if (refocus) list.querySelector(`.tab[data-id="${id}"] button.tab-main`)?.focus();
+  if (value !== null) announce(state.names.has(id) ? 'Name saved' : 'Original name restored');
+  refresh(); // catch up on tab changes held back while editing
+}
+
+function clearName(id) {
+  if (!state.names.delete(id)) return;
+  saveNames();
+  render();
+  announce('Original name restored');
+}
+
+function saveNames() {
+  chrome.storage.session.set({ names: Object.fromEntries(state.names) });
+}
+
+// ----- Context menu -----
+
+function openMenu(row, x, y) {
+  const id = Number(row.dataset.id);
+  state.menuTab = id;
+  resetName.hidden = !state.names.has(id);
+
+  // Focus the row first so focus returns to it when the menu closes.
+  row.querySelector('button.tab-main')?.focus();
+  menu.showPopover();
+
+  // Keyboard-opened menus have no pointer position, so sit under the row instead.
+  const box = row.getBoundingClientRect();
+  const wanted = x || y ? { x, y } : { x: box.left + 24, y: box.bottom };
+  const { width, height } = menu.getBoundingClientRect();
+  menu.style.left = `${Math.max(4, Math.min(wanted.x, innerWidth - width - 4))}px`;
+  menu.style.top = `${Math.max(4, Math.min(wanted.y, innerHeight - height - 4))}px`;
+  menu.querySelector('[role="menuitem"]:not([hidden])').focus();
+}
+
+function menuItems() {
+  return [...menu.querySelectorAll('[role="menuitem"]:not([hidden])')];
+}
+
+// ----- Finding the current tab -----
+
+function showCurrentTab() {
+  const current = state.tabs.find((t) => t.active && t.windowId === state.windowId);
+  if (!current) return;
+
+  const rowFor = () => list.querySelector(`.tab[data-id="${current.id}"]`);
+
+  // Undo whatever is hiding it: a search that filters it out, or a collapsed folder.
+  if (state.query && !rowFor()) setQuery('');
+  const folder = rowFor()?.closest('.folder');
+  if (folder?.hasAttribute('data-collapsed')) {
+    state.collapsed.delete(folder.dataset.folder);
+    save();
+    render();
+  }
+
+  const row = rowFor();
+  if (!row) return;
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  row.scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' });
+  row.querySelector('button.tab-main')?.focus({ preventScroll: true });
+
+  // A short pulse shows where it landed. The highlighter stroke stays after it fades.
+  row.setAttribute('data-found', '');
+  setTimeout(() => row.removeAttribute('data-found'), 1400);
 }
 
 async function closeTabs(ids, focusIndex = null) {
@@ -486,6 +664,9 @@ async function restore() {
   const saved = await chrome.storage.local.get(['view', 'collapsed']);
   if (VIEWS.includes(saved.view)) state.view = saved.view;
   state.collapsed = new Set(saved.collapsed ?? []);
+  // Names live in memory only (session storage): they last until Chrome closes.
+  const session = await chrome.storage.session.get('names');
+  state.names = new Map(Object.entries(session.names ?? {}).map(([id, name]) => [Number(id), name]));
   document.querySelector(`input[name="view"][value="${state.view}"]`).checked = true;
 }
 
@@ -499,7 +680,41 @@ for (const input of document.querySelectorAll('input[name="view"]')) {
 
 closeDupes.addEventListener('click', () => closeTabs(state.extraCopies));
 
+locate.addEventListener('click', showCurrentTab);
+
+list.addEventListener('contextmenu', (e) => {
+  const row = e.target.closest('.tab');
+  // While a name is being edited, leave the browser's own menu (copy, paste) alone.
+  if (!row || row.classList.contains('tab-editing')) return;
+  e.preventDefault();
+  openMenu(row, e.clientX, e.clientY);
+});
+
+menu.addEventListener('click', (e) => {
+  const action = e.target.closest('[data-action]')?.dataset.action;
+  if (!action) return;
+  const id = state.menuTab;
+  menu.hidePopover();
+  if (action === 'rename') startEdit(id);
+  else clearName(id);
+});
+
+menu.addEventListener('keydown', (e) => {
+  const items = menuItems();
+  const i = items.indexOf(document.activeElement);
+  if (e.key === 'ArrowDown') items[(i + 1) % items.length].focus();
+  else if (e.key === 'ArrowUp') items[(i - 1 + items.length) % items.length].focus();
+  else if (e.key === 'Home') items[0].focus();
+  else if (e.key === 'End') items.at(-1).focus();
+  else if (e.key === 'Tab') menu.hidePopover();
+  else return;
+  if (e.key !== 'Tab') e.preventDefault();
+});
+
 document.addEventListener('keydown', (e) => {
+  // The rename box and the context menu handle their own keys.
+  if (e.target.closest?.('.rename-input, #menu')) return;
+
   const rows = visibleRows();
   const typing = e.target === search;
 
@@ -530,6 +745,9 @@ document.addEventListener('keydown', (e) => {
   } else if (e.key === 'ArrowUp') {
     e.preventDefault();
     (rows[i - 1] ?? search).focus();
+  } else if (e.key === 'F2') {
+    e.preventDefault();
+    startEdit(Number(rows[i].closest('.tab').dataset.id));
   } else if (e.key === 'Delete') {
     e.preventDefault();
     closeTabs([Number(rows[i].closest('.tab').dataset.id)], i);

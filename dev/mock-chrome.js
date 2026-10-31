@@ -57,6 +57,7 @@
   const event = () => ({ addListener: (fn) => listeners.push(fn) });
   const fire = () => listeners.forEach((fn) => fn());
   const store = {};
+  const sessionStore = {};
 
   window.chrome = {
     tabs: {
@@ -99,6 +100,10 @@
       local: {
         get: async () => ({ ...store }),
         set: async (values) => Object.assign(store, values),
+      },
+      session: {
+        get: async () => ({ ...sessionStore }),
+        set: async (values) => Object.assign(sessionStore, values),
       },
     },
     runtime: {},

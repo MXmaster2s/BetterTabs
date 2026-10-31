@@ -45,7 +45,8 @@ Reading Chrome → organising → drawing → acting → wiring, in that order i
 - `render()` filters by the search query, then draws folders (`renderFolder`) and rows (`renderTab`).
 - `findDuplicates()` fills `state.duplicates` and `state.extraCopies`.
 - `closeTabs`, `activate`, `toggle`, `setView`, `setQuery` are the user actions.
-- State that survives restarts (`view`, `collapsed`) lives in `chrome.storage.local`.
+- `startEdit` / `finishEdit` rename a tab inline; `openMenu` shows the right-click menu (a `popover`); `showCurrentTab` scrolls to the active tab.
+- State that survives restarts (`view`, `collapsed`) lives in `chrome.storage.local`. Custom tab names live in `chrome.storage.session` (memory only, gone when Chrome closes).
 
 ## Install in Chrome
 
@@ -80,7 +81,9 @@ python3 -m http.server 8741
 
 Open `http://localhost:8741/dev/preview.html` at a narrow width (about 380 px wide) in light and dark mode. The preview loads the real `sidepanel.*` files and replaces `chrome.*` with `dev/mock-chrome.js`.
 
-Check: every view (Sites, Windows, Recent, Groups), search, collapse and expand, closing a tab, "Close duplicates", keyboard use (`/`, arrows, `Enter`, `Delete`), and the console for errors.
+Check: every view (Sites, Windows, Recent, Groups), search, collapse and expand, closing a tab, "Close duplicates", renaming (right-click, `F2`, `Enter`, `Esc`, reset), the "Show current tab" button, keyboard use (`/`, arrows, `Enter`, `Delete`), and the console for errors.
+
+Two preview quirks: some automated browsers don't send a real `contextmenu` event on right-click (dispatch one with `new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX, clientY })`), and a hidden browser pane pauses smooth scrolling, so stub `matchMedia('(prefers-reduced-motion: reduce)')` to test scroll position.
 
 If you add a Chrome API call, add the matching fake to `dev/mock-chrome.js`.
 
@@ -113,4 +116,4 @@ npx modern-web-guidance@latest install --choose
 
 - Don't add a build system, TypeScript or a UI framework.
 - Don't add `host_permissions` or content scripts. The extension never reads page content.
-- Don't store tab titles or URLs anywhere. Only the chosen view and collapsed folders are saved.
+- Don't store tab titles or URLs anywhere. Only the chosen view and collapsed folders are saved to disk; names the user types are kept in memory only (`storage.session`), keyed by tab id, and dropped when the tab closes.

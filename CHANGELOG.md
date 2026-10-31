@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.0
+
+- Rename a tab: right-click it and choose **Edit name**, or press `F2`. Renamed tabs show a **Renamed** badge, and **Reset name** puts the original back. Names last until Chrome closes.
+- A **Show current tab** button next to the search box scrolls the list to the tab you're on, expanding its folder or clearing a search if needed.
+
 ## 1.1.0
 
 - Renamed to BetterTabs.
