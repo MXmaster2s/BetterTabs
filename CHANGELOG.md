@@ -1,5 +1,13 @@
 # Changelog
 
+What changed in BetterTabs, newest first. The version being worked on is in `extension/manifest.json`.
+
+## 1.2.1
+
+- Nothing changes in the extension itself. The repository is reorganised: the files Chrome loads now live in `extension/`, so **Load unpacked** takes that folder. Tools moved to `scripts/` and `preview/`.
+- Added a `node scripts/package.mjs` command that builds the Web Store zip, release steps in `docs/RELEASING.md`, and contributor files and templates.
+- The check now also fails when a document links to a file that does not exist.
+
 ## 1.2.0
 
 - Rename a tab: right-click it and choose **Edit name**, or press `F2`. Renamed tabs show a **Renamed** badge, and **Reset name** puts the original back. Names last until Chrome closes.

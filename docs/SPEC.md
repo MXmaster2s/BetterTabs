@@ -16,8 +16,8 @@ Single purpose: show and organise your open tabs.
 
 ## Pieces
 
-1. **Service worker** (`background.js`): calls `chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true })` so clicking the toolbar icon opens the panel.
-2. **Side panel page** (`sidepanel.html`, `.css`, `.js`): everything the user sees.
+1. **Service worker** (`extension/background.js`): calls `chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true })` so clicking the toolbar icon opens the panel.
+2. **Side panel page** (`extension/sidepanel.html`, `.css`, `.js`): everything the user sees.
 
 ## Layout of the panel
 

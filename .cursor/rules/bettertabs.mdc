@@ -1,0 +1,6 @@
+---
+description: BetterTabs: how to work in this repository
+alwaysApply: true
+---
+
+Before doing anything in this repository, read `AGENTS.md` at its root and follow it. It lists the hard rules, where each file lives, and the three commands that prove a change works.

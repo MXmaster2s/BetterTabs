@@ -1,6 +1,6 @@
 # Chrome Web Store listing
 
-Copy these into the Chrome Web Store Developer Dashboard. Keep this file in step with `manifest.json`: `node dev/check.mjs` fails if a permission has no justification here.
+Copy these into the Chrome Web Store Developer Dashboard. Keep this file in step with `extension/manifest.json`: `node scripts/check.mjs` fails if a permission has no justification here.
 
 ## Name
 

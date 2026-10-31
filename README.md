@@ -1,8 +1,19 @@
 # BetterTabs
 
-A Chrome extension that puts every open tab in Chrome's side panel and organises them so you can find the one you want. Click the toolbar icon and the panel opens on the right, staying open while you browse.
+Every open tab, from every window, in Chrome's side panel, grouped by website.
 
-Nothing leaves your browser. There is no server, account or analytics.
+Click the toolbar icon and the panel opens on the right and stays open while you browse. Nothing leaves your browser: there is no server, account or analytics.
+
+## Install
+
+No build step. Chrome 121 or later.
+
+1. Download this repository (**Code → Download ZIP**, then unzip it) or clone it.
+2. Open `chrome://extensions` and turn on **Developer mode** (top right).
+3. Click **Load unpacked** and choose the `extension` folder inside the repository.
+4. Pin BetterTabs from the puzzle-piece menu, then click its icon.
+
+After changing a file, click the reload arrow on the extension's card.
 
 ## Features
 
@@ -28,20 +39,7 @@ Nothing leaves your browser. There is no server, account or analytics.
 - Updates live as you open, close and switch tabs.
 - Works with the keyboard alone, with screen readers, in light and dark mode, in high-contrast mode, and with Chrome's font-size setting.
 
-See [CHANGELOG.md](CHANGELOG.md) for what changed in each version. The current version is in [manifest.json](manifest.json).
-
-## Install
-
-No build step. Chrome 121 or later.
-
-1. Download this repository (**Code → Download ZIP**, then unzip it) or clone it.
-2. Open `chrome://extensions` and turn on **Developer mode** (top right).
-3. Click **Load unpacked** and choose the folder that contains `manifest.json`.
-4. Pin BetterTabs from the puzzle-piece menu, then click its icon. The panel opens on the right.
-
-After changing a file, click the reload arrow on the extension's card.
-
-## Keyboard
+### Keyboard
 
 | Key | Action |
 | --- | --- |
@@ -52,58 +50,62 @@ After changing a file, click the reload arrow on the extension's card.
 | `F2` | Rename the tab (or right-click it and choose **Edit name**) |
 | `Delete` | Close the tab |
 
-## Build it with your coding agent
+## Work on it with your coding agent
 
-This repository is written so an agent can install, change and verify the extension without help from you. Point your agent at the repo and give it a prompt like one of these.
+The repository is written so an agent can install, change and verify the extension without help from you.
 
-Install it:
+1. Clone the repository and open the folder in the tool you code with: an agent in your editor or terminal.
+2. Say what you want. If your tool does not pick up the instructions by itself, tell it: "read AGENTS.md".
 
-> Read AGENTS.md in this repository, then load the extension into my Chrome and confirm the side panel opens.
+For example:
 
-Change it:
+> Read AGENTS.md, then load the extension into my Chrome and confirm the side panel opens.
 
-> Read AGENTS.md. Add a "Pinned" view that lists only pinned tabs. Follow the repo's conventions, update docs/SPEC.md, and verify with `node dev/check.mjs` and the preview page.
+> Read AGENTS.md. Add a "Pinned" view that lists only pinned tabs. Follow the repo's conventions and update the docs.
 
-Make your own version:
+> Read docs/SPEC.md. Build a Chrome side panel extension that behaves as described, but organise tabs by &lt;your idea&gt; instead of by website.
 
-> Read docs/SPEC.md. Build a Chrome side panel extension that behaves as described, but organise tabs by <your idea> instead of by website.
+The agent works through the rules in [AGENTS.md](AGENTS.md), proves its change with the checks and the preview page, and updates the docs in the same change. Only real Chrome shows favicons, tab groups and live updates; for that, [Chrome DevTools for agents](https://developer.chrome.com/docs/extensions/ai/build-with-ai) lets an agent install, reload and inspect an extension in a running Chrome.
 
-What the agent gets:
+## What is inside
 
-| File | Purpose |
+| | |
 | --- | --- |
-| [AGENTS.md](AGENTS.md) | Constraints, file map, install steps and how to verify a change |
-| [docs/SPEC.md](docs/SPEC.md) | Complete behaviour spec, enough to rebuild from scratch |
-| [dev/check.mjs](dev/check.mjs) | Dependency-free checks for the manifest, scripts and permissions |
-| [dev/preview.html](dev/preview.html) | The real panel in an ordinary browser tab, using fake tabs |
-| [CHROMEWEBSTORE.md](CHROMEWEBSTORE.md) | Store listing text and a justification for every permission |
+| [`extension/`](extension) | The extension: manifest, service worker, side panel page, styles, logic and icons. This is the folder Chrome loads and the Web Store zip is made from. |
+| [`docs/`](docs) | The behaviour spec, the store listing, the release steps and the scripts reference. |
+| [`scripts/`](scripts) | The checks, the zip builder and the icon drawing script. No dependencies. |
+| [`preview/`](preview) | The real panel in an ordinary browser tab, with fake tabs and a fake `chrome.*`. |
+| [`.github/`](.github) | CI, issue and pull request templates, and the Copilot pointer to `AGENTS.md`. |
 
-The preview and checks are quick, but only real Chrome shows favicons, tab groups and live updates. For that, [Chrome DevTools for agents](https://developer.chrome.com/docs/extensions/ai/build-with-ai) lets an agent install, reload and inspect an extension in a running Chrome.
+## Requirements
 
-## Develop
+- Chrome 121 or later (side panel API and `tab.lastAccessed`).
+- To work on it: Node.js 18 or later for the checks; Python 3 for the preview server and the icon script. Nothing to install.
+
+## By hand
 
 ```bash
-node dev/check.mjs                 # manifest, syntax and permission checks
-python3 -m http.server 8741        # then open http://localhost:8741/dev/preview.html
-python3 dev/make-icons.py          # redraw the toolbar icons
+node scripts/check.mjs             # manifest, syntax, permissions, changelog and docs
+python3 -m http.server 8741        # then open http://localhost:8741/preview/
+node scripts/package.mjs           # dist/bettertabs-<version>.zip for the Web Store
+python3 scripts/make-icons.py      # redraw the toolbar icons
 ```
 
-## Project layout
+## Documentation
 
-```
-manifest.json       extension manifest (Manifest V3)
-background.js       opens the side panel when the icon is clicked
-sidepanel.html      panel markup
-sidepanel.css       panel styles
-sidepanel.js        panel logic
-icons/              toolbar icons
-docs/SPEC.md        behaviour spec
-dev/                checks, preview page, mock Chrome APIs, icon script
-```
+| Read | For |
+| --- | --- |
+| [AGENTS.md](AGENTS.md) | The rules and file map for agents and people changing the code |
+| [docs/SPEC.md](docs/SPEC.md) | Everything BetterTabs does, precisely enough to rebuild it |
+| [docs/scripts.md](docs/scripts.md) | What each command checks or changes |
+| [docs/RELEASING.md](docs/RELEASING.md) | Cutting a release and submitting to the Chrome Web Store |
+| [docs/store-listing.md](docs/store-listing.md) | Store text, privacy policy and a justification for each permission |
+| [CHANGELOG.md](CHANGELOG.md) | What changed in each version |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | How to propose and submit a change |
 
 ## Contributing
 
-Issues and pull requests are welcome. Run `node dev/check.mjs` first and keep the no-build, no-dependency rule. When you add or change a feature, update the **Features** list above, `docs/SPEC.md` and `CHANGELOG.md` in the same pull request.
+Issues and pull requests are welcome; start with [CONTRIBUTING.md](CONTRIBUTING.md). Keep the no-build, no-dependency rule, and update the docs in the same pull request.
 
 ## License
 

@@ -1,6 +1,6 @@
 """Draws the toolbar icons (a folder with a highlighted tab) as PNGs.
 
-Run with: python3 dev/make-icons.py
+Run with: python3 scripts/make-icons.py
 Uses only the standard library, so there is nothing to install.
 """
 
@@ -65,7 +65,7 @@ def png(size, raw):
 
 
 if __name__ == "__main__":
-    out = Path(__file__).resolve().parent.parent / "icons"
+    out = Path(__file__).resolve().parent.parent / "extension" / "icons"
     out.mkdir(exist_ok=True)
     for size in (16, 32, 48, 128):
         (out / f"icon{size}.png").write_bytes(draw(size))
