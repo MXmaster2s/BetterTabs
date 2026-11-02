@@ -27,4 +27,4 @@ Open <http://localhost:8742/>. The build copies `site/`, `extension/` and `previ
 
 ## Publishing
 
-Any static host works: publish the contents of `dist/site/`. With GitHub Pages, build in a workflow and upload `dist/site` as the Pages artifact. The pages use relative links, so they work from a project path such as `/BetterTabs/` as well as from a domain root.
+The site is published at <https://bettertabs.fyi> by GitHub Pages. `.github/workflows/pages.yml` runs the checks, builds `dist/site` and deploys it on every push to `main` that touches `site/`, `extension/`, `preview/` or the build script. `site/CNAME` names the domain; the domain's DNS records point at GitHub Pages. To publish somewhere else, serve the contents of `dist/site/` from any static host. The pages use relative links, so they also work from a project path such as `/BetterTabs/`.
