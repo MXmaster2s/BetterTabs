@@ -128,11 +128,19 @@ Two tabs are duplicates only if their URLs are exactly equal (including `#` frag
 [longbook](https://longbook.app) is a Mac and iPhone app for recurring money. This feature hands a billing or price page to its Add Commitment screen.
 
 - **Which pages.** Judged from the address only, never the page. `http` and `https` addresses where the host starts with `billing.`, `pricing.` or `checkout.`, or where any path segment (or segment of the `#` route) equals `billing`, `pricing`, `price(s)`, `plan(s)`, `subscription(s)`, `subscribe`, `upgrade`, `checkout`, `invoice(s)`, `payment-method(s)` or `manage-subscription`, ignoring case. `/blog/our-plans-for-2026` does not match; `/en/pricing?ref=x` and `app.example.com/#/settings/plans` do.
+- **Can be turned off.** The setting **Show Add to longbook on billing and price pages** (on by default) hides the button and the menu items everywhere when it is off.
 - **Only on a Mac.** The button and the menu item are not offered on other systems, because longbook has no version for them (`navigator.userAgentData.platform`, falling back to `navigator.platform`).
 - **Where.** A small **Add to longbook** button on that tab's row, between the title and the close button (accessible name "Add <Name> to longbook"), and an **Add to longbook** item in the tab's context menu.
 - **The name.** The site's own name: `www.` removed, the registrable label taken (one label further left for `co.uk`-style endings), first letter capitalised. `github.com` gives `Github`; `billing.example.co.uk` gives `Example`. An IP address is used as it is.
 - **The link.** `longbook://add?name=<name, percent-encoded>&from=bettertabs`, opened by clicking a temporary link in the panel so Chrome shows its usual "Open longbook?" prompt the first time. longbook is expected to open its Add Commitment screen with the name filled in and everything else empty. BetterTabs sends nothing else, and nothing leaves the computer.
-- **If longbook is not installed.** Chrome does not say whether an app answered, so BetterTabs does not guess. While any shown tab offers the button, a plain **Get longbook** text link sits in the summary row (and in the right-click menu of such tabs). It opens `https://longbook.app/?utm_source=bettertabs&utm_medium=extension&utm_campaign=add-to-longbook` in a new tab.
+- **If longbook is not installed.** Chrome does not say whether an app answered, so BetterTabs does not guess. A plain **Get longbook** link sits in the right-click menu of tabs that offer the button, and in the settings (see Settings). It opens `https://longbook.app/?utm_source=bettertabs&utm_medium=extension&utm_campaign=add-to-longbook` in a new tab.
+
+### Settings
+
+A **Settings** icon button sits fixed at the bottom right of the panel (`aria-label` "Settings"; the list has extra bottom padding so it never covers a row). It opens a popover above it, which closes on `Esc` or an outside click and puts focus on the first control when it opens. Changes apply and are saved at once. There is no save button.
+
+- **Show Add to longbook on billing and price pages**: a checkbox, on by default. Beneath it, "Needs the longbook app on your Mac" and a **Get longbook** link to `https://longbook.app/?utm_source=bettertabs&utm_medium=extension&utm_campaign=add-to-longbook`, opened in a new tab.
+- **Open the panel in**: a select with **The view I used last** (default), **Sites**, **Windows**, **Recent** and **Groups**. A fixed choice is applied each time the panel opens, instead of the remembered view.
 
 ### Show current tab
 
@@ -160,7 +168,7 @@ The list redraws (debounced by 60 ms) when tabs are created, removed, moved, att
 
 ### Persistence
 
-`chrome.storage.local` holds `{ view, collapsed: string[] }` where each collapsed id is `<view>:<folder key>`. `chrome.storage.session` holds `{ names: { [tabId]: string }, favourites: number[] }`, the custom tab names and the favourite tab ids. Nothing else is stored.
+`chrome.storage.local` holds `{ view, collapsed: string[], settings: { showLongbook: boolean, startView: 'last' | 'site' | 'window' | 'recent' | 'group' } }` where each collapsed id is `<view>:<folder key>`. `chrome.storage.session` holds `{ names: { [tabId]: string }, favourites: number[] }`, the custom tab names and the favourite tab ids. Nothing else is stored.
 
 ## Keyboard
 
@@ -193,7 +201,7 @@ The list redraws (debounced by 60 ms) when tabs are created, removed, moved, att
 
 ## Privacy
 
-No network requests and no analytics. The only links that leave the browser are ones you click: the longbook link, and Get longbook, which opens a web page in a new tab. Tab titles and URLs are read to display them and are never stored or sent anywhere. Names the user types and the tabs they favourite are held in memory for the browser session and never written to disk or sent anywhere.
+No network requests and no analytics. The only links that leave the browser are ones you click: the longbook link, and Get longbook (in the right-click menu and the settings), which opens a web page in a new tab. Tab titles and URLs are read to display them and are never stored or sent anywhere. Names the user types and the tabs they favourite are held in memory for the browser session and never written to disk or sent anywhere.
 
 ## Out of scope
 

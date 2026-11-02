@@ -47,7 +47,7 @@ Needed to show the tab list in Chrome's side panel, and to open it when the tool
 
 ### `storage`
 
-Needed to remember the selected view and which folders the user collapsed, and to hold the names the user gives their tabs and the tabs they favourite while Chrome is open. The view and folders are saved locally; names and favourites stay in memory only.
+Needed to remember the selected view, which folders the user collapsed and their settings, and to hold the names the user gives their tabs and the tabs they favourite while Chrome is open. The view, folders and settings are saved locally; names and favourites stay in memory only.
 
 ### `favicon`
 
@@ -69,4 +69,4 @@ No. All code ships inside the extension package.
 
 ## Privacy policy
 
-BetterTabs does not collect, store, share or transmit personal data. The tab titles and web addresses it reads stay in your browser and are used only to show your tab list. The only things saved are your chosen view and the folders you collapsed, kept locally with Chrome's extension storage. Names you give your tabs and the tabs you favourite are held in memory until Chrome closes. There is no account, server or analytics. Clicking "Add to longbook" on a billing or price page opens the longbook app on your Mac with the site's name; if it is not installed, a link to longbook.app opens only if you click it.
+BetterTabs does not collect, store, share or transmit personal data. The tab titles and web addresses it reads stay in your browser and are used only to show your tab list. The only things saved are your chosen view, the folders you collapsed and your settings, kept locally with Chrome's extension storage. Names you give your tabs and the tabs you favourite are held in memory until Chrome closes. There is no account, server or analytics. Clicking "Add to longbook" on a billing or price page opens the longbook app on your Mac with the site's name; if it is not installed, a link to longbook.app opens only if you click it. A setting turns the button off.

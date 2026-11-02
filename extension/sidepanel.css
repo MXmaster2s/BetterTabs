@@ -236,17 +236,6 @@ button {
   font-variant-numeric: tabular-nums;
 }
 
-.plain-link {
-  margin-right: auto;
-  margin-left: 0.75rem;
-  color: var(--focus);
-  font-size: 0.75rem;
-}
-
-.plain-link[hidden] {
-  display: none;
-}
-
 .text-button {
   min-height: var(--target);
   padding: 0.125rem 0.5rem;
@@ -265,7 +254,7 @@ button {
 /* Folders: one per website, window, time span or tab group */
 
 main {
-  padding: 0.875rem 0.5rem 2rem;
+  padding: 0.875rem 0.5rem 3.5rem;
 }
 
 .folder {
@@ -584,6 +573,71 @@ main {
 #menu button[hidden],
 #menu a[hidden] {
   display: none;
+}
+
+/* Settings: a button fixed at the bottom right that opens a popover above it. */
+
+.settings-button {
+  position: fixed;
+  right: 0.5rem;
+  bottom: 0.5rem;
+  box-shadow: 0 0.125rem 0.5rem rgb(0 0 0 / 0.16);
+}
+
+#settings {
+  position: fixed;
+  inset: auto 0.5rem 3rem auto;
+  width: min(17rem, calc(100vw - 1rem));
+  margin: 0;
+  padding: 0.75rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.5rem;
+  background: var(--field);
+  color: var(--ink);
+  box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 0.22);
+}
+
+#settings h2 {
+  margin: 0 0 0.625rem;
+  font-size: 0.8125rem;
+}
+
+#settings a {
+  color: var(--focus);
+}
+
+.setting {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.setting input {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  margin: 0.125rem 0 0;
+}
+
+.setting-hint {
+  margin: 0.25rem 0 0.75rem 1.5rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.setting-field {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.setting-field select {
+  min-height: var(--target);
+  padding: 0.25rem 0.375rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.3125rem;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
 }
 
 /* Empty search */

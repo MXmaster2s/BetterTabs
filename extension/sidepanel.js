@@ -37,6 +37,7 @@ const state = {
   editing: null, // id of the tab whose name is being edited
   menuTab: null, // id of the tab the context menu is open for
   menuFromStrip: false, // whether that menu was opened on a favourite icon
+  settings: { showLongbook: true, startView: 'last' },
 };
 
 const list = document.getElementById('list');
@@ -47,7 +48,9 @@ const liveStatus = document.getElementById('status');
 const closeDupes = document.getElementById('close-dupes');
 const locate = document.getElementById('locate');
 const menu = document.getElementById('menu');
-const getLongbook = document.getElementById('get-longbook');
+const settingsPanel = document.getElementById('settings');
+const settingLongbook = document.getElementById('setting-longbook');
+const settingView = document.getElementById('setting-view');
 const menuGetLongbook = document.getElementById('menu-get-longbook');
 const renameItem = menu.querySelector('[data-action="rename"]');
 const resetName = menu.querySelector('[data-action="reset"]');
@@ -153,7 +156,7 @@ function serviceName(url) {
 }
 
 function offersLongbook(tab) {
-  return IS_MAC && isBillingPage(urlOf(tab));
+  return IS_MAC && state.settings.showLongbook && isBillingPage(urlOf(tab));
 }
 
 function hueOf(text) {
@@ -393,7 +396,6 @@ function render() {
     ? `${shown.length} of ${plural(state.tabs.length, 'tab')} match`
     : `${plural(state.tabs.length, 'tab')} in ${plural(windows, 'window')}`;
 
-  getLongbook.hidden = !shown.some(offersLongbook);
   closeDupes.hidden = state.extraCopies.length === 0;
   closeDupes.textContent = `Close ${plural(state.extraCopies.length, 'duplicate')}`;
 
@@ -676,7 +678,7 @@ function toggleFavourite(id, { fromStrip = false } = {}) {
 // ----- longbook -----
 
 // Opens longbook's Add Commitment screen with the site's name filled in. Chrome cannot say
-// whether an app answered, so "Get longbook" is always offered beside the button instead.
+// whether an app answered, so "Get longbook" sits beside the item in the right-click menu.
 function addToLongbook(tab) {
   const link = h('a', { href: `longbook://add?name=${encodeURIComponent(serviceName(urlOf(tab)))}&from=bettertabs` });
   document.body.append(link);
@@ -784,9 +786,20 @@ function save() {
   chrome.storage.local.set({ view: state.view, collapsed: [...state.collapsed] });
 }
 
+function saveSettings() {
+  chrome.storage.local.set({ settings: state.settings });
+}
+
 async function restore() {
-  const saved = await chrome.storage.local.get(['view', 'collapsed']);
+  const saved = await chrome.storage.local.get(['view', 'collapsed', 'settings']);
   if (VIEWS.includes(saved.view)) state.view = saved.view;
+  state.settings.showLongbook = saved.settings?.showLongbook !== false;
+  if (VIEWS.includes(saved.settings?.startView)) {
+    state.settings.startView = saved.settings.startView;
+    state.view = saved.settings.startView;
+  }
+  settingLongbook.checked = state.settings.showLongbook;
+  settingView.value = state.settings.startView;
   state.collapsed = new Set(saved.collapsed ?? []);
   const session = await chrome.storage.session.get(['names', 'favourites']);
   state.names = new Map(Object.entries(session.names ?? {}).map(([id, name]) => [Number(id), name]));
@@ -803,6 +816,19 @@ for (const input of document.querySelectorAll('input[name="view"]')) {
 }
 
 closeDupes.addEventListener('click', () => closeTabs(state.extraCopies));
+
+settingsPanel.addEventListener('toggle', (e) => {
+  if (e.newState === 'open') settingLongbook.focus();
+});
+settingLongbook.addEventListener('change', () => {
+  state.settings.showLongbook = settingLongbook.checked;
+  saveSettings();
+  render();
+});
+settingView.addEventListener('change', () => {
+  state.settings.startView = settingView.value;
+  saveSettings();
+});
 
 locate.addEventListener('click', showCurrentTab);
 
@@ -840,8 +866,8 @@ menu.addEventListener('keydown', (e) => {
 });
 
 document.addEventListener('keydown', (e) => {
-  // The rename box and the context menu handle their own keys.
-  if (e.target.closest?.('.rename-input, #menu')) return;
+  // The rename box, the context menu and the settings handle their own keys.
+  if (e.target.closest?.('.rename-input, #menu, #settings')) return;
 
   const rows = visibleRows();
   const typing = e.target === search;

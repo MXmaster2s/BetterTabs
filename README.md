@@ -32,7 +32,7 @@ After changing a file, click the reload arrow on the extension's card.
 - Right-click a tab and choose **Add to favourites**. Its site icon appears in a row above the search box, and one click takes you to that tab, even in another window. Right-click the icon and choose **Remove from favourites**, or close the tab, to take it off. Favourite tabs are badged in the list, and favourites last until Chrome closes.
 
 **longbook**
-- On a billing or price page (`/pricing`, `/billing`, `/plans`, `/subscription` and the like), a Mac shows an **Add to longbook** button on that tab's row, and the right-click menu has the same item. It opens the Add Commitment screen of the [longbook](https://longbook.app) app with the site's name filled in, ready for you to fill the rest and save. A plain **Get longbook** link beside the count opens longbook.app in a new tab if you don't have the app yet. BetterTabs decides from the address alone and never reads the page.
+- On a billing or price page (`/pricing`, `/billing`, `/plans`, `/subscription` and the like), a Mac shows an **Add to longbook** button on that tab's row, and the right-click menu has the same item. It opens the Add Commitment screen of the [longbook](https://longbook.app) app with the site's name filled in, ready for you to fill the rest and save. If you don't have the app yet, **Get longbook** in the right-click menu opens longbook.app. A setting turns the button off. BetterTabs decides from the address alone and never reads the page.
 
 **Rename**
 - Right-click a tab and choose **Edit name** (or select it and press `F2`) to give it a name you'll recognise. Renamed tabs are badged, and **Reset name** brings the original back. Names last until Chrome closes.
@@ -40,6 +40,9 @@ After changing a file, click the reload arrow on the extension's card.
 **Clean up**
 - Tabs with exactly the same address are marked **Duplicate**. **Close duplicates** keeps one copy of each, preferring the tab you're looking at.
 - Close a tab with its × button, or close every tab in a folder with **Close all**. Closing happens straight away, and Chrome's **Reopen closed tab** (`Ctrl/Cmd+Shift+T`) undoes it.
+
+**Settings**
+- The icon button at the bottom right opens the settings: hide the **Add to longbook** button, and choose which view the panel opens in (the one you used last, or always Sites, Windows, Recent or Groups). Settings are saved on your computer and take effect at once.
 
 **Comfortable**
 - Updates live as you open, close and switch tabs.

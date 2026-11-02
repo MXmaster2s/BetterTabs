@@ -19,7 +19,7 @@ This repository is **BetterTabs**: a Chrome extension (Manifest V3) that opens i
 3. No network requests, analytics or remote code. Everything stays in the browser.
 4. Request the fewest permissions possible, and no `host_permissions` or content scripts: the extension never reads page content. Every permission in `extension/manifest.json` needs a usage pattern in `scripts/check.mjs` and a justification in `docs/store-listing.md`; the check fails if they drift apart.
 5. Closing tabs is immediate by design (no confirmation dialog). Do not add one.
-6. Don't store tab titles or URLs. Only the chosen view and collapsed folders are saved to disk (`chrome.storage.local`); names the user types and favourited tabs are kept in memory only (`chrome.storage.session`), keyed by tab id.
+6. Don't store tab titles or URLs. Only the chosen view, collapsed folders and the user's settings are saved to disk (`chrome.storage.local`); names the user types and favourited tabs are kept in memory only (`chrome.storage.session`), keyed by tab id.
 7. CSS sizes use `rem`/`em`, not `px`, so the panel follows the user's font-size setting. Interactive targets are at least 24 CSS px (`--target`), focus rings use `:focus-visible`, and state is never shown by colour alone.
 8. Don't assign page-controlled strings (tab titles, URLs) to `innerHTML`. Build DOM with the `h()` helper in `extension/sidepanel.js`.
 9. **Every new or changed feature updates the docs in the same change** (see [Docs go with the code](#docs-go-with-the-code)).
@@ -103,8 +103,8 @@ Reading Chrome → organising → drawing → acting → wiring, in that order i
 - `render()` filters by the search query, then draws folders (`renderFolder`) and rows (`renderTab`).
 - `findDuplicates()` fills `state.duplicates` and `state.extraCopies`.
 - `closeTabs`, `activate`, `toggle`, `setView`, `setQuery` are the user actions.
-- `startEdit` / `finishEdit` rename a tab inline; `toggleFavourite` and `renderFavourites` handle the icon row above the search box; `openMenu` shows the right-click menu (a `popover`); `showCurrentTab` scrolls to the active tab; `isBillingPage`, `serviceName` and `addToLongbook` handle the Add to longbook button.
-- State that survives restarts (`view`, `collapsed`) lives in `chrome.storage.local`. Custom tab names and favourite tab ids live in `chrome.storage.session`.
+- `startEdit` / `finishEdit` rename a tab inline; `toggleFavourite` and `renderFavourites` handle the icon row above the search box; `openMenu` shows the right-click menu (a `popover`); `showCurrentTab` scrolls to the active tab; `isBillingPage`, `serviceName` and `addToLongbook` handle the Add to longbook button; `saveSettings` and the `#settings` popover handle the settings button at the bottom right.
+- State that survives restarts (`view`, `collapsed`, `settings`) lives in `chrome.storage.local`. Custom tab names and favourite tab ids live in `chrome.storage.session`.
 
 ## Conventions
 

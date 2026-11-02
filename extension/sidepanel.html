@@ -28,11 +28,31 @@
     </fieldset>
     <div class="summary">
       <p id="count"></p>
-      <a id="get-longbook" class="plain-link" href="https://longbook.app/?utm_source=bettertabs&amp;utm_medium=extension&amp;utm_campaign=add-to-longbook" target="_blank" rel="noopener" hidden>Get longbook</a>
       <button id="close-dupes" class="text-button" type="button" hidden></button>
     </div>
   </header>
   <main id="list"></main>
+  <button id="settings-button" class="icon-button settings-button" type="button" popovertarget="settings" aria-label="Settings" title="Settings">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4.5h12M2 11.5h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="10.5" cy="4.5" r="1.9" fill="var(--field)" stroke="currentColor" stroke-width="1.6"/><circle cx="5.5" cy="11.5" r="1.9" fill="var(--field)" stroke="currentColor" stroke-width="1.6"/></svg>
+  </button>
+  <section id="settings" popover aria-labelledby="settings-title">
+    <h2 id="settings-title">Settings</h2>
+    <label class="setting">
+      <input id="setting-longbook" type="checkbox">
+      <span>Show Add to longbook on billing and price pages</span>
+    </label>
+    <p class="setting-hint">Needs the longbook app on your Mac. <a href="https://longbook.app/?utm_source=bettertabs&amp;utm_medium=extension&amp;utm_campaign=add-to-longbook" target="_blank" rel="noopener">Get longbook</a></p>
+    <label class="setting-field">
+      <span>Open the panel in</span>
+      <select id="setting-view">
+        <option value="last">The view I used last</option>
+        <option value="site">Sites</option>
+        <option value="window">Windows</option>
+        <option value="recent">Recent</option>
+        <option value="group">Groups</option>
+      </select>
+    </label>
+  </section>
   <div id="menu" popover role="menu" aria-label="Tab actions">
     <button type="button" role="menuitem" data-action="rename">Edit name</button>
     <button type="button" role="menuitem" data-action="reset" hidden>Reset name</button>

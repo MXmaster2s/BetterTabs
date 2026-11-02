@@ -2,6 +2,11 @@
 
 What changed in BetterTabs, newest first. The version being worked on is in `extension/manifest.json`.
 
+## 1.5.0
+
+- A **Settings** button at the bottom right of the panel. It can hide the **Add to longbook** button, and set which view the panel opens in. Settings are saved on your computer.
+- The **Get longbook** link no longer sits beside the tab count. It stays in the right-click menu and in the settings.
+
 ## 1.4.0
 
 - On a billing or price page (a Mac only), the tab's row shows an **Add to longbook** button, and the right-click menu has the same item. It opens longbook's Add Commitment screen with the site's name already filled in. A plain **Get longbook** link (summary row and the menu) opens longbook.app in a new tab. It needs a version of longbook that opens that screen from the link.
