@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BetterTabs: every open tab in Chrome's side panel</title>
+  <meta name="description" content="BetterTabs lists every open tab from every window in Chrome's side panel, grouped by website, with search, favourites, renaming and one-click cleanup. Free and open source.">
+  <link rel="canonical" href="https://bettertabs.fyi/">
+  <meta name="theme-color" content="#ffe45c">
+  <link rel="icon" type="image/png" href="assets/icon.png">
+  <link rel="apple-touch-icon" href="assets/icon.png">
+  <meta property="og:site_name" content="BetterTabs">
+  <meta property="og:title" content="BetterTabs: every open tab in Chrome's side panel">
+  <meta property="og:description" content="BetterTabs lists every open tab from every window in Chrome's side panel, grouped by website, with search, favourites, renaming and one-click cleanup. Free and open source.">
+  <meta property="og:url" content="https://bettertabs.fyi/">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="BetterTabs: every open tab in Chrome's side panel">
+  <meta name="twitter:description" content="BetterTabs lists every open tab from every window in Chrome's side panel, grouped by website, with search, favourites, renaming and one-click cleanup. Free and open source.">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "BetterTabs",
+    "applicationCategory": "BrowserApplication",
+    "operatingSystem": "Chrome 121 or later",
+    "description": "A Chrome extension that lists every open tab in the side panel, grouped by website.",
+    "url": "https://bettertabs.fyi/",
+    "softwareVersion": "1.4.0",
+    "license": "https://opensource.org/licenses/MIT",
+    "installUrl": "https://github.com/MXmaster2s/BetterTabs#install",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+  </script>
+  <link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="./"><img src="assets/icon.png" alt="" width="28" height="28">BetterTabs</a>
+      <a href="#features">Features</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://github.com/MXmaster2s/BetterTabs">GitHub</a>
+      <a class="button button-primary" href="#install">Get BetterTabs</a>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="hero wrap">
+      <h1>Every tab, in order.</h1>
+      <p class="lede">BetterTabs lists every open tab from every window in Chrome's side panel, grouped by website, so the one you want is never more than a search away.</p>
+      <div class="actions">
+        <a class="button button-primary" href="#install">Get BetterTabs</a>
+        <a class="button button-quiet" href="https://github.com/MXmaster2s/BetterTabs">View on GitHub</a>
+      </div>
+      <p class="facts">Free and open source. Chrome 121 or later. No account, no tracking.</p>
+
+      <div class="window">
+        <div class="strip" aria-hidden="true">
+          <span style="--base: hsl(210 62% 50%)">M</span>
+          <span style="--base: hsl(265 62% 50%)">G</span>
+          <span style="--base: hsl(28 62% 50%)">Y</span>
+          <span class="now" style="--base: hsl(210 62% 50%)">Docs</span>
+          <span style="--base: hsl(150 62% 50%)">D</span>
+          <span style="--base: hsl(340 62% 50%)">N</span>
+          <span style="--base: hsl(48 62% 50%)">S</span>
+          <span style="--base: hsl(190 62% 50%)">A</span>
+          <span style="--base: hsl(300 62% 50%)">C</span>
+          <span style="--base: hsl(12 62% 50%)">G</span>
+          <span style="--base: hsl(95 62% 50%)">X</span>
+          <span style="--base: hsl(230 62% 50%)">Z</span>
+          <span style="--base: hsl(330 62% 50%)">P</span>
+          <span style="--base: hsl(170 62% 50%)">B</span>
+          <span style="--base: hsl(60 62% 50%)">R</span>
+          <span style="--base: hsl(280 62% 50%)">L</span>
+          <span class="strip-note">Which one was it?</span>
+        </div>
+        <div class="stage">
+          <div class="page" aria-hidden="true"><i></i><i></i><i></i><i style="width: 82%"></i><i style="width: 64%"></i><i></i><i style="width: 38%"></i></div>
+          <iframe class="demo" src="preview/" title="BetterTabs panel running on sample tabs"></iframe>
+        </div>
+      </div>
+      <p class="demo-note">That is the real panel, running on made-up tabs. Search, collapse a site, close a tab, or right-click one.</p>
+    </div>
+
+    <section id="how">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>One click, and the whole picture.</h2>
+          <p>No new tab page to open, no menu to dig through. The panel stays beside the page you are reading.</p>
+        </div>
+        <ol class="steps">
+          <li>
+            <h3>Click the icon</h3>
+            <p>The panel opens on the right of Chrome and stays open while you browse. It updates as you open, close and switch tabs.</p>
+          </li>
+          <li>
+            <h3>Find the tab</h3>
+            <p>See every tab grouped by site, or search by name or address. Click one to switch to it, even in another window.</p>
+          </li>
+          <li>
+            <h3>Tidy up</h3>
+            <p>Close one tab, every tab on a site, or all the duplicates in a click. Nothing asks you to confirm.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="features">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Made for people with forty tabs open.</h2>
+          <p>Each part does one small job, and they all work with the keyboard.</p>
+        </div>
+        <ul class="cards">
+          <li class="card" style="--base: hsl(210 62% 50%)">
+            <h3>Sites</h3>
+            <p>Tabs are grouped by website, busiest first, each site in its own colour. Chrome's own pages and local files get folders of their own at the end.</p>
+          </li>
+          <li class="card" style="--base: hsl(150 62% 45%)">
+            <h3>Four views</h3>
+            <p>Switch to Windows, Recent or Groups to see the same tabs by window, by when you last used them, or by Chrome tab group.</p>
+          </li>
+          <li class="card" style="--base: hsl(28 62% 50%)">
+            <h3>Find</h3>
+            <p>Search by name, title or address as you type. Press <kbd>/</kbd> to jump to the box, and the target button scrolls the list to the tab you are on.</p>
+          </li>
+          <li class="card" style="--base: hsl(300 62% 50%)">
+            <h3>Rename</h3>
+            <p>Right-click a tab and choose Edit name. Give "Inbox (12)" a name you will recognise; Reset name brings the original back.</p>
+          </li>
+          <li class="card" style="--base: hsl(48 80% 48%)">
+            <h3>Favourites</h3>
+            <p>Right-click a tab and choose Add to favourites. Its site icon sits above the search box, one click from that tab. Close the tab and it goes.</p>
+          </li>
+          <li class="card" style="--base: hsl(340 62% 50%)">
+            <h3>Clean up</h3>
+            <p>Tabs with the same address are marked Duplicate, and one click closes the extra copies. Chrome's Reopen closed tab undoes a close.</p>
+          </li>
+          <li class="card card-wide" style="--base: hsl(262 52% 56%)">
+            <h3>Add to longbook</h3>
+            <p>On a billing or price page (pricing, billing, plans, checkout), a Mac shows an Add to longbook button on that tab. It opens the Add Commitment screen of the longbook app with the site's name filled in, ready for the amount and date. BetterTabs decides from the address alone and never reads the page.</p>
+            <p>Don't have the app yet? <a href="https://longbook.app/?utm_source=bettertabs&amp;utm_medium=website&amp;utm_campaign=add-to-longbook" target="_blank" rel="noopener">Get longbook</a>.</p>
+          </li>
+        </ul>
+        <p class="more">It also follows light and dark mode and Chrome's font size, and works with screen readers and high-contrast mode.</p>
+      </div>
+    </section>
+
+    <section id="privacy">
+      <div class="wrap">
+        <div class="privacy">
+          <div class="section-head">
+            <h2>It never looks at your pages.</h2>
+            <p>BetterTabs reads the title and address of each tab to draw the list, and nothing else. There is no account, no server and no analytics, and it asks for five permissions.</p>
+            <p class="privacy-note">Read the whole <a href="privacy.html">privacy policy</a>, or the <a href="https://github.com/MXmaster2s/BetterTabs/blob/main/docs/store-listing.md">longer explanation of each permission</a>.</p>
+          </div>
+          <ul class="permissions">
+            <li><code>tabs</code><span>Read each tab's title and address, switch to a tab, and close the tabs you ask it to close.</span></li>
+            <li><code>tabGroups</code><span>Read the names and colours of your tab groups for the Groups view.</span></li>
+            <li><code>sidePanel</code><span>Show the list in Chrome's side panel and open it from the toolbar icon.</span></li>
+            <li><code>storage</code><span>Remember your view and collapsed folders. Names and favourites stay in memory until Chrome closes.</span></li>
+            <li><code>favicon</code><span>Show each site's icon from Chrome's own cache.</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="install">
+      <div class="wrap">
+        <div class="install">
+          <div class="section-head">
+            <h2>Free, and yours to change.</h2>
+            <p>BetterTabs is open source under the MIT license, with no build step. It is not on the Chrome Web Store yet, so for now you load it yourself in about a minute.</p>
+            <div class="actions">
+              <a class="button button-primary" href="https://github.com/MXmaster2s/BetterTabs/archive/refs/heads/main.zip">Download the ZIP</a>
+              <a class="button button-quiet" href="https://github.com/MXmaster2s/BetterTabs">View on GitHub</a>
+            </div>
+          </div>
+          <div class="install-card">
+            <h3>Install in Chrome</h3>
+            <ol>
+              <li>Download the ZIP and unzip it.</li>
+              <li>Open <code>chrome://extensions</code> and turn on <strong>Developer mode</strong> (top right).</li>
+              <li>Click <strong>Load unpacked</strong> and choose the <code>extension</code> folder inside the unzipped download.</li>
+              <li>Pin BetterTabs from the puzzle-piece menu, then click its icon.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Questions, answered.</h2>
+        </div>
+        <div class="faq">
+          <details>
+            <summary>Why do I have to turn on Developer mode?</summary>
+            <p>Chrome only loads extensions that are not in its store this way. Once BetterTabs is published to the Chrome Web Store, it will install in one click.</p>
+          </details>
+          <details>
+            <summary>Can it see the pages I visit?</summary>
+            <p>No. It has no host permissions and no content scripts, so it cannot read or change a page. It sees only the title and address Chrome shows for each tab, and it never sends them anywhere.</p>
+          </details>
+          <details>
+            <summary>What does it save?</summary>
+            <p>Your chosen view and which folders you collapsed, kept on your computer with Chrome's extension storage. Tab names and favourites are kept in memory only, so they are gone when Chrome closes.</p>
+          </details>
+          <details>
+            <summary>What is the Add to longbook button?</summary>
+            <p>On a billing or price page, a Mac shows it on that tab's row and in the right-click menu. It opens the <a href="https://longbook.app/?utm_source=bettertabs&amp;utm_medium=website&amp;utm_campaign=add-to-longbook" target="_blank" rel="noopener">longbook</a> app's Add Commitment screen with the site's name filled in. Nothing is sent anywhere: the link opens an app on your own computer, and the page is never read.</p>
+          </details>
+          <details>
+            <summary>Can I get a closed tab back?</summary>
+            <p>Closing is immediate, with no "are you sure?". Chrome's own Reopen closed tab (<kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>T</kbd>) brings it back.</p>
+          </details>
+          <details>
+            <summary>Which browsers does it work in?</summary>
+            <p>Chrome 121 or later. It uses Chrome's side panel API; other Chromium browsers may work, but it has not been tested in them.</p>
+          </details>
+          <details>
+            <summary>How do I update it?</summary>
+            <p>Replace the folder with the newer download, then click the reload arrow on the extension's card in <code>chrome://extensions</code>. The <a href="https://github.com/MXmaster2s/BetterTabs/blob/main/CHANGELOG.md">changelog</a> lists what changed in each version.</p>
+          </details>
+          <details>
+            <summary>Can I change it or build my own?</summary>
+            <p>Yes. The repository is written so you can hand it to a coding agent: AGENTS.md says how to change and verify it, and docs/SPEC.md describes the behaviour precisely enough to rebuild it from scratch.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <p>© 2026 BetterTabs contributors. MIT license.</p>
+      <nav aria-label="Footer">
+        <a href="https://github.com/MXmaster2s/BetterTabs">GitHub</a>
+        <a href="https://github.com/MXmaster2s/BetterTabs/blob/main/CHANGELOG.md">Changelog</a>
+        <a href="https://github.com/MXmaster2s/BetterTabs/issues">Report a problem</a>
+        <a href="privacy.html">Privacy policy</a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>

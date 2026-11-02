@@ -1,0 +1,722 @@
+/* BetterTabs site. Colours and folder tabs come from the extension itself (extension/sidepanel.css). */
+
+:root {
+  color-scheme: light dark;
+  --paper: #edf1f5;
+  --field: #ffffff;
+  --ink: #18222e;
+  --muted: #586472;
+  --rule: #d2d9e1;
+  --hover: #e0e6ed;
+  --mark: #ffe45c;
+  --mark-ink: #18222e;
+  --focus: #2f6feb;
+  --tint-mix: 30%;
+  --serif: ui-serif, "New York", "Iowan Old Style", Charter, Georgia, serif;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #161b22;
+    --field: #0f1419;
+    --ink: #e3e8ee;
+    --muted: #97a3b0;
+    --rule: #29313b;
+    --hover: #212932;
+    --focus: #7aa7ff;
+    --tint-mix: 36%;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 4.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 1rem/1.55 var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  line-height: 1.12;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+code,
+kbd {
+  font-family: var(--mono);
+  font-size: 0.9em;
+}
+
+code {
+  padding: 0.05em 0.35em;
+  border-radius: 0.3rem;
+  background: var(--hover);
+}
+
+kbd {
+  padding: 0.1em 0.4em;
+  border: 1px solid var(--rule);
+  border-bottom-width: 2px;
+  border-radius: 0.3rem;
+  background: var(--field);
+}
+
+.wrap {
+  width: min(100% - 2.5rem, 68rem);
+  margin-inline: auto;
+}
+
+.skip {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 10;
+  padding: 0.5rem 0.875rem;
+  border-radius: 0.5rem;
+  background: var(--field);
+  translate: 0 -200%;
+}
+
+.skip:focus {
+  translate: 0;
+}
+
+/* Nav */
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: color-mix(in oklab, var(--paper) 82%, transparent);
+  border-bottom: 1px solid var(--rule);
+  backdrop-filter: saturate(1.6) blur(14px);
+}
+
+.nav .wrap {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  min-height: 3.5rem;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-right: auto;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.brand img {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.4rem;
+}
+
+.nav a:not(.brand):not(.button) {
+  color: var(--muted);
+  font-size: 0.9375rem;
+  text-decoration: none;
+}
+
+.nav a:not(.brand):not(.button):hover {
+  color: var(--ink);
+}
+
+/* Buttons: the highlighter yellow is the current-tab colour in the extension */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0.5rem 1.25rem;
+  border: 2px solid var(--ink);
+  border-radius: 0.625rem;
+  font-weight: 650;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.button-primary {
+  background: var(--mark);
+  color: var(--mark-ink);
+  box-shadow: 0.1875rem 0.1875rem 0 var(--ink);
+  transition: translate 0.12s ease, box-shadow 0.12s ease;
+}
+
+.button-primary:hover {
+  translate: 0.0625rem 0.0625rem;
+  box-shadow: 0.125rem 0.125rem 0 var(--ink);
+}
+
+.button-quiet:hover {
+  background: var(--hover);
+}
+
+.nav .button {
+  min-height: 2.25rem;
+  padding: 0.25rem 0.875rem;
+  font-size: 0.9375rem;
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button-primary {
+    transition: none;
+  }
+}
+
+@media (max-width: 40rem) {
+  .nav a:not(.brand):not(.button) {
+    display: none;
+  }
+}
+
+/* Hero */
+
+.hero {
+  padding: 4.5rem 0 1rem;
+}
+
+.hero h1 {
+  max-width: 14ch;
+  font: 800 clamp(2.75rem, 7vw, 5rem) / 1 var(--serif);
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.hero .lede {
+  max-width: 40rem;
+  margin-top: 1.5rem;
+  color: var(--muted);
+  font-size: clamp(1.0625rem, 2.2vw, 1.25rem);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+.facts {
+  margin-top: 1.25rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+/* The demo: a Chrome window with the real panel running in the side panel */
+
+.window {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  margin-top: 3.5rem;
+  border: 2px solid var(--ink);
+  border-radius: 0.875rem;
+  background: var(--field);
+  box-shadow: 0.5rem 0.5rem 0 var(--ink);
+  overflow: hidden;
+}
+
+.strip {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  padding: 0.5rem 0.625rem 0;
+  background: var(--hover);
+  border-bottom: 1px solid var(--rule);
+  overflow: hidden;
+}
+
+.strip span {
+  display: grid;
+  flex: 1 1 0;
+  place-items: center;
+  min-width: 0;
+  max-width: 2.75rem;
+  height: 1.875rem;
+  border-radius: 0.5rem 0.5rem 0 0;
+  background: color-mix(in oklab, var(--base) 34%, var(--paper));
+  font-size: 0.6875rem;
+  font-weight: 700;
+  overflow: hidden;
+}
+
+.strip span.now {
+  flex: 0 0 9rem;
+  max-width: none;
+  place-items: center start;
+  padding-left: 0.625rem;
+  background: var(--field);
+  white-space: nowrap;
+}
+
+.strip .strip-note {
+  display: block;
+  flex: none;
+  align-self: center;
+  max-width: none;
+  height: auto;
+  margin-left: auto;
+  padding-left: 0.75rem;
+  background: none;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.stage {
+  display: grid;
+  grid-template-columns: 1fr minmax(0, 24rem);
+  min-height: 34rem;
+}
+
+.page {
+  display: grid;
+  align-content: start;
+  gap: 0.875rem;
+  padding: 2rem;
+}
+
+.page i {
+  display: block;
+  height: 0.75rem;
+  border-radius: 0.375rem;
+  background: var(--hover);
+}
+
+.page i:first-child {
+  width: 45%;
+  height: 1.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.demo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 34rem;
+  border: 0;
+  border-left: 2px solid var(--ink);
+  background: var(--paper);
+}
+
+.demo-note {
+  margin-top: 1.25rem;
+  color: var(--muted);
+  font-size: 0.9375rem;
+}
+
+@media (max-width: 52rem) {
+  .stage {
+    grid-template-columns: 1fr;
+  }
+
+  .page {
+    display: none;
+  }
+
+  /* Fewer, wider tabs: squeezed to slivers they only look broken on a phone. */
+  .strip span:nth-child(n + 9):not(.strip-note) {
+    display: none;
+  }
+
+  .strip span {
+    max-width: 2.25rem;
+  }
+
+  .strip span.now {
+    flex-basis: 5.5rem;
+  }
+
+  .demo {
+    border-left: 0;
+  }
+}
+
+/* Sections */
+
+section {
+  padding: 5.5rem 0 0;
+}
+
+section > .wrap > h2,
+.section-head h2 {
+  max-width: 22ch;
+  font: 800 clamp(1.875rem, 4.2vw, 2.75rem) / 1.08 var(--serif);
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.section-head p {
+  max-width: 38rem;
+  margin-top: 1rem;
+  color: var(--muted);
+  font-size: 1.125rem;
+}
+
+/* How it works */
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 2rem;
+  margin: 2.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+
+.steps li {
+  padding-top: 1rem;
+  border-top: 2px solid var(--ink);
+  counter-increment: step;
+}
+
+.steps li::before {
+  content: counter(step);
+  display: inline-grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-bottom: 0.75rem;
+  border-radius: 50%;
+  background: var(--mark);
+  color: var(--mark-ink);
+  font-weight: 800;
+}
+
+.steps h3 {
+  font-size: 1.25rem;
+}
+
+.steps p {
+  margin-top: 0.5rem;
+  color: var(--muted);
+}
+
+/* Features: each card is a folder, like the folders in the panel */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  gap: 3rem 1.5rem;
+  margin: 4rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  --tint: color-mix(in oklab, var(--base) var(--tint-mix), var(--paper));
+  position: relative;
+  padding: 1.5rem 1.25rem 1.25rem;
+  border-top: 2px solid var(--tint);
+  border-radius: 0 0.625rem 0.625rem 0.625rem;
+  background: var(--field);
+}
+
+.card h3 {
+  position: absolute;
+  bottom: 100%;
+  left: -2px;
+  padding: 0.3125rem 0.875rem 0.25rem;
+  border-radius: 0.5rem 0.5rem 0 0;
+  background: var(--tint);
+  font: 700 0.9375rem/1.3 var(--sans);
+}
+
+.card p {
+  color: var(--muted);
+}
+
+.card p + p {
+  margin-top: 0.625rem;
+}
+
+.card-wide {
+  grid-column: 1 / -1;
+}
+
+.card-wide p {
+  max-width: 44rem;
+}
+
+.more {
+  margin-top: 2.5rem;
+  color: var(--muted);
+}
+
+/* Privacy */
+
+.privacy {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 3rem;
+  align-items: start;
+  padding: 2.5rem;
+  border: 2px solid var(--ink);
+  border-radius: 0.875rem;
+  background: var(--field);
+}
+
+.privacy h2 {
+  font: 800 clamp(1.75rem, 3.6vw, 2.375rem) / 1.1 var(--serif);
+  letter-spacing: -0.02em;
+}
+
+.privacy .section-head p {
+  margin-top: 1rem;
+}
+
+.permissions {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.permissions li {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--rule);
+}
+
+.permissions li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.permissions code {
+  align-self: start;
+  justify-self: start;
+}
+
+.permissions span {
+  color: var(--muted);
+}
+
+.privacy-note {
+  margin-top: 1rem;
+  color: var(--muted);
+  font-size: 0.9375rem;
+}
+
+@media (max-width: 52rem) {
+  .privacy {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 1.5rem;
+  }
+
+  .permissions li {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+}
+
+/* Install */
+
+.install {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 3rem;
+  align-items: start;
+}
+
+.install ol {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.install li {
+  padding-left: 0.375rem;
+}
+
+.install li + li {
+  margin-top: 0.75rem;
+}
+
+.install .actions {
+  margin-top: 1.5rem;
+}
+
+.install-card {
+  padding: 1.5rem;
+  border: 2px solid var(--ink);
+  border-radius: 0.875rem;
+  background: var(--field);
+}
+
+.install-card h3 {
+  margin-bottom: 1rem;
+  font-size: 1.125rem;
+}
+
+@media (max-width: 52rem) {
+  .install {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+/* FAQ */
+
+.faq {
+  max-width: 46rem;
+  margin-top: 2rem;
+}
+
+.faq details {
+  border-top: 1px solid var(--rule);
+}
+
+.faq details:last-child {
+  border-bottom: 1px solid var(--rule);
+}
+
+.faq summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 3rem;
+  padding: 0.75rem 0;
+  font-weight: 650;
+  cursor: pointer;
+  list-style: none;
+}
+
+.faq summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq summary::after {
+  content: "+";
+  flex: none;
+  color: var(--muted);
+  font-size: 1.375rem;
+  line-height: 1;
+}
+
+.faq details[open] summary::after {
+  content: "\2212";
+}
+
+.faq details p {
+  padding: 0 2rem 1rem 0;
+  color: var(--muted);
+}
+
+.faq p + p {
+  margin-top: -0.25rem;
+}
+
+/* Footer */
+
+footer {
+  margin-top: 6rem;
+  padding: 2rem 0 3rem;
+  border-top: 1px solid var(--rule);
+  color: var(--muted);
+  font-size: 0.9375rem;
+}
+
+footer .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  justify-content: space-between;
+}
+
+footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+}
+
+/* Privacy page and other plain pages */
+
+.doc {
+  max-width: 42rem;
+  padding: 4rem 0 0;
+}
+
+.doc h1 {
+  font: 800 clamp(2rem, 5vw, 3rem) / 1.05 var(--serif);
+  letter-spacing: -0.02em;
+}
+
+.doc h2 {
+  margin-top: 2.5rem;
+  font: 700 1.375rem/1.2 var(--sans);
+}
+
+.doc p,
+.doc ul {
+  margin-top: 0.875rem;
+}
+
+.doc ul {
+  padding-left: 1.25rem;
+}
+
+.doc li + li {
+  margin-top: 0.375rem;
+}
+
+.doc .updated {
+  color: var(--muted);
+}
+
+/* High contrast mode drops background colours, so keep the edges */
+
+@media (forced-colors: active) {
+  .button-primary {
+    border-color: ButtonText;
+  }
+
+  .card,
+  .card h3,
+  .steps li::before {
+    border: 1px solid CanvasText;
+  }
+
+  .strip span.now {
+    outline: 2px solid Highlight;
+  }
+}
