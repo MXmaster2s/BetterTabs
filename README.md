@@ -31,6 +31,9 @@ After changing a file, click the reload arrow on the extension's card.
 **Favourites**
 - Right-click a tab and choose **Add to favourites**. Its site icon appears in a row above the search box, and one click takes you to that tab, even in another window. Right-click the icon and choose **Remove from favourites**, or close the tab, to take it off. Favourite tabs are badged in the list, and favourites last until Chrome closes.
 
+**longbook**
+- On a billing or price page (`/pricing`, `/billing`, `/plans`, `/subscription` and the like), a Mac shows an **Add to longbook** button on that tab's row, and the right-click menu has the same item. It opens the Add Commitment screen of the [longbook](https://longbook.app) app with the site's name filled in, ready for you to fill the rest and save. A plain **Get longbook** link beside the count opens longbook.app in a new tab if you don't have the app yet. BetterTabs decides from the address alone and never reads the page.
+
 **Rename**
 - Right-click a tab and choose **Edit name** (or select it and press `F2`) to give it a name you'll recognise. Renamed tabs are badged, and **Reset name** brings the original back. Names last until Chrome closes.
 
@@ -75,6 +78,7 @@ The agent works through the rules in [AGENTS.md](AGENTS.md), proves its change w
 | | |
 | --- | --- |
 | [`extension/`](extension) | The extension: manifest, service worker, side panel page, styles, logic and icons. This is the folder Chrome loads and the Web Store zip is made from. |
+| [`site/`](site) | The landing page. Its live demo is the real panel on fake tabs. |
 | [`docs/`](docs) | The behaviour spec, the store listing, the release steps and the scripts reference. |
 | [`scripts/`](scripts) | The checks, the zip builder and the icon drawing script. No dependencies. |
 | [`preview/`](preview) | The real panel in an ordinary browser tab, with fake tabs and a fake `chrome.*`. |
@@ -91,6 +95,7 @@ The agent works through the rules in [AGENTS.md](AGENTS.md), proves its change w
 node scripts/check.mjs             # manifest, syntax, permissions, changelog and docs
 python3 -m http.server 8741        # then open http://localhost:8741/preview/
 node scripts/package.mjs           # dist/bettertabs-<version>.zip for the Web Store
+node scripts/build-site.mjs        # dist/site, the landing page (see docs/site.md)
 python3 scripts/make-icons.py      # redraw the toolbar icons
 ```
 
@@ -100,6 +105,7 @@ python3 scripts/make-icons.py      # redraw the toolbar icons
 | --- | --- |
 | [AGENTS.md](AGENTS.md) | The rules and file map for agents and people changing the code |
 | [docs/SPEC.md](docs/SPEC.md) | Everything BetterTabs does, precisely enough to rebuild it |
+| [docs/site.md](docs/site.md) | The landing page: how to view, update and publish it |
 | [docs/scripts.md](docs/scripts.md) | What each command checks or changes |
 | [docs/RELEASING.md](docs/RELEASING.md) | Cutting a release and submitting to the Chrome Web Store |
 | [docs/store-listing.md](docs/store-listing.md) | Store text, privacy policy and a justification for each permission |

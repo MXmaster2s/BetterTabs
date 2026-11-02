@@ -2,6 +2,10 @@
 
 What changed in BetterTabs, newest first. The version being worked on is in `extension/manifest.json`.
 
+## 1.4.0
+
+- On a billing or price page (a Mac only), the tab's row shows an **Add to longbook** button, and the right-click menu has the same item. It opens longbook's Add Commitment screen with the site's name already filled in. A plain **Get longbook** link (summary row and the menu) opens longbook.app in a new tab. It needs a version of longbook that opens that screen from the link.
+
 ## 1.3.0
 
 - Right-click a tab and choose **Add to favourites**. Its site icon appears in a row above the search box, and one click takes you to that tab. Right-click an icon and choose **Remove from favourites** to take it off. Closing the tab removes it from the favourites. Favourites last until Chrome closes, like tab names.

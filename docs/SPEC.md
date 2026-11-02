@@ -123,6 +123,17 @@ Two tabs are duplicates only if their URLs are exactly equal (including `#` frag
 - Added and removed are announced ("Added to favourites", "Removed from favourites").
 - Favourites are tab ids in `chrome.storage.session`: in memory only, gone when Chrome quits.
 
+### Add to longbook
+
+[longbook](https://longbook.app) is a Mac and iPhone app for recurring money. This feature hands a billing or price page to its Add Commitment screen.
+
+- **Which pages.** Judged from the address only, never the page. `http` and `https` addresses where the host starts with `billing.`, `pricing.` or `checkout.`, or where any path segment (or segment of the `#` route) equals `billing`, `pricing`, `price(s)`, `plan(s)`, `subscription(s)`, `subscribe`, `upgrade`, `checkout`, `invoice(s)`, `payment-method(s)` or `manage-subscription`, ignoring case. `/blog/our-plans-for-2026` does not match; `/en/pricing?ref=x` and `app.example.com/#/settings/plans` do.
+- **Only on a Mac.** The button and the menu item are not offered on other systems, because longbook has no version for them (`navigator.userAgentData.platform`, falling back to `navigator.platform`).
+- **Where.** A small **Add to longbook** button on that tab's row, between the title and the close button (accessible name "Add <Name> to longbook"), and an **Add to longbook** item in the tab's context menu.
+- **The name.** The site's own name: `www.` removed, the registrable label taken (one label further left for `co.uk`-style endings), first letter capitalised. `github.com` gives `Github`; `billing.example.co.uk` gives `Example`. An IP address is used as it is.
+- **The link.** `longbook://add?name=<name, percent-encoded>&from=bettertabs`, opened by clicking a temporary link in the panel so Chrome shows its usual "Open longbook?" prompt the first time. longbook is expected to open its Add Commitment screen with the name filled in and everything else empty. BetterTabs sends nothing else, and nothing leaves the computer.
+- **If longbook is not installed.** Chrome does not say whether an app answered, so BetterTabs does not guess. While any shown tab offers the button, a plain **Get longbook** text link sits in the summary row (and in the right-click menu of such tabs). It opens `https://longbook.app/?utm_source=bettertabs&utm_medium=extension&utm_campaign=add-to-longbook` in a new tab.
+
 ### Show current tab
 
 The icon button next to the search box finds the active tab of the panel's window and brings it into view:
@@ -182,8 +193,8 @@ The list redraws (debounced by 60 ms) when tabs are created, removed, moved, att
 
 ## Privacy
 
-No network access. No analytics. Tab titles and URLs are read to display them and are never stored or sent anywhere. Names the user types and the tabs they favourite are held in memory for the browser session and never written to disk or sent anywhere.
+No network requests and no analytics. The only links that leave the browser are ones you click: the longbook link, and Get longbook, which opens a web page in a new tab. Tab titles and URLs are read to display them and are never stored or sent anywhere. Names the user types and the tabs they favourite are held in memory for the browser session and never written to disk or sent anywhere.
 
 ## Out of scope
 
-Syncing between devices, names that survive restarting Chrome, saving or restoring sessions, undoing a close (Chrome's **Reopen closed tab**, `Ctrl/Cmd+Shift+T`, does that), tab suspension, and page content access.
+Reading page content to find prices, filling in more than the name, knowing whether longbook is installed, Windows or Linux support for the longbook button, syncing between devices, names that survive restarting Chrome, saving or restoring sessions, undoing a close (Chrome's **Reopen closed tab**, `Ctrl/Cmd+Shift+T`, does that), tab suspension, and page content access.

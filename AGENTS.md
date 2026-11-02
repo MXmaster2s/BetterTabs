@@ -87,8 +87,10 @@ Requires Chrome 121 or later. After editing any file, click the reload arrow on 
 | `docs/store-listing.md` | Store text, privacy policy and a justification for each permission. |
 | `docs/RELEASING.md` | How to cut a release and submit it to the Chrome Web Store. |
 | `docs/scripts.md` | What each command checks or changes. |
+| `site/` | The landing page (`site/index.html`, `site/privacy.html`, `site/assets/`). Its demo is the real panel. See `docs/site.md`. |
 | `scripts/check.mjs` | Dependency-free checks. Run before every commit. |
 | `scripts/package.mjs` | Builds the Web Store zip from `extension/`. |
+| `scripts/build-site.mjs` | Assembles `dist/site` (site, extension and preview) for viewing or publishing. |
 | `preview/` | The real panel in a normal browser tab, with fake tabs. |
 | `CHANGELOG.md` | One entry per version, newest first. |
 
@@ -101,7 +103,7 @@ Reading Chrome → organising → drawing → acting → wiring, in that order i
 - `render()` filters by the search query, then draws folders (`renderFolder`) and rows (`renderTab`).
 - `findDuplicates()` fills `state.duplicates` and `state.extraCopies`.
 - `closeTabs`, `activate`, `toggle`, `setView`, `setQuery` are the user actions.
-- `startEdit` / `finishEdit` rename a tab inline; `toggleFavourite` and `renderFavourites` handle the icon row above the search box; `openMenu` shows the right-click menu (a `popover`); `showCurrentTab` scrolls to the active tab.
+- `startEdit` / `finishEdit` rename a tab inline; `toggleFavourite` and `renderFavourites` handle the icon row above the search box; `openMenu` shows the right-click menu (a `popover`); `showCurrentTab` scrolls to the active tab; `isBillingPage`, `serviceName` and `addToLongbook` handle the Add to longbook button.
 - State that survives restarts (`view`, `collapsed`) lives in `chrome.storage.local`. Custom tab names and favourite tab ids live in `chrome.storage.session`.
 
 ## Conventions
@@ -120,6 +122,7 @@ A change is not finished until a reader of GitHub would learn about it. In the s
 - `README.md`: the **Features** list, and the **Keyboard** table if keys changed. It is what people read first, so it must describe what the extension does today.
 - `docs/SPEC.md`: the behaviour, precisely.
 - `docs/store-listing.md`: the description, when users see the difference.
+- `site/index.html`: the feature cards, FAQ and permission lines, and the JSON-LD `softwareVersion`; `site/privacy.html` if the privacy story changes.
 - `extension/manifest.json` `version` and `CHANGELOG.md`: bump for any user-visible change and add a line under the same version.
 
 `node scripts/check.mjs` fails if `CHANGELOG.md` has no entry for the manifest version, if a document links to or names a file that doesn't exist, or if a permission has no justification. It cannot tell whether the Features list is accurate; that part is yours.

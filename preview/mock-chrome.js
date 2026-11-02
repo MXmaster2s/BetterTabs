@@ -17,6 +17,7 @@
     [1, 'Acme: Know what you pay for', 'https://acme.example/', 25, 11],
     [1, 'Pricing | Acme', 'https://acme.example/pricing', 26, 11],
     [1, 'Search Console - Performance', 'https://search.google.com/search-console/performance', 3000, 11],
+    [1, 'Billing & plans - Settings', 'https://github.com/settings/billing/summary', 14, 10],
     [1, 'YouTube', 'https://www.youtube.com/', 8, -1],
     [1, 'Lo-fi beats to code to', 'https://www.youtube.com/watch?v=jfKfPfyJRdk', 3, -1, { audible: true }],
     [2, 'Gift ideas - Google Search', 'https://www.google.com/search?q=gift+ideas', 7000, -1],

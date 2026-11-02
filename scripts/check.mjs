@@ -4,6 +4,7 @@
 //   - every permission is used, and every chrome.* API that needs one is requested
 //   - the changelog and the store listing cover the current version and permissions
 //   - every file a document links to or names in `code` exists, so the docs cannot drift
+//   - the website's links resolve, its icon is the extension's, and its version matches
 
 import { execFileSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
@@ -39,6 +40,7 @@ const scripts = [
   'preview/mock-chrome.js',
   'scripts/check.mjs',
   'scripts/package.mjs',
+  'scripts/build-site.mjs',
 ];
 for (const file of scripts) {
   try {
@@ -119,6 +121,29 @@ for (const document of documents) {
   }
 }
 
+// The website: its links resolve, its icon is the extension's, and its version is current
+const pages = files.filter((file) => file.startsWith('site/') && file.endsWith('.html'));
+for (const page of pages) {
+  const html = read(page);
+  for (const [, target] of html.matchAll(/(?:href|src)="([^"#:]+)(?:#[^"]*)?"/g)) {
+    const resolved = join(dirname(page), target).replace(/\/$/, '');
+    // preview/ is copied beside the site when it is built (scripts/build-site.mjs)
+    if (/^(preview|extension)(\/|$)/.test(target) || target === './') continue;
+    if (!paths.has(resolved) && !folders.has(resolved)) fail(`${page} points to ${target}, which does not exist`);
+  }
+  for (const [, json] of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) {
+    try {
+      const data = JSON.parse(json);
+      if (data.softwareVersion !== manifest.version) fail(`${page} says version ${data.softwareVersion}, but the manifest says ${manifest.version}`);
+    } catch {
+      fail(`${page} has JSON-LD that does not parse`);
+    }
+  }
+}
+if (existsSync(join(root, 'site/assets/icon.png')) && !readFileSync(join(root, 'site/assets/icon.png')).equals(readFileSync(join(extension, 'icons/icon128.png')))) {
+  fail('site/assets/icon.png differs from extension/icons/icon128.png; copy the icon over after redrawing it');
+}
+
 // Every pointer file sends agents to AGENTS.md
 for (const pointer of ['.github/copilot-instructions.md', '.cursor/rules/bettertabs.mdc']) {
   if (!existsSync(join(root, pointer))) fail(`${pointer} is missing`);
@@ -130,5 +155,5 @@ if (problems.length) {
   process.exit(1);
 }
 console.log(
-  `✓ manifest, ${scripts.length} scripts, ${requested.size} permissions and ${documents.length} documents check out`,
+  `✓ manifest, ${scripts.length} scripts, ${requested.size} permissions, ${documents.length} documents and ${pages.length} pages check out`,
 );

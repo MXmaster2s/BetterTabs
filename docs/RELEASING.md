@@ -5,7 +5,7 @@ BetterTabs ships as a zip uploaded to the Chrome Web Store. Anyone can also load
 ## Cut a release
 
 1. Finish the change and its docs: **Features** in `README.md`, `docs/SPEC.md`, `docs/store-listing.md` where users would notice.
-2. Bump `version` in `extension/manifest.json` (patch for fixes, minor for features).
+2. Bump `version` in `extension/manifest.json` (patch for fixes, minor for features) and `softwareVersion` in the JSON-LD of `site/index.html`.
 3. Add a `## <version>` entry at the top of `CHANGELOG.md`, newest first, in plain sentences about what people can now do.
 4. Run the checks and try the extension in real Chrome (reload it on `chrome://extensions`):
 

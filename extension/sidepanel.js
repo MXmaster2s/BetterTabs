@@ -16,6 +16,13 @@ const GROUP_COLOURS = {
   orange: '#fa903e',
 };
 
+// Pages where you pay or choose what to pay: judged from the address alone, never the page.
+const BILLING_SEGMENT = /^(billing|pricing|prices?|plans?|subscriptions?|subscribe|upgrade|checkout|invoices?|payment-methods?|manage-subscription)$/i;
+const BILLING_HOST = /^(billing|pricing|checkout)\./i;
+// longbook is a Mac and iPhone app; Chrome extensions only exist on desktop, so this is the Mac button.
+const IS_MAC = /mac/i.test(navigator.userAgentData?.platform ?? navigator.platform ?? '');
+const SECOND_LEVEL = new Set(['co', 'com', 'org', 'net', 'gov', 'edu', 'ac']);
+
 const state = {
   view: 'site',
   query: '',
@@ -40,9 +47,12 @@ const liveStatus = document.getElementById('status');
 const closeDupes = document.getElementById('close-dupes');
 const locate = document.getElementById('locate');
 const menu = document.getElementById('menu');
+const getLongbook = document.getElementById('get-longbook');
+const menuGetLongbook = document.getElementById('menu-get-longbook');
 const renameItem = menu.querySelector('[data-action="rename"]');
 const resetName = menu.querySelector('[data-action="reset"]');
 const favouriteItem = menu.querySelector('[data-action="favourite"]');
+const longbookItem = menu.querySelector('[data-action="longbook"]');
 
 let pendingFocus = null;
 
@@ -116,6 +126,34 @@ function pathOf(url) {
   } catch {
     return url;
   }
+}
+
+// A billing or price page: /pricing, /account/billing, billing.example.com, #/settings/plans.
+function isBillingPage(url) {
+  try {
+    const u = new URL(url);
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') return false;
+    if (BILLING_HOST.test(u.hostname)) return true;
+    const route = `${u.pathname}/${u.hash.replace(/^#!?/, '')}`.split(/[/?]/);
+    return route.some((segment) => BILLING_SEGMENT.test(segment));
+  } catch {
+    return false;
+  }
+}
+
+// The site's own name for the commitment: github.com -> Github, billing.example.co.uk -> Example.
+function serviceName(url) {
+  const host = new URL(url).hostname.replace(/^www\./, '');
+  if (/^[\d.]+$/.test(host) || host.includes(':')) return host;
+  const labels = host.split('.');
+  const n = labels.length;
+  const registrable =
+    n >= 3 && labels[n - 1].length === 2 && SECOND_LEVEL.has(labels[n - 2]) ? labels[n - 3] : (labels[n - 2] ?? labels[0]);
+  return registrable.charAt(0).toUpperCase() + registrable.slice(1);
+}
+
+function offersLongbook(tab) {
+  return IS_MAC && isBillingPage(urlOf(tab));
 }
 
 function hueOf(text) {
@@ -355,6 +393,7 @@ function render() {
     ? `${shown.length} of ${plural(state.tabs.length, 'tab')} match`
     : `${plural(state.tabs.length, 'tab')} in ${plural(windows, 'window')}`;
 
+  getLongbook.hidden = !shown.some(offersLongbook);
   closeDupes.hidden = state.extraCopies.length === 0;
   closeDupes.textContent = `Close ${plural(state.extraCopies.length, 'duplicate')}`;
 
@@ -491,6 +530,18 @@ function renderTab(tab) {
         ),
       ),
     ),
+    offersLongbook(tab) &&
+      h(
+        'button',
+        {
+          class: 'tab-longbook',
+          type: 'button',
+          title: `Add ${serviceName(url)} to longbook`,
+          'aria-label': `Add ${serviceName(url)} to longbook`,
+          onclick: () => addToLongbook(tab),
+        },
+        'Add to longbook',
+      ),
     h(
       'button',
       {
@@ -498,7 +549,7 @@ function renderTab(tab) {
         type: 'button',
         'aria-label': `Close ${title}`,
         title: 'Close tab',
-        onclick: (e) => closeTabs([tab.id], visibleRows().indexOf(e.currentTarget.previousElementSibling)),
+        onclick: (e) => closeTabs([tab.id], visibleRows().indexOf(e.currentTarget.closest('.tab').querySelector('.tab-main'))),
       },
       svg(ICON_CLOSE),
     ),
@@ -622,6 +673,17 @@ function toggleFavourite(id, { fromStrip = false } = {}) {
   announce(adding ? 'Added to favourites' : 'Removed from favourites');
 }
 
+// ----- longbook -----
+
+// Opens longbook's Add Commitment screen with the site's name filled in. Chrome cannot say
+// whether an app answered, so "Get longbook" is always offered beside the button instead.
+function addToLongbook(tab) {
+  const link = h('a', { href: `longbook://add?name=${encodeURIComponent(serviceName(urlOf(tab)))}&from=bettertabs` });
+  document.body.append(link);
+  link.click();
+  link.remove();
+}
+
 // ----- Context menu -----
 
 // `row` is a tab row or a favourite icon. Favourite icons can only be removed.
@@ -633,6 +695,8 @@ function openMenu(row, x, y) {
   renameItem.hidden = fromStrip;
   resetName.hidden = fromStrip || !state.names.has(id);
   favouriteItem.textContent = state.favourites.includes(id) ? 'Remove from favourites' : 'Add to favourites';
+  longbookItem.hidden = !offersLongbook(state.tabs.find((t) => t.id === id) ?? {});
+  menuGetLongbook.hidden = longbookItem.hidden;
 
   // Focus the row first so focus returns to it when the menu closes.
   (fromStrip ? row : row.querySelector('button.tab-main'))?.focus();
@@ -759,6 +823,7 @@ menu.addEventListener('click', (e) => {
   menu.hidePopover();
   if (action === 'rename') startEdit(id);
   else if (action === 'favourite') toggleFavourite(id, { fromStrip: state.menuFromStrip });
+  else if (action === 'longbook') addToLongbook(state.tabs.find((t) => t.id === id));
   else clearName(id);
 });
 

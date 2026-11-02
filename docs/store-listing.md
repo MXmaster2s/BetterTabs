@@ -22,6 +22,7 @@ BetterTabs puts every open tab, from every window, in Chrome's side panel and or
 - Windows, Recent and Groups: the same tabs by window, by when you last used them, or by Chrome tab group.
 - Search by title or address.
 - Rename any tab: right-click it and choose Edit name.
+- On a billing or price page (Mac), "Add to longbook" opens the longbook app's Add Commitment screen with the site's name filled in.
 - Favourite a tab: right-click it and choose Add to favourites. Its site icon sits above the search box, one click away.
 - One button scrolls the list to the tab you're on.
 - Duplicate tabs are marked, and one click closes the extra copies.
@@ -68,4 +69,4 @@ No. All code ships inside the extension package.
 
 ## Privacy policy
 
-BetterTabs does not collect, store, share or transmit personal data. The tab titles and web addresses it reads stay in your browser and are used only to show your tab list. The only things saved are your chosen view and the folders you collapsed, kept locally with Chrome's extension storage. Names you give your tabs and the tabs you favourite are held in memory until Chrome closes. There is no account, server or analytics.
+BetterTabs does not collect, store, share or transmit personal data. The tab titles and web addresses it reads stay in your browser and are used only to show your tab list. The only things saved are your chosen view and the folders you collapsed, kept locally with Chrome's extension storage. Names you give your tabs and the tabs you favourite are held in memory until Chrome closes. There is no account, server or analytics. Clicking "Add to longbook" on a billing or price page opens the longbook app on your Mac with the site's name; if it is not installed, a link to longbook.app opens only if you click it.
