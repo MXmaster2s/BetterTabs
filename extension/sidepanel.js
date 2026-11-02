@@ -26,18 +26,23 @@ const state = {
   duplicates: new Set(),
   extraCopies: [],
   names: new Map(), // tab id -> name typed by the user
+  favourites: [], // ids of favourite tabs, in the order they were added
   editing: null, // id of the tab whose name is being edited
   menuTab: null, // id of the tab the context menu is open for
+  menuFromStrip: false, // whether that menu was opened on a favourite icon
 };
 
 const list = document.getElementById('list');
+const strip = document.getElementById('favourites');
 const search = document.getElementById('search');
 const count = document.getElementById('count');
 const liveStatus = document.getElementById('status');
 const closeDupes = document.getElementById('close-dupes');
 const locate = document.getElementById('locate');
 const menu = document.getElementById('menu');
+const renameItem = menu.querySelector('[data-action="rename"]');
 const resetName = menu.querySelector('[data-action="reset"]');
+const favouriteItem = menu.querySelector('[data-action="favourite"]');
 
 let pendingFocus = null;
 
@@ -163,13 +168,13 @@ async function load() {
   state.windowId = current.id;
   state.groups = new Map(groups.map((g) => [g.id, g]));
   state.tabs = sortTabs(tabs);
-  forgetClosedNames();
+  forgetClosedTabs();
   findDuplicates();
   render();
 }
 
-// A name belongs to its tab and goes when the tab does.
-function forgetClosedNames() {
+// A name or a favourite belongs to its tab and goes when the tab does.
+function forgetClosedTabs() {
   const open = new Set(state.tabs.map((t) => t.id));
   let changed = false;
   for (const id of state.names.keys()) {
@@ -178,7 +183,12 @@ function forgetClosedNames() {
       changed = true;
     }
   }
-  if (changed) saveNames();
+  const kept = state.favourites.filter((id) => open.has(id));
+  if (kept.length !== state.favourites.length) {
+    state.favourites = kept;
+    changed = true;
+  }
+  if (changed) saveSession();
 }
 
 let refreshTimer;
@@ -331,6 +341,7 @@ function foldersFor(tabs) {
 
 function render() {
   const focusedId = document.activeElement?.closest?.('.tab')?.dataset.id;
+  const focusedFavourite = document.activeElement?.closest?.('.fav')?.dataset.id;
   const words = state.query.toLowerCase().split(/\s+/).filter(Boolean);
   const shown = words.length
     ? state.tabs.filter((t) => {
@@ -347,6 +358,8 @@ function render() {
   closeDupes.hidden = state.extraCopies.length === 0;
   closeDupes.textContent = `Close ${plural(state.extraCopies.length, 'duplicate')}`;
 
+  renderFavourites();
+
   const folders = foldersFor(shown);
   list.replaceChildren(...(folders.length ? folders.map(renderFolder) : [renderEmpty()]));
 
@@ -356,7 +369,35 @@ function render() {
     pendingFocus = null;
   } else if (focusedId) {
     list.querySelector(`.tab[data-id="${focusedId}"] .tab-main`)?.focus();
+  } else if (focusedFavourite) {
+    strip.querySelector(`.fav[data-id="${focusedFavourite}"]`)?.focus();
   }
+}
+
+// The favourites: one icon per tab, above the search box. A click goes to the tab.
+function renderFavourites() {
+  const tabs = state.favourites.map((id) => state.tabs.find((t) => t.id === id)).filter(Boolean);
+  strip.hidden = tabs.length === 0;
+  strip.replaceChildren(
+    ...tabs.map((tab) => {
+      const url = urlOf(tab);
+      const title = labelOf(tab);
+      return h(
+        'button',
+        {
+          class: 'fav',
+          type: 'button',
+          'data-id': tab.id,
+          style: `--base: hsl(${hueOf(siteOf(url).key)} 62% 50%)`,
+          title: `${title}\n${url}`,
+          'aria-label': title,
+          'aria-current': tab.active && tab.windowId === state.windowId ? 'true' : null,
+          onclick: () => activate(tab),
+        },
+        favicon(url),
+      );
+    }),
+  );
 }
 
 function renderFolder(folder) {
@@ -443,6 +484,7 @@ function renderTab(tab) {
           { class: 'tab-detail' },
           detail,
           renamed && h('span', { class: 'badge' }, 'Renamed'),
+          state.favourites.includes(tab.id) && h('span', { class: 'badge' }, 'Favourite'),
           state.duplicates.has(tab.id) && h('span', { class: 'badge badge-duplicate' }, 'Duplicate'),
           tab.pinned && h('span', { class: 'badge' }, 'Pinned'),
           tab.audible && h('span', { class: 'badge' }, 'Playing'),
@@ -547,7 +589,7 @@ function finishEdit(id, value, { refocus = false } = {}) {
     const name = value.trim();
     if (!name || name === originalTitle(tab)) state.names.delete(id);
     else state.names.set(id, name);
-    saveNames();
+    saveSession();
   }
 
   render();
@@ -558,24 +600,42 @@ function finishEdit(id, value, { refocus = false } = {}) {
 
 function clearName(id) {
   if (!state.names.delete(id)) return;
-  saveNames();
+  saveSession();
   render();
   announce('Original name restored');
 }
 
-function saveNames() {
-  chrome.storage.session.set({ names: Object.fromEntries(state.names) });
+// Names and favourites live in memory only (session storage): they last until Chrome closes.
+function saveSession() {
+  chrome.storage.session.set({ names: Object.fromEntries(state.names), favourites: state.favourites });
+}
+
+// ----- Favourites -----
+
+function toggleFavourite(id, { fromStrip = false } = {}) {
+  const adding = !state.favourites.includes(id);
+  state.favourites = adding ? [...state.favourites, id] : state.favourites.filter((f) => f !== id);
+  saveSession();
+  render();
+  // The icon that was just removed can't keep focus; hand it to the tab's row.
+  if (!adding && fromStrip) list.querySelector(`.tab[data-id="${id}"] button.tab-main`)?.focus();
+  announce(adding ? 'Added to favourites' : 'Removed from favourites');
 }
 
 // ----- Context menu -----
 
+// `row` is a tab row or a favourite icon. Favourite icons can only be removed.
 function openMenu(row, x, y) {
   const id = Number(row.dataset.id);
+  const fromStrip = row.classList.contains('fav');
   state.menuTab = id;
-  resetName.hidden = !state.names.has(id);
+  state.menuFromStrip = fromStrip;
+  renameItem.hidden = fromStrip;
+  resetName.hidden = fromStrip || !state.names.has(id);
+  favouriteItem.textContent = state.favourites.includes(id) ? 'Remove from favourites' : 'Add to favourites';
 
   // Focus the row first so focus returns to it when the menu closes.
-  row.querySelector('button.tab-main')?.focus();
+  (fromStrip ? row : row.querySelector('button.tab-main'))?.focus();
   menu.showPopover();
 
   // Keyboard-opened menus have no pointer position, so sit under the row instead.
@@ -664,9 +724,9 @@ async function restore() {
   const saved = await chrome.storage.local.get(['view', 'collapsed']);
   if (VIEWS.includes(saved.view)) state.view = saved.view;
   state.collapsed = new Set(saved.collapsed ?? []);
-  // Names live in memory only (session storage): they last until Chrome closes.
-  const session = await chrome.storage.session.get('names');
+  const session = await chrome.storage.session.get(['names', 'favourites']);
   state.names = new Map(Object.entries(session.names ?? {}).map(([id, name]) => [Number(id), name]));
+  state.favourites = (session.favourites ?? []).map(Number);
   document.querySelector(`input[name="view"][value="${state.view}"]`).checked = true;
 }
 
@@ -682,13 +742,15 @@ closeDupes.addEventListener('click', () => closeTabs(state.extraCopies));
 
 locate.addEventListener('click', showCurrentTab);
 
-list.addEventListener('contextmenu', (e) => {
-  const row = e.target.closest('.tab');
-  // While a name is being edited, leave the browser's own menu (copy, paste) alone.
-  if (!row || row.classList.contains('tab-editing')) return;
-  e.preventDefault();
-  openMenu(row, e.clientX, e.clientY);
-});
+for (const area of [list, strip]) {
+  area.addEventListener('contextmenu', (e) => {
+    const row = e.target.closest('.tab, .fav');
+    // While a name is being edited, leave the browser's own menu (copy, paste) alone.
+    if (!row || row.classList.contains('tab-editing')) return;
+    e.preventDefault();
+    openMenu(row, e.clientX, e.clientY);
+  });
+}
 
 menu.addEventListener('click', (e) => {
   const action = e.target.closest('[data-action]')?.dataset.action;
@@ -696,6 +758,7 @@ menu.addEventListener('click', (e) => {
   const id = state.menuTab;
   menu.hidePopover();
   if (action === 'rename') startEdit(id);
+  else if (action === 'favourite') toggleFavourite(id, { fromStrip: state.menuFromStrip });
   else clearName(id);
 });
 

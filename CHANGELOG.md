@@ -2,6 +2,10 @@
 
 What changed in BetterTabs, newest first. The version being worked on is in `extension/manifest.json`.
 
+## 1.3.0
+
+- Right-click a tab and choose **Add to favourites**. Its site icon appears in a row above the search box, and one click takes you to that tab. Right-click an icon and choose **Remove from favourites** to take it off. Closing the tab removes it from the favourites. Favourites last until Chrome closes, like tab names.
+
 ## 1.2.1
 
 - Nothing changes in the extension itself. The repository is reorganised: the files Chrome loads now live in `extension/`, so **Load unpacked** takes that folder. Tools moved to `scripts/` and `preview/`.

@@ -19,7 +19,7 @@ This repository is **BetterTabs**: a Chrome extension (Manifest V3) that opens i
 3. No network requests, analytics or remote code. Everything stays in the browser.
 4. Request the fewest permissions possible, and no `host_permissions` or content scripts: the extension never reads page content. Every permission in `extension/manifest.json` needs a usage pattern in `scripts/check.mjs` and a justification in `docs/store-listing.md`; the check fails if they drift apart.
 5. Closing tabs is immediate by design (no confirmation dialog). Do not add one.
-6. Don't store tab titles or URLs. Only the chosen view and collapsed folders are saved to disk (`chrome.storage.local`); names the user types are kept in memory only (`chrome.storage.session`), keyed by tab id.
+6. Don't store tab titles or URLs. Only the chosen view and collapsed folders are saved to disk (`chrome.storage.local`); names the user types and favourited tabs are kept in memory only (`chrome.storage.session`), keyed by tab id.
 7. CSS sizes use `rem`/`em`, not `px`, so the panel follows the user's font-size setting. Interactive targets are at least 24 CSS px (`--target`), focus rings use `:focus-visible`, and state is never shown by colour alone.
 8. Don't assign page-controlled strings (tab titles, URLs) to `innerHTML`. Build DOM with the `h()` helper in `extension/sidepanel.js`.
 9. **Every new or changed feature updates the docs in the same change** (see [Docs go with the code](#docs-go-with-the-code)).
@@ -42,7 +42,7 @@ node scripts/package.mjs           # dist/bettertabs-<version>.zip (only for a r
 
 Open <http://localhost:8741/preview/> at a narrow width (about 380 px) in light and dark mode. The preview loads the real `extension/sidepanel.*` files and replaces `chrome.*` with `preview/mock-chrome.js`.
 
-Check: every view (Sites, Windows, Recent, Groups), search, collapse and expand, closing a tab, **Close duplicates**, renaming (right-click, `F2`, `Enter`, `Esc`, reset), **Show current tab**, keyboard use (`/`, arrows, `Enter`, `Delete`), and the console for errors.
+Check: every view (Sites, Windows, Recent, Groups), search, collapse and expand, closing a tab, **Close duplicates**, renaming (right-click, `F2`, `Enter`, `Esc`, reset), favourites (add, click the icon, remove, close the tab), **Show current tab**, keyboard use (`/`, arrows, `Enter`, `Delete`), and the console for errors.
 
 Two preview quirks: some automated browsers don't send a real `contextmenu` event on right-click (dispatch one with `new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX, clientY })`), and a hidden browser pane pauses smooth scrolling, so stub `matchMedia('(prefers-reduced-motion: reduce)')` to test scroll position.
 
@@ -101,8 +101,8 @@ Reading Chrome → organising → drawing → acting → wiring, in that order i
 - `render()` filters by the search query, then draws folders (`renderFolder`) and rows (`renderTab`).
 - `findDuplicates()` fills `state.duplicates` and `state.extraCopies`.
 - `closeTabs`, `activate`, `toggle`, `setView`, `setQuery` are the user actions.
-- `startEdit` / `finishEdit` rename a tab inline; `openMenu` shows the right-click menu (a `popover`); `showCurrentTab` scrolls to the active tab.
-- State that survives restarts (`view`, `collapsed`) lives in `chrome.storage.local`. Custom tab names live in `chrome.storage.session`.
+- `startEdit` / `finishEdit` rename a tab inline; `toggleFavourite` and `renderFavourites` handle the icon row above the search box; `openMenu` shows the right-click menu (a `popover`); `showCurrentTab` scrolls to the active tab.
+- State that survives restarts (`view`, `collapsed`) lives in `chrome.storage.local`. Custom tab names and favourite tab ids live in `chrome.storage.session`.
 
 ## Conventions
 

@@ -28,6 +28,9 @@ After changing a file, click the reload arrow on the extension's card.
 - **Show current tab**: the target button next to the search box scrolls the list to the tab you're on. It clears a search or expands a folder if either is hiding it.
 - Click any tab to switch to it, even if it's in another window.
 
+**Favourites**
+- Right-click a tab and choose **Add to favourites**. Its site icon appears in a row above the search box, and one click takes you to that tab, even in another window. Right-click the icon and choose **Remove from favourites**, or close the tab, to take it off. Favourite tabs are badged in the list, and favourites last until Chrome closes.
+
 **Rename**
 - Right-click a tab and choose **Edit name** (or select it and press `F2`) to give it a name you'll recognise. Renamed tabs are badged, and **Reset name** brings the original back. Names last until Chrome closes.
 

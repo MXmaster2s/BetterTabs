@@ -22,6 +22,7 @@ BetterTabs puts every open tab, from every window, in Chrome's side panel and or
 - Windows, Recent and Groups: the same tabs by window, by when you last used them, or by Chrome tab group.
 - Search by title or address.
 - Rename any tab: right-click it and choose Edit name.
+- Favourite a tab: right-click it and choose Add to favourites. Its site icon sits above the search box, one click away.
 - One button scrolls the list to the tab you're on.
 - Duplicate tabs are marked, and one click closes the extra copies.
 - Click a tab to switch to it, even in another window. Close one tab, or every tab on a site, in one click.
@@ -45,7 +46,7 @@ Needed to show the tab list in Chrome's side panel, and to open it when the tool
 
 ### `storage`
 
-Needed to remember the selected view and which folders the user collapsed, and to hold the names the user gives their tabs while Chrome is open. The view and folders are saved locally; names stay in memory only.
+Needed to remember the selected view and which folders the user collapsed, and to hold the names the user gives their tabs and the tabs they favourite while Chrome is open. The view and folders are saved locally; names and favourites stay in memory only.
 
 ### `favicon`
 
@@ -67,4 +68,4 @@ No. All code ships inside the extension package.
 
 ## Privacy policy
 
-BetterTabs does not collect, store, share or transmit personal data. The tab titles and web addresses it reads stay in your browser and are used only to show your tab list. The only things saved are your chosen view and the folders you collapsed, kept locally with Chrome's extension storage. Names you give your tabs are held in memory until Chrome closes. There is no account, server or analytics.
+BetterTabs does not collect, store, share or transmit personal data. The tab titles and web addresses it reads stay in your browser and are used only to show your tab list. The only things saved are your chosen view and the folders you collapsed, kept locally with Chrome's extension storage. Names you give your tabs and the tabs you favourite are held in memory until Chrome closes. There is no account, server or analytics.

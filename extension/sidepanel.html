@@ -9,6 +9,7 @@
 <body>
   <header class="bar">
     <h1 class="visually-hidden">Open tabs</h1>
+    <div id="favourites" class="favourites" role="group" aria-label="Favourite tabs" hidden></div>
     <div class="finder">
       <div class="search">
         <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.75" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m10.5 10.5 3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
@@ -34,6 +35,7 @@
   <div id="menu" popover role="menu" aria-label="Tab actions">
     <button type="button" role="menuitem" data-action="rename">Edit name</button>
     <button type="button" role="menuitem" data-action="reset" hidden>Reset name</button>
+    <button type="button" role="menuitem" data-action="favourite">Add to favourites</button>
   </div>
   <!-- Announces search results and closed tabs. Kept separate so routine tab updates stay silent. -->
   <p id="status" class="visually-hidden" role="status"></p>

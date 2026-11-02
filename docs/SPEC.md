@@ -24,14 +24,15 @@ Single purpose: show and organise your open tabs.
 From top to bottom:
 
 1. A visually hidden `<h1>` "Open tabs".
-2. A row with a search box (`type="search"`, label "Search tabs") and, to its right, a square icon button (a target symbol) labelled **Show current tab**.
-3. A four-way view switch (radio group): **Sites**, **Windows**, **Recent**, **Groups**.
-4. A summary row: the tab count on the left; on the right, a "Close N duplicates" text button shown only when duplicates exist.
-5. The list: a column of folders. Each folder has a header (`<h2>` wrapping a toggle button with the folder name and its tab count, plus a "Close all" button) and a `<ul>` of tab rows.
-6. A visually hidden `role="status"` element for screen reader announcements.
-7. A context menu (`<div popover role="menu">`) holding **Edit name** and, for renamed tabs only, **Reset name**.
+2. A row of favourite icons (see Favourites), shown only when there is at least one favourite.
+3. A row with a search box (`type="search"`, label "Search tabs") and, to its right, a square icon button (a target symbol) labelled **Show current tab**.
+4. A four-way view switch (radio group): **Sites**, **Windows**, **Recent**, **Groups**.
+5. A summary row: the tab count on the left; on the right, a "Close N duplicates" text button shown only when duplicates exist.
+6. The list: a column of folders. Each folder has a header (`<h2>` wrapping a toggle button with the folder name and its tab count, plus a "Close all" button) and a `<ul>` of tab rows.
+7. A visually hidden `role="status"` element for screen reader announcements.
+8. A context menu (`<div popover role="menu">`) holding **Edit name**, **Reset name** (renamed tabs only) and **Add to favourites** / **Remove from favourites**.
 
-The toolbar (items 2 to 4) stays pinned to the top while the list scrolls.
+The toolbar (items 1 to 5) stays pinned to the top while the list scrolls.
 
 ## Data
 
@@ -111,6 +112,17 @@ Two tabs are duplicates only if their URLs are exactly equal (including `#` frag
 - Names are kept in `chrome.storage.session`, keyed by tab id: in memory only, they survive closing the panel and navigating inside the tab, and are dropped when the tab closes or Chrome quits.
 - While a name is being edited, the browser's own context menu (copy, paste) is left alone.
 
+### Favourites
+
+- **Add to favourites** in a tab row's context menu adds that tab; the same item reads **Remove from favourites** for a tab that is already a favourite. Added tabs are shown in the order they were added.
+- Each favourite is a square icon button (the site's favicon, or the letter tile) in a row above the search box. The row wraps and is hidden when empty. The button's accessible name and tooltip are the tab's name (custom name if it has one), and the tooltip also shows the URL.
+- Clicking an icon switches to that tab, as clicking its row does, including focusing its window. The icon of the tab you are looking at has `aria-current="true"` and the highlighter background (an outline in forced-colours mode).
+- Right-clicking an icon (or pressing the context-menu key on it) opens a menu with only **Remove from favourites**. After removing from the row, keyboard focus moves to that tab's row in the list.
+- A tab that is a favourite shows a **Favourite** badge in the list.
+- When a favourite tab closes, it is removed from the favourites. Navigating inside the tab keeps it, and its icon follows the page.
+- Added and removed are announced ("Added to favourites", "Removed from favourites").
+- Favourites are tab ids in `chrome.storage.session`: in memory only, gone when Chrome quits.
+
 ### Show current tab
 
 The icon button next to the search box finds the active tab of the panel's window and brings it into view:
@@ -137,7 +149,7 @@ The list redraws (debounced by 60 ms) when tabs are created, removed, moved, att
 
 ### Persistence
 
-`chrome.storage.local` holds `{ view, collapsed: string[] }` where each collapsed id is `<view>:<folder key>`. `chrome.storage.session` holds `{ names: { [tabId]: string } }`, the custom tab names. Nothing else is stored.
+`chrome.storage.local` holds `{ view, collapsed: string[] }` where each collapsed id is `<view>:<folder key>`. `chrome.storage.session` holds `{ names: { [tabId]: string }, favourites: number[] }`, the custom tab names and the favourite tab ids. Nothing else is stored.
 
 ## Keyboard
 
@@ -170,7 +182,7 @@ The list redraws (debounced by 60 ms) when tabs are created, removed, moved, att
 
 ## Privacy
 
-No network access. No analytics. Tab titles and URLs are read to display them and are never stored or sent anywhere. Names the user types are held in memory for the browser session and never written to disk or sent anywhere.
+No network access. No analytics. Tab titles and URLs are read to display them and are never stored or sent anywhere. Names the user types and the tabs they favourite are held in memory for the browser session and never written to disk or sent anywhere.
 
 ## Out of scope
 

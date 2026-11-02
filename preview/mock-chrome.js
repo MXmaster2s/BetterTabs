@@ -1,6 +1,6 @@
 // A stand-in for the chrome.* APIs the side panel uses, so the panel can be
 // opened and tested in an ordinary browser tab with made-up tabs.
-// Used only by dev/preview.html. It is not part of the extension.
+// Used only by preview/index.html. It is not part of the extension.
 (() => {
   const now = Date.now();
   const min = 60e3;
