@@ -84,6 +84,7 @@ Requires Chrome 121 or later. After editing any file, click the reload arrow on 
 | `extension/sidepanel.js` | All panel logic. See the map below. |
 | `extension/icons/` | Toolbar icons. Redraw with `python3 scripts/make-icons.py`. |
 | `docs/SPEC.md` | Full behaviour spec, precise enough to rebuild the extension. |
+| `docs/research/` | Competitor, traffic, search and Reddit research with its CSV data. Read it before choosing what to build next. |
 | `docs/store-listing.md` | Store text, privacy policy and a justification for each permission. |
 | `docs/RELEASING.md` | How to cut a release and submit it to the Chrome Web Store. |
 | `docs/scripts.md` | What each command checks or changes. |

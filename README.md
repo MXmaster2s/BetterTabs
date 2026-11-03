@@ -117,6 +117,7 @@ python3 scripts/make-icons.py      # redraw the toolbar icons
 | [AGENTS.md](AGENTS.md) | The rules and file map for agents and people changing the code |
 | [docs/SPEC.md](docs/SPEC.md) | Everything BetterTabs does, precisely enough to rebuild it |
 | [docs/site.md](docs/site.md) | The landing page: how to view, update and publish it |
+| [docs/research/](docs/research) | Competitor research, traffic, search phrases and Reddit complaints, with the data |
 | [docs/scripts.md](docs/scripts.md) | What each command checks or changes |
 | [docs/RELEASING.md](docs/RELEASING.md) | Cutting a release and submitting to the Chrome Web Store |
 | [docs/store-listing.md](docs/store-listing.md) | Store text, privacy policy and a justification for each permission |

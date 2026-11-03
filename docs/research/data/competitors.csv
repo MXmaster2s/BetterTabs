@@ -1,0 +1,12 @@
+name,kind,users,rating,ratings_count,what_it_does,website,figures_source,checked
+OneTab,extension,2000000,3.8,14600,Collapses all open tabs into one saved list,https://www.one-tab.com,Chrome Web Store page,2026-11-02
+Session Buddy,extension,1000000,3.3,25100,Saved sessions and crash recovery,https://www.sessionbuddy.com,Chrome Web Store page,2026-11-02
+Toby,extension,300000,3.6,3300,Drag tabs into visual collections; paid plans,https://gettoby.com,Chrome Web Store page,2026-11-02
+Workona,extension,200000,4.2,3800,Project workspaces and team sharing,https://workona.com,Chrome Web Store page,2026-11-02
+Tabs Outliner,extension,100000,3.2,3300,Tree view of windows and tabs with notes,https://tabsoutliner.com,Chrome Web Store page,2026-11-02
+Tab Wrangler,extension,50000,4.2,947,Automatically closes idle tabs,,Chrome Web Store page,2026-11-02
+Tab Manager Plus,extension,200000,4.7,,Fast search and duplicate cleanup; open source; last updated Oct 2024,,Comparison article (vendor-written); not checked on the Store,
+Vertical Tabs in Side Panel,extension,100000,4.4,,Plain vertical tab list in the side panel,,Comparison article (vendor-written); not checked on the Store,
+VertiTab,extension,20000,4.7,,Vertical and tree tabs with AI grouping and snapshots,,Comparison article (maker's own); not checked on the Store,
+SuperchargeNavigation,extension,,,,Workspaces; 50 automatic snapshots; keyboard search,,No figures found,
+Chrome native vertical tabs,built-in browser feature,,,,Chrome's own vertical tab strip (rolled out from April 2026),,Press coverage; no official Google post found,
