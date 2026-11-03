@@ -19,7 +19,7 @@ This repository is **BetterTabs**: a Chrome extension (Manifest V3) that opens i
 3. No network requests, analytics or remote code. Everything stays in the browser.
 4. Request the fewest permissions possible, and no `host_permissions` or content scripts: the extension never reads page content. Every permission in `extension/manifest.json` needs a usage pattern in `scripts/check.mjs` and a justification in `docs/store-listing.md`; the check fails if they drift apart.
 5. Closing tabs is immediate by design (no confirmation dialog). Do not add one.
-6. Don't store tab titles or URLs. Saved to disk (`chrome.storage.local`): the chosen view, collapsed folders, the user's settings, and the names the user typed and the tabs they favourited, kept under a short SHA-256 hash of the page address (never the address) so they come back after a restart. Between restarts they are also held by tab id in `chrome.storage.session`.
+6. Don't store tab titles or URLs, with one exception: the opt-in **automatic backups** setting, off by default. Saved to disk (`chrome.storage.local`): the chosen view, collapsed folders, the user's settings, and the names the user typed and the tabs they favourited, kept under a short SHA-256 hash of the page address (never the address) so they come back after a restart. Between restarts they are also held by tab id in `chrome.storage.session`. Only while the user has turned automatic backups on, `background.js` also keeps copies of the open tabs' titles and addresses under `backups` in `chrome.storage.local`; they never leave the computer (never `chrome.storage.sync`), and turning the setting off deletes them. Don't add any other place that stores addresses.
 7. CSS sizes use `rem`/`em`, not `px`, so the panel follows the user's font-size setting. Interactive targets are at least 24 CSS px (`--target`), focus rings use `:focus-visible`, and state is never shown by colour alone.
 8. Don't assign page-controlled strings (tab titles, URLs) to `innerHTML`. Build DOM with the `h()` helper in `extension/sidepanel.js`.
 9. **Every new or changed feature updates the docs in the same change** (see [Docs go with the code](#docs-go-with-the-code)).
@@ -78,7 +78,7 @@ Requires Chrome 121 or later. After editing any file, click the reload arrow on 
 | Path | What |
 | --- | --- |
 | `extension/manifest.json` | Declares the side panel, toolbar icon, permissions and the version. |
-| `extension/background.js` | Service worker. Opens the side panel when the toolbar icon is clicked or a keyboard shortcut is pressed. |
+| `extension/background.js` | Service worker. Opens the side panel when the toolbar icon is clicked or a keyboard shortcut is pressed, and takes the automatic backups while that setting is on. |
 | `extension/sidepanel.html` | Panel markup: search, view switch, count, list, context menu. |
 | `extension/sidepanel.css` | All styling. Light and dark, high contrast, reduced motion. |
 | `extension/sidepanel.js` | All panel logic. See the map below. |
@@ -105,7 +105,7 @@ Reading Chrome → organising → drawing → acting → wiring, in that order i
 - `findDuplicates()` fills `state.duplicates` and `state.extraCopies`.
 - `closeTabs`, `activate`, `toggle`, `setView`, `setQuery` are the user actions.
 - `startEdit` / `finishEdit` rename a tab inline; `toggleFavourite` and `renderFavourites` handle the icon row above the search box; `openMenu` shows the right-click menu (a `popover`); `showCurrentTab` scrolls to the active tab; `isBillingPage`, `serviceName` and `addToLongbook` handle the Add to longbook button; `saveSettings` and the `#settings` popover handle the settings button at the bottom right.
-- State that survives restarts (`view`, `collapsed`, `settings`, `remembered`) lives in `chrome.storage.local`. `remembered` holds custom names and favourites by page hash (`fingerprint`, `adoptRemembered`, `rememberChoices`). Custom names and favourite tab ids for the running session live in `chrome.storage.session`.
+- State that survives restarts (`view`, `collapsed`, `settings`, `remembered`, and `backups` while automatic backups are on) lives in `chrome.storage.local`. `showBackups`, `restoreBackup`, `saveBackup` and `downloadBookmarks` handle the Backups popover and the export file; `background.js` (`backUp`, `thin`) takes and prunes the copies. `remembered` holds custom names and favourites by page hash (`fingerprint`, `adoptRemembered`, `rememberChoices`). Custom names and favourite tab ids for the running session live in `chrome.storage.session`.
 - `canSuspend` and `suspendTabs` handle **Suspend**; the `focusSearch` note in session storage is how `background.js` asks the panel to focus the search box.
 
 ## Conventions

@@ -144,7 +144,20 @@ Chrome keeps a suspended (discarded) tab in the strip and reloads it when it is 
 
 A **Settings** icon button sits fixed at the bottom right of the panel (`aria-label` "Settings"; the list has extra bottom padding so it never covers a row). It opens a popover above it, which closes on `Esc` or an outside click and puts focus on the first control when it opens. Changes apply and are saved at once. There is no save button.
 
-Below the settings, behind a rule, is the **Export open tabs** button (`#export-tabs`). It builds a bookmarks file (Netscape bookmark HTML, which Chrome can import) from the tabs the panel lists and offers it as a download named `bettertabs-` plus the date, ending `.html`, using a Blob and a download link, so no permission is needed. Tabs are grouped by window, the current window first as "This window (N tabs)", the rest "Window 2" and so on; each link shows the tab's list label (the user's own name if set) and its address. Tabs with no address and new-tab pages are left out. The status line announces "Exported N tabs to a file". Nothing is stored; the file is the user's.
+Below those, behind a rule, is **Keep automatic backups of my open tabs** (`#setting-backup`), a checkbox that is off by default, with a hint saying that it keeps the tab titles and addresses on this computer, about every five minutes, for around half a day, and that turning it off deletes them, and a **Restore from a backup** button (`#open-backups`) that closes the settings and opens the Backups popover (see Backups).
+
+Below that, behind another rule, is the **Export open tabs** button (`#export-tabs`). It builds a bookmarks file (Netscape bookmark HTML, which Chrome can import) from the tabs the panel lists and offers it as a download named `bettertabs-` plus the date, ending `.html`, using a Blob and a download link, so no permission is needed. Tabs are grouped by window, the current window first as "This window (N tabs)", the rest "Window 2" and so on; each link shows the tab's list label (the user's own name if set) and its address. Tabs with no address and new-tab pages are left out. The status line announces "Exported N tabs to a file". Nothing is stored; the file is the user's.
+
+### Backups
+
+While `settings.autoBackup` is true, the service worker (`background.js`) keeps copies of the open tabs in `chrome.storage.local` under `backups`: an array, newest first, of `{ at: epoch ms, windows: [[{ title, url, pinned? }]] }`. Titles are cut to 200 characters and addresses to 2,000; new-tab pages and tabs with no address are left out. It listens for tab created, removed, updated and attached events and for browser start-up, and acts at most once every 30 seconds. It takes a copy when the last one is at least five minutes old and the list of addresses (per window, in order) differs from it, and it takes the first copy at once when the setting is turned on. After each copy the list is thinned: all copies of the newest 12 are kept, then the newest copy of each hour, up to 12 hours. If storage refuses the write (quota), the oldest copies are dropped until it fits. Turning the setting off removes `backups`. No permission beyond `tabs` and `storage` is used, and nothing is written to `chrome.storage.sync`.
+
+The Backups popover (`#backups`, headed **Backups**, focus on the heading when it opens) lists the copies newest first. Each shows when it was taken ("Today, 2:05 PM", "Yesterday, …", or the weekday and date), "N tabs in M windows", and two buttons:
+
+- **Restore** opens each saved window as a new, unfocused window with `chrome.windows.create`. Only `http` and `https` addresses are opened, and addresses that are already open in any window are skipped. The first tab of each window loads; the others are discarded (suspended) right after, and tabs that were pinned are pinned again. The popover closes and the status line says "Restored N tabs", with ", skipping M already open or not a web page" when some were left out, or "Nothing to restore: every web page in this backup is already open".
+- **Save as file** downloads the copy as a bookmarks file named `bettertabs-backup-` plus the date and time, ending `.html`, in the same format as the export (windows named "Window 1" and so on). The status line says "Saved N tabs from this backup to a file".
+
+**Delete all backups** (shown only when there are copies) removes `backups` and says "Deleted all backups". With no copies the popover says "No copies yet. The first one is taken when you open, close or change a tab.", and with the setting off, "Backups are off. Turn them on in Settings."
 
 - **Show Add to longbook on billing and price pages**: a checkbox, on by default. Beneath it, "Needs the longbook app on your Mac" and a **Get longbook** link to `https://longbook.app/?utm_source=bettertabs&utm_medium=extension&utm_campaign=add-to-longbook`, opened in a new tab.
 - **Open the panel in**: a select with **The view I used last** (default), **Sites**, **Windows**, **Recent** and **Groups**. A fixed choice is applied each time the panel opens, instead of the remembered view.
@@ -175,7 +188,7 @@ The list redraws (debounced by 60 ms) when tabs are created, removed, moved, att
 
 ### Persistence
 
-`chrome.storage.local` holds `{ view, collapsed: string[], settings: { showLongbook: boolean, startView: 'last' | 'site' | 'window' | 'recent' | 'group' }, remembered: { names: { [pageHash]: string }, favourites: string[] } }` where each collapsed id is `<view>:<folder key>`. `chrome.storage.session` holds `{ names: { [tabId]: string }, favourites: number[] }`, the custom tab names and the favourite tab ids for this run of Chrome, plus a short-lived `focusSearch` timestamp that the keyboard shortcut leaves for the panel. Nothing else is stored.
+`chrome.storage.local` holds `{ view, collapsed: string[], settings: { showLongbook: boolean, startView: 'last' | 'site' | 'window' | 'recent' | 'group', autoBackup: boolean }, remembered: { names: { [pageHash]: string }, favourites: string[] }, backups?: Backup[] }` (`backups` exists only while automatic backups are on; see Backups) where each collapsed id is `<view>:<folder key>`. `chrome.storage.session` holds `{ names: { [tabId]: string }, favourites: number[] }`, the custom tab names and the favourite tab ids for this run of Chrome, plus a short-lived `focusSearch` timestamp that the keyboard shortcut leaves for the panel. Nothing else is stored.
 
 ## Keyboard
 
@@ -210,7 +223,7 @@ Two shortcuts are declared in the manifest as `commands` and handled by the serv
 
 ## Privacy
 
-No network requests and no analytics. The only links that leave the browser are ones you click: the longbook link, and Get longbook (in the right-click menu and the settings), which opens a web page in a new tab. Tab titles and URLs are read to display them and are never stored or sent anywhere. Names the user types and the tabs they favourite are saved on the computer under a hash of the page address, never the address, and never sent anywhere.
+No network requests and no analytics. The only links that leave the browser are ones you click: the longbook link, and Get longbook (in the right-click menu and the settings), which opens a web page in a new tab. Tab titles and URLs are read to display them and are never sent anywhere. They are stored only if the user turns on automatic backups, and then only on the computer, until the setting is turned off or the backups are deleted. Names the user types and the tabs they favourite are saved on the computer under a hash of the page address, never the address, and never sent anywhere.
 
 ## Out of scope
 

@@ -26,7 +26,7 @@
     "operatingSystem": "Chrome 121 or later",
     "description": "A Chrome extension that lists every open tab in the side panel, grouped by website.",
     "url": "https://bettertabs.fyi/",
-    "softwareVersion": "1.6.0",
+    "softwareVersion": "1.7.0",
     "license": "https://opensource.org/licenses/MIT",
     "installUrl": "https://github.com/MXmaster2s/BetterTabs#install",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
@@ -172,7 +172,7 @@
           </li>
           <li class="card" style="--base: hsl(100 50% 42%)">
             <h3>Back up</h3>
-            <p>Export open tabs, in the settings, saves the name and address of every tab to a file you keep. Open it in any browser to click through the links, or import it into Chrome's bookmarks. Nothing is stored or sent anywhere.</p>
+            <p>Turn on automatic backups in the settings and BetterTabs keeps recent copies of your open tabs on your computer. After a crash or a bad restart, restore a copy, or save it as a file. Off until you turn it on, deleted when you turn it off, never sent anywhere. Export open tabs saves a file you keep.</p>
           </li>
           <li class="card" style="--base: hsl(236 52% 58%)">
             <h3>Shortcuts</h3>
@@ -209,7 +209,6 @@
           <div>
             <h3>Later</h3>
             <ul>
-              <li><strong>Automatic backups</strong><span>Keep recent copies of your open tabs on your computer, so a crash or a bad restart never costs you the lot. This stores page addresses, so it will be a setting you turn on.</span></li>
               <li><strong>Workspaces</strong><span>Separate sets of tabs for work, a trip or a project, and a switch between them.</span></li>
               <li><strong>Notes on tabs</strong><span>A line to remind you why you opened a page.</span></li>
               <li><strong>Warn about duplicates</strong><span>Say so when you open a page you already have open.</span></li>
@@ -233,7 +232,7 @@
             <li><code>tabs</code><span>Read each tab's title and address, switch to a tab, and close the tabs you ask it to close.</span></li>
             <li><code>tabGroups</code><span>Read the names and colours of your tab groups for the Groups view.</span></li>
             <li><code>sidePanel</code><span>Show the list in Chrome's side panel and open it from the toolbar icon.</span></li>
-            <li><code>storage</code><span>Remember your view, collapsed folders, settings, tab names and favourites. Pages are kept as a short hash, never as an address.</span></li>
+            <li><code>storage</code><span>Remember your view, collapsed folders, settings, tab names and favourites. Pages are kept as a short hash, never as an address. If you turn on automatic backups, it also keeps copies of your open tabs on your computer.</span></li>
             <li><code>favicon</code><span>Show each site's icon from Chrome's own cache.</span></li>
           </ul>
         </div>
@@ -280,7 +279,7 @@
           </details>
           <details>
             <summary>What does it save?</summary>
-            <p>Your chosen view, which folders you collapsed and your settings, kept on your computer with Chrome's extension storage. The names you give tabs and your favourites are saved too, under a short hash of the page address, never the address, so they come back when the page is open again after you restart Chrome.</p>
+            <p>Your chosen view, which folders you collapsed and your settings, kept on your computer with Chrome's extension storage. The names you give tabs and your favourites are saved too, under a short hash of the page address, never the address, so they come back when the page is open again after you restart Chrome. If you turn on automatic backups (off by default), copies of your open tabs' titles and addresses are kept on your computer too, and deleted when you turn the setting off.</p>
           </details>
           <details>
             <summary>What is the Add to longbook button?</summary>

@@ -44,7 +44,7 @@
     <ul>
       <li><strong>It cannot read your pages.</strong> It asks Chrome for five permissions (<code>tabs</code>, <code>tabGroups</code>, <code>sidePanel</code>, <code>storage</code> and <code>favicon</code>), no host permissions and no content scripts. It sees the title and address Chrome shows for each tab, and has no way to look inside a page.</li>
       <li><strong>It makes no network requests.</strong> There is no server, account or analytics. The code contains no <code>fetch</code>, <code>XMLHttpRequest</code> or <code>WebSocket</code>.</li>
-      <li><strong>It stores almost nothing.</strong> Your view, collapsed folders and settings stay on your computer. Names and favourites are remembered under a short hash of the page address, never the address itself. It keeps no history of pages you visited.</li>
+      <li><strong>It stores almost nothing.</strong> Your view, collapsed folders and settings stay on your computer. Names and favourites are remembered under a short hash of the page address, never the address itself. It keeps no history of pages you visited. The one exception is automatic backups, which are off until you turn them on: they keep copies of your open tabs on your computer so you can restore them after a crash, and turning them off deletes the copies.</li>
       <li><strong>You choose when anything leaves.</strong> Export open tabs writes a file you keep, only when you click it.</li>
       <li><strong>It is open source.</strong> The code is MIT licensed on GitHub, small, with no build step, so the files Chrome loads are the files you can read. If the project changed hands, anyone could see what changed, and anyone could keep the old version going.</li>
     </ul>

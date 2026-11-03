@@ -591,7 +591,8 @@ main {
   box-shadow: 0 0.125rem 0.5rem rgb(0 0 0 / 0.16);
 }
 
-#settings {
+#settings,
+#backups {
   position: fixed;
   inset: auto 0.5rem 3rem auto;
   width: min(17rem, calc(100vw - 1rem));
@@ -604,12 +605,14 @@ main {
   box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 0.22);
 }
 
-#settings h2 {
+#settings h2,
+#backups h2 {
   margin: 0 0 0.625rem;
   font-size: 0.8125rem;
 }
 
-#settings a {
+#settings a,
+#backups a {
   color: var(--focus);
 }
 
@@ -659,6 +662,59 @@ main {
 
 .setting-action .setting-hint {
   margin: 0.125rem 0 0;
+}
+
+.setting-action .setting + .setting-hint {
+  margin: 0.25rem 0 0.375rem 1.5rem;
+}
+
+/* Backups: the copies of the open tabs, newest first. */
+
+#backups {
+  max-height: min(24rem, calc(100vh - 4rem));
+  overflow-y: auto;
+}
+
+#backups h2 {
+  outline: none;
+}
+
+#backups .setting-hint {
+  margin: 0 0 0.5rem;
+}
+
+.backup-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.backup {
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--rule);
+}
+
+.backup-when {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.backup-size {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.backup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin: 0.125rem 0 0 -0.5rem;
+}
+
+#delete-backups {
+  margin-left: -0.5rem;
 }
 
 /* Empty search */

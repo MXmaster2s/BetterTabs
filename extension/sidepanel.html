@@ -53,9 +53,23 @@
       </select>
     </label>
     <div class="setting-action">
+      <label class="setting">
+        <input id="setting-backup" type="checkbox">
+        <span>Keep automatic backups of my open tabs</span>
+      </label>
+      <p class="setting-hint">Keeps the titles and addresses of your tabs on this computer, about every five minutes, for around half a day. Turning this off deletes them.</p>
+      <button id="open-backups" class="text-button" type="button">Restore from a backup</button>
+    </div>
+    <div class="setting-action">
       <button id="export-tabs" class="text-button" type="button">Export open tabs</button>
       <p class="setting-hint">Saves a file with the name and address of every open tab. Open it in any browser, or import it as bookmarks.</p>
     </div>
+  </section>
+  <section id="backups" popover aria-labelledby="backups-title">
+    <h2 id="backups-title" tabindex="-1">Backups</h2>
+    <p id="backups-note" class="setting-hint"></p>
+    <ul id="backup-list" class="backup-list"></ul>
+    <button id="delete-backups" class="text-button" type="button" hidden>Delete all backups</button>
   </section>
   <div id="menu" popover role="menu" aria-label="Tab actions">
     <button type="button" role="menuitem" data-action="rename">Edit name</button>

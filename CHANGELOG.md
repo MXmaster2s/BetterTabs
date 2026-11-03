@@ -2,6 +2,11 @@
 
 What changed in BetterTabs, newest first. The version being worked on is in `extension/manifest.json`.
 
+## 1.7.0
+
+- **Automatic backups**, a setting that is off until you turn it on. While it is on, BetterTabs keeps copies of the titles and addresses of your open tabs on your computer: a new copy about every five minutes while your tabs change, every copy of the last hour, then one an hour for about half a day more. Nothing is sent anywhere. Turning the setting off deletes the copies.
+- **Restore from a backup** in the settings lists the copies, newest first. **Restore** opens each saved window as a new window, skips pages you already have open, and loads only the first tab of each window: the rest wait, suspended, until you click them. **Save as file** turns a copy into a bookmarks file, and **Delete all backups** removes them.
+
 ## 1.6.0
 
 - Names you give tabs and your favourites now survive restarting Chrome. They come back when the same page is open again, and Chrome's **Reopen closed tab** brings a closed one back with its name. They are saved under a short hash of the page address; the address itself is never stored.

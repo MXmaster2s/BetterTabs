@@ -46,7 +46,8 @@ After changing a file, click the reload arrow on the extension's card.
 
 **Settings**
 - The icon button at the bottom right opens the settings: hide the **Add to longbook** button, and choose which view the panel opens in (the one you used last, or always Sites, Windows, Recent or Groups). Settings are saved on your computer and take effect at once.
-- **Export open tabs** saves a file with the name and address of every open tab, grouped by window. Open it in any browser to click through the links, or import it into Chrome's bookmarks (**Bookmarks → Import bookmarks and settings → Bookmarks HTML file**). Your backup if Chrome loses a session; BetterTabs itself stores no addresses.
+- **Export open tabs** saves a file with the name and address of every open tab, grouped by window. Open it in any browser to click through the links, or import it into Chrome's bookmarks (**Bookmarks → Import bookmarks and settings → Bookmarks HTML file**). A file you keep, whatever happens to Chrome.
+- **Automatic backups** (off until you turn them on in the settings) keep copies of your open tabs' titles and addresses on your computer: a new copy about every five minutes while your tabs change, every copy of the last hour, then one an hour for about half a day. **Restore from a backup** lists them. **Restore** opens each saved window, skips pages you already have open, and loads only the first tab of each window so hundreds of tabs don't load at once. **Save as file** exports a copy, and **Delete all backups** removes them. Turning the setting off deletes the copies. Nothing leaves your computer.
 
 **Comfortable**
 - Updates live as you open, close and switch tabs.
@@ -129,7 +130,7 @@ python3 scripts/make-icons.py      # redraw the toolbar icons
 What other tab managers do that BetterTabs does not do yet, easiest first (also on [bettertabs.fyi](https://bettertabs.fyi/#roadmap)):
 
 - **Next:** Group this site into a Chrome tab group; select several tabs and act on them together; drag to reorder and move between windows; saved lists; close idle tabs automatically; the Chrome Web Store, Edge and Brave.
-- **Later:** automatic local backups (a setting, because they store addresses); workspaces; notes on tabs; a warning when you open a duplicate; a tree view.
+- **Later:** workspaces; notes on tabs; a warning when you open a duplicate; a tree view.
 - **Not planned:** syncing between devices, because it would send your tab list off your computer.
 
 ## Contributing

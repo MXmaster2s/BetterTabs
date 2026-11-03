@@ -43,7 +43,7 @@ const state = {
   editing: null, // id of the tab whose name is being edited
   menuTab: null, // id of the tab the context menu is open for
   menuFromStrip: false, // whether that menu was opened on a favourite icon
-  settings: { showLongbook: true, startView: 'last' },
+  settings: { showLongbook: true, startView: 'last', autoBackup: false },
 };
 
 const list = document.getElementById('list');
@@ -58,6 +58,13 @@ const settingsPanel = document.getElementById('settings');
 const settingLongbook = document.getElementById('setting-longbook');
 const settingView = document.getElementById('setting-view');
 const exportButton = document.getElementById('export-tabs');
+const settingBackup = document.getElementById('setting-backup');
+const openBackups = document.getElementById('open-backups');
+const backupsPanel = document.getElementById('backups');
+const backupsTitle = document.getElementById('backups-title');
+const backupsNote = document.getElementById('backups-note');
+const backupList = document.getElementById('backup-list');
+const deleteBackups = document.getElementById('delete-backups');
 const menuGetLongbook = document.getElementById('menu-get-longbook');
 const renameItem = menu.querySelector('[data-action="rename"]');
 const resetName = menu.querySelector('[data-action="reset"]');
@@ -890,8 +897,39 @@ function escapeHtml(text) {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+const pad = (n) => String(n).padStart(2, '0');
+const dayOf = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
 // A bookmarks file: it opens as a list of links in any browser and imports into Chrome's bookmarks.
-// Built from a Blob and a download link, so it needs no permission.
+// Built from a Blob and a download link, so it needs no permission. `windows` is
+// [{ name, tabs: [{ title, url }] }]; `stamp` is the date (and time) in the heading and file name.
+function downloadBookmarks(windows, stamp, fileName) {
+  const total = windows.reduce((sum, w) => sum + w.tabs.length, 0);
+  const lines = [
+    '<!DOCTYPE NETSCAPE-Bookmark-file-1>',
+    '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">',
+    `<title>BetterTabs ${stamp}</title>`,
+    `<h1>BetterTabs: ${escapeHtml(plural(total, 'tab'))}, ${stamp}</h1>`,
+    '<DL><p>',
+  ];
+  for (const { name, tabs } of windows) {
+    lines.push(`  <DT><H3>${escapeHtml(name)} (${plural(tabs.length, 'tab')})</H3>`, '  <DL><p>');
+    for (const tab of tabs) {
+      lines.push(`    <DT><A HREF="${escapeHtml(tab.url)}">${escapeHtml(tab.title)}</A>`);
+    }
+    lines.push('  </DL><p>');
+  }
+  lines.push('</DL><p>');
+
+  const link = h('a', {
+    href: URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/html' })),
+    download: fileName,
+  });
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(link.href), 10000);
+  return total;
+}
+
 function exportTabs() {
   const exportable = state.tabs
     .filter((t) => urlOf(t) && !/^(chrome|edge):\/\/newtab\/?$/.test(urlOf(t)))
@@ -902,33 +940,80 @@ function exportTabs() {
   }
   const byWindow = Map.groupBy(exportable, (t) => t.windowId);
   const order = [...byWindow.keys()].sort((a, b) => (b === state.windowId) - (a === state.windowId));
-  const today = new Date();
-  const date = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-  const lines = [
-    '<!DOCTYPE NETSCAPE-Bookmark-file-1>',
-    '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">',
-    `<title>BetterTabs ${date}</title>`,
-    `<h1>BetterTabs: ${escapeHtml(plural(exportable.length, 'tab'))}, ${date}</h1>`,
-    '<DL><p>',
-  ];
-  order.forEach((windowId, i) => {
-    const tabs = byWindow.get(windowId);
-    const name = windowId === state.windowId ? 'This window' : `Window ${i + 1}`;
-    lines.push(`  <DT><H3>${name} (${plural(tabs.length, 'tab')})</H3>`, '  <DL><p>');
-    for (const tab of tabs) {
-      lines.push(`    <DT><A HREF="${escapeHtml(urlOf(tab))}">${escapeHtml(labelOf(tab))}</A>`);
-    }
-    lines.push('  </DL><p>');
-  });
-  lines.push('</DL><p>');
+  const date = dayOf(new Date());
+  const windows = order.map((windowId, i) => ({
+    name: windowId === state.windowId ? 'This window' : `Window ${i + 1}`,
+    tabs: byWindow.get(windowId).map((tab) => ({ title: labelOf(tab), url: urlOf(tab) })),
+  }));
+  const total = downloadBookmarks(windows, date, `bettertabs-${date}.html`);
+  announce(`Exported ${plural(total, 'tab')} to a file`);
+}
 
-  const link = h('a', {
-    href: URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/html' })),
-    download: `bettertabs-${date}.html`,
-  });
-  link.click();
-  setTimeout(() => URL.revokeObjectURL(link.href), 10000);
-  announce(`Exported ${plural(exportable.length, 'tab')} to a file`);
+// ---------- Backups ----------
+// background.js keeps the copies in chrome.storage.local while the setting is on; the panel lists,
+// restores, saves and deletes them.
+
+function whenText(at) {
+  const date = new Date(at);
+  const time = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  const days = Math.round((new Date().setHours(0, 0, 0, 0) - new Date(at).setHours(0, 0, 0, 0)) / 86400000);
+  if (days === 0) return `Today, ${time}`;
+  if (days === 1) return `Yesterday, ${time}`;
+  return `${date.toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' })}, ${time}`;
+}
+
+async function showBackups() {
+  const { backups = [] } = await chrome.storage.local.get('backups');
+  backupList.replaceChildren(
+    ...backups.map((backup) => {
+      const tabCount = backup.windows.reduce((sum, w) => sum + w.length, 0);
+      return h('li', { class: 'backup' },
+        h('p', { class: 'backup-when' }, whenText(backup.at)),
+        h('p', { class: 'backup-size' }, `${plural(tabCount, 'tab')} in ${plural(backup.windows.length, 'window')}`),
+        h('div', { class: 'backup-actions' },
+          h('button', { class: 'text-button', type: 'button', onclick: () => restoreBackup(backup) }, 'Restore'),
+          h('button', { class: 'text-button', type: 'button', onclick: () => saveBackup(backup) }, 'Save as file')));
+    }),
+  );
+  deleteBackups.hidden = !backups.length;
+  backupsNote.textContent = !state.settings.autoBackup
+    ? 'Backups are off. Turn them on in Settings.'
+    : backups.length
+      ? 'Copies of your open tabs, kept on this computer. Restore opens each window with its tabs.'
+      : 'No copies yet. The first one is taken when you open, close or change a tab.';
+}
+
+// Opens each saved window as a new window. Pages that are already open are skipped, and only the
+// first tab of each window loads: the rest are suspended so hundreds of tabs don't load at once.
+async function restoreBackup(backup) {
+  const open = new Set(state.tabs.map(urlOf));
+  let opened = 0;
+  for (const saved of backup.windows) {
+    const entries = saved.filter((t) => /^https?:/i.test(t.url) && !open.has(t.url));
+    if (!entries.length) continue;
+    const win = await chrome.windows.create({ url: entries.map((t) => t.url), focused: false });
+    const created = (await chrome.tabs.query({ windowId: win.id })).sort((a, b) => a.index - b.index);
+    created.forEach((tab, i) => {
+      if (entries[i]?.pinned) chrome.tabs.update(tab.id, { pinned: true }).catch(() => {});
+      if (i > 0) chrome.tabs.discard(tab.id).catch(() => {});
+    });
+    opened += entries.length;
+  }
+  backupsPanel.hidePopover();
+  const total = backup.windows.reduce((sum, w) => sum + w.length, 0);
+  announce(
+    opened
+      ? `Restored ${plural(opened, 'tab')}${opened < total ? `, skipping ${total - opened} already open or not a web page` : ''}`
+      : 'Nothing to restore: every web page in this backup is already open',
+  );
+}
+
+function saveBackup(backup) {
+  const when = new Date(backup.at);
+  const windows = backup.windows.map((tabs, i) => ({ name: `Window ${i + 1}`, tabs }));
+  const total = downloadBookmarks(windows, `${dayOf(when)} ${pad(when.getHours())}:${pad(when.getMinutes())}`,
+    `bettertabs-backup-${dayOf(when)}-${pad(when.getHours())}${pad(when.getMinutes())}.html`);
+  announce(`Saved ${plural(total, 'tab')} from this backup to a file`);
 }
 
 function setQuery(value) {
@@ -957,11 +1042,13 @@ async function restore() {
   const saved = await chrome.storage.local.get(['view', 'collapsed', 'settings', 'remembered']);
   if (VIEWS.includes(saved.view)) state.view = saved.view;
   state.settings.showLongbook = saved.settings?.showLongbook !== false;
+  state.settings.autoBackup = saved.settings?.autoBackup === true;
   if (VIEWS.includes(saved.settings?.startView)) {
     state.settings.startView = saved.settings.startView;
     state.view = saved.settings.startView;
   }
   settingLongbook.checked = state.settings.showLongbook;
+  settingBackup.checked = state.settings.autoBackup;
   settingView.value = state.settings.startView;
   state.collapsed = new Set(saved.collapsed ?? []);
   const names = saved.remembered?.names;
@@ -996,6 +1083,26 @@ settingLongbook.addEventListener('change', () => {
 settingView.addEventListener('change', () => {
   state.settings.startView = settingView.value;
   saveSettings();
+});
+
+settingBackup.addEventListener('change', () => {
+  state.settings.autoBackup = settingBackup.checked;
+  saveSettings();
+  // Off means nothing is kept: the saved copies go with the setting.
+  if (!settingBackup.checked) chrome.storage.local.remove('backups');
+});
+openBackups.addEventListener('click', () => {
+  settingsPanel.hidePopover();
+  backupsPanel.showPopover();
+});
+backupsPanel.addEventListener('toggle', (e) => {
+  if (e.newState !== 'open') return;
+  showBackups().then(() => backupsTitle.focus());
+});
+deleteBackups.addEventListener('click', async () => {
+  await chrome.storage.local.remove('backups');
+  announce('Deleted all backups');
+  showBackups();
 });
 
 exportButton.addEventListener('click', exportTabs);
@@ -1038,7 +1145,7 @@ menu.addEventListener('keydown', (e) => {
 
 document.addEventListener('keydown', (e) => {
   // The rename box, the context menu and the settings handle their own keys.
-  if (e.target.closest?.('.rename-input, #menu, #settings')) return;
+  if (e.target.closest?.('.rename-input, #menu, #settings, #backups')) return;
 
   const rows = visibleRows();
   const typing = e.target === search;

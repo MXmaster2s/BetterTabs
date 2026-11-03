@@ -50,7 +50,7 @@ Needed to show the tab list in Chrome's side panel, and to open it when the tool
 
 ### `storage`
 
-Needed to remember the selected view, which folders the user collapsed and their settings, and the names the user gives their tabs and the tabs they favourite. Everything is saved locally in the browser. Names and favourites are filed under a short hash of the page address, never the address, so they come back when the page is open again after a restart.
+Needed to remember the selected view, which folders the user collapsed and their settings, and the names the user gives their tabs and the tabs they favourite. Everything is saved locally in the browser. Names and favourites are filed under a short hash of the page address, never the address, so they come back when the page is open again after a restart. If the user turns on the optional automatic backups setting (off by default), it also keeps copies of the open tabs' titles and addresses there, so they can be restored after a crash. Turning the setting off deletes them.
 
 ### `favicon`
 
@@ -66,10 +66,10 @@ No. All code ships inside the extension package.
 
 ## Data usage
 
-- Collects: nothing. Tab titles and addresses are read to display them and are not transmitted. They are not stored either: names the user types and favourites are saved under a hash of the page address.
+- Collects: nothing. Tab titles and addresses are read to display them and are never transmitted. By default they are not stored either: names the user types and favourites are saved under a hash of the page address. Only if the user turns on the optional automatic backups setting are the titles and addresses of the open tabs kept, on the user's own computer (Chrome's local extension storage, never synced), until the user turns the setting off or deletes the backups. On the Web Store's privacy tab, this is web history that is stored locally and never transmitted.
 - Sells or transfers user data: no.
 - Uses data for anything unrelated to the single purpose: no.
 
 ## Privacy policy
 
-BetterTabs does not collect, store, share or transmit personal data. The tab titles and web addresses it reads stay in your browser and are used only to show your tab list. The only things saved are your chosen view, the folders you collapsed, your settings, the names you give tabs and your favourite tabs, kept locally with Chrome's extension storage. Names and favourites are filed under a short hash of the page address, not the address itself, so they come back when the same page is open after a restart. There is no account, server or analytics. Clicking "Add to longbook" on a billing or price page opens the longbook app on your Mac with the site's name; if it is not installed, a link to longbook.app opens only if you click it. A setting turns the button off.
+BetterTabs does not collect, share or transmit personal data. The tab titles and web addresses it reads stay in your browser and are used only to show your tab list, and to make backups if you turn that setting on. The only things saved are your chosen view, the folders you collapsed, your settings, the names you give tabs and your favourite tabs, kept locally with Chrome's extension storage. Names and favourites are filed under a short hash of the page address, not the address itself, so they come back when the same page is open after a restart. If you turn on automatic backups, which are off by default, it also keeps copies of the titles and addresses of your open tabs on your computer, so you can restore them after a crash; they are never sent anywhere, and turning the setting off deletes them. There is no account, server or analytics. Clicking "Add to longbook" on a billing or price page opens the longbook app on your Mac with the site's name; if it is not installed, a link to longbook.app opens only if you click it. A setting turns the button off.

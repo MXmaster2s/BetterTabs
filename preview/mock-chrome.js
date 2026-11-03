@@ -67,12 +67,25 @@
     }
   })();
   const sessionStore = {};
+  // A few made-up backups so the Backups screen has something to show on the first visit.
+  if (sessionStorage.getItem('mock-local') == null) {
+    const tab = (title, url, pinned) => ({ title, url, ...(pinned && { pinned }) });
+    store.backups = [
+      { at: now - 6 * min, windows: [[tab('Inbox - Gmail', 'https://mail.google.com/mail/u/0/#inbox'), tab('Pull requests', 'https://github.com/acme/app/pulls'), tab('Cloudflare dashboard', 'https://dash.cloudflare.com/', true)], [tab('Gift ideas - Google Search', 'https://www.google.com/search?q=gift+ideas')]] },
+      { at: now - 26 * 60 * min, windows: [[tab('Docs', 'https://docs.example/start'), tab('Pricing | Acme', 'https://acme.example/pricing')]] },
+    ];
+  }
 
   window.chrome = {
     tabs: {
-      query: async () => tabs.map((t) => ({ ...t })),
-      update: async (id) => {
+      query: async ({ windowId } = {}) => tabs.filter((t) => windowId == null || t.windowId === windowId).map((t) => ({ ...t })),
+      update: async (id, props = {}) => {
         const tab = tabs.find((t) => t.id === id);
+        if ('pinned' in props) {
+          tab.pinned = props.pinned;
+          fire();
+          return { ...tab };
+        }
         for (const t of tabs) if (t.windowId === tab.windowId) t.active = false;
         tab.active = true;
         tab.lastAccessed = Date.now();
@@ -109,12 +122,28 @@
     },
     windows: {
       getCurrent: async () => ({ id: 1 }),
+      create: async ({ url }) => {
+        const windowId = Math.max(...tabs.map((t) => t.windowId)) + 1;
+        [].concat(url).forEach((u, i) => {
+          tabs.push({ id: 1000 + tabs.length, windowId, title: u, url: u, groupId: -1, index: i, active: i === 0, pinned: false, audible: false, lastAccessed: Date.now() });
+        });
+        fire();
+        return { id: windowId };
+      },
       update: async () => {},
       onFocusChanged: event(),
     },
     storage: {
       local: {
         get: async () => ({ ...store }),
+        remove: async (key) => {
+          delete store[key];
+          try {
+            sessionStorage.setItem('mock-local', JSON.stringify(store));
+          } catch {
+            // Storage is blocked: see set().
+          }
+        },
         set: async (values) => {
           Object.assign(store, values);
           try {
