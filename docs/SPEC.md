@@ -124,6 +124,10 @@ Two tabs are duplicates only if their URLs are exactly equal (including `#` frag
 - Added and removed are announced ("Added to favourites", "Removed from favourites").
 - Favourites are stored in `chrome.storage.local` under `favourites`, as an array of `{ url, title }`.
 
+### Group this site
+
+In the Sites view, a folder for a website (not Chrome pages or files) shows **Group** at the right of its header, before **Suspend**, when at least one window has two or more of its unpinned tabs that are not already all in the same tab group. It makes one Chrome tab group per window with `chrome.tabs.group`, holding that window's unpinned tabs from the folder, and titles it with the site name with `chrome.tabGroups.update` (Chrome picks the colour). Pinned tabs are left out, because Chrome cannot group them; a tab that is already in another group moves out of it. The status line says "Grouped N tabs from <site>", or "Chrome would not group these tabs" if every call failed. The folder then shows in the Groups view with Chrome's colour. No permission beyond `tabs` and `tabGroups` is used. Its accessible name is "Group N tabs from <site> into a Chrome tab group".
+
 ### Suspending
 
 Chrome keeps a suspended (discarded) tab in the strip and reloads it when it is used. **Suspend** is shown at the right of each folder header (with **Close all**) when the folder has at least one tab that can be suspended, and as **Suspend tab** in a tab's right-click menu. A tab can be suspended unless it is the active tab of its window, already suspended, playing sound, pinned, or not an `http`, `https` or `file` page. The folder button suspends every such tab in the folder through `chrome.tabs.discard`; it is announced "Suspended N tabs", or "Chrome would not suspend these tabs" when Chrome declined. A suspended tab shows a **Suspended** badge. If Chrome gives the tab a new id, its name and favourite place move to it (`chrome.tabs.onReplaced`).
@@ -176,7 +180,7 @@ The icon button next to the search box finds the active tab of the panel's windo
 Every control has a native tooltip (the `title` attribute) that says what it does and, where one exists, the key that does the same. The shortcuts for **Open BetterTabs** and **Search tabs** come from `chrome.commands.getAll()`, so they show whatever the user set at `chrome://extensions/shortcuts`; if the call fails the shortcut is left out. The toolbar icon's tooltip is set the same way by the service worker ("Open BetterTabs (Alt+Shift+B)"). Tooltips on:
 
 - The search box (`/`, and the search shortcut), **Show current tab**, each view label, **Close N duplicates** and the settings button.
-- Each folder's header (**Collapse** or **Expand** plus its name), **Suspend** (what it unloads and what it leaves alone) and **Close all** (and the reopen key, `Cmd+Shift+T` on a Mac, `Ctrl+Shift+T` elsewhere).
+- Each folder's header (**Collapse** or **Expand** plus its name), **Group**, **Suspend** (what it unloads and what it leaves alone) and **Close all** (and the reopen key, `Cmd+Shift+T` on a Mac, `Ctrl+Shift+T` elsewhere).
 - Each tab row (name, original name if renamed, address, "Click to switch to this tab. F2 renames it."), its close button ("Close tab (Delete key). It closes straight away."), and its **Add to longbook** button.
 - Every item in the right-click menu (including `F2` on **Edit name**), every control in the settings and the Backups popover, and each favourite icon (see Favourites).
 

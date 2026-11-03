@@ -4,6 +4,7 @@ What changed in BetterTabs, newest first. The version being worked on is in `ext
 
 ## 1.7.0
 
+- **Group** on each site's folder (Sites view) puts that site's tabs into one Chrome tab group named after the site, one group per window. Pinned tabs are left out, and it hides once a window's tabs are already together.
 - **Favourites stay when you close the tab.** The icon remains in the row above the search box, faded with a dashed edge, and a click opens the page again. Remove it from its right-click menu. A favourite now keeps the page's title and address on your computer until you remove it, so favourites you made in an earlier version are not carried over.
 - Clicking a favourite also scrolls the list to its tab and pulses the row, as **Show current tab** does.
 - Every button, tab and menu item has a hover tooltip that says what it does and which key does the same. The search box and the toolbar icon show the shortcuts you have set in Chrome.

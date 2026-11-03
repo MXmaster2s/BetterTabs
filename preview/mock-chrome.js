@@ -91,6 +91,14 @@
         tab.lastAccessed = Date.now();
         fire();
       },
+      group: async ({ tabIds }) => {
+        const id = Math.max(...groups.map((g) => g.id)) + 1;
+        const windowId = tabs.find((t) => t.id === tabIds[0]).windowId;
+        groups.push({ id, title: '', color: 'grey', windowId });
+        for (const t of tabs) if (tabIds.includes(t.id)) t.groupId = id;
+        fire();
+        return id;
+      },
       create: async ({ url }) => {
         const tab = { id: 2000 + tabs.length, windowId: 1, title: url, url, groupId: -1, index: 0, active: false, pinned: false, audible: false, lastAccessed: Date.now() };
         for (const t of tabs) if (t.windowId === 1) t.active = false;
@@ -124,6 +132,10 @@
     },
     tabGroups: {
       query: async () => groups,
+      update: async (id, props) => {
+        Object.assign(groups.find((g) => g.id === id), props);
+        fire();
+      },
       onCreated: event(),
       onRemoved: event(),
       onUpdated: event(),

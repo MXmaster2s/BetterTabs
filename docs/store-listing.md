@@ -27,6 +27,7 @@ BetterTabs puts every open tab, from every window, in Chrome's side panel and or
 - Hover any button for a tooltip that says what it does and which key does the same.
 - One button scrolls the list to the tab you're on.
 - Duplicate tabs are marked, and one click closes the extra copies.
+- Group a site's tabs into a Chrome tab group in one click.
 - Suspend tabs you are not using to free memory. They stay in the list and reload when you click them.
 - Export every open tab to a file you keep, to open in any browser or import as bookmarks.
 - Keyboard shortcuts: Alt+Shift+B opens the panel, Alt+Shift+F opens it with search ready.

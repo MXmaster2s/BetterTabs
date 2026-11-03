@@ -69,7 +69,7 @@ Effort is a guess for the current code, which has no build step, no network and 
 | 3 | Suspend tabs in a folder or from the menu | Tab Wrangler, tab suspenders | Small | Built in 1.6.0 |
 | 4 | Close old tabs from the Recent view | Tab Wrangler (manual) | Small | Already there: Close all on the Older folder |
 | 5 | Export every open tab to a file | OneTab, Session Buddy | Small | Built in 1.6.0 |
-| 6 | Group this site into a Chrome tab group | VertiTab AI grouping | Small to medium | Next |
+| 6 | Group this site into a Chrome tab group | VertiTab AI grouping | Small to medium | Built in 1.7.0 |
 | 7 | Saved lists, restored later | OneTab, Session Buddy, Toby | Medium | Next, kept on the computer only |
 | 8 | Select several tabs, then close, suspend or move | Tab Manager Plus | Medium | Next |
 | 9 | Drag to reorder and move between windows | Tab Manager Plus, Toby | Medium | Next |

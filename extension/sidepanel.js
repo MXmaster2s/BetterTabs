@@ -564,6 +564,18 @@ function renderFolder(folder) {
       h(
         'div',
         { class: 'folder-actions' },
+        groupsToMake(folder).length > 0 &&
+          h(
+            'button',
+            {
+              class: 'text-button close-all',
+              type: 'button',
+              title: `Put these tabs into one Chrome tab group named ${folder.label}. Pinned tabs are left out, and a tab already in another group moves out of it.`,
+              'aria-label': `Group ${plural(folder.tabs.filter((t) => !t.pinned).length, 'tab')} from ${folder.label} into a Chrome tab group`,
+              onclick: () => groupSite(folder),
+            },
+            'Group',
+          ),
         folder.tabs.some(canSuspend) &&
           h(
             'button',
@@ -937,6 +949,34 @@ async function suspendTabs(tabs) {
   // Chrome answers with nothing for a tab it would not unload.
   const done = results.filter((r) => r.status === 'fulfilled' && r.value).length;
   announce(done ? `Suspended ${plural(done, 'tab')}` : 'Chrome would not suspend these tabs');
+  refresh();
+}
+
+// Group this site: one Chrome tab group per window holding that window's tabs from the folder.
+// Chrome's groups live inside one window, and pinned tabs can't be in a group. A tab that is in
+// another group is moved out of it, so the button hides once a window's tabs are already together.
+function groupsToMake(folder) {
+  if (state.view !== 'site' || folder.key.startsWith('~')) return [];
+  const byWindow = Map.groupBy(
+    folder.tabs.filter((t) => !t.pinned),
+    (t) => t.windowId,
+  );
+  return [...byWindow.values()].filter(
+    (tabs) => tabs.length > 1 && !(tabs[0].groupId !== -1 && tabs.every((t) => t.groupId === tabs[0].groupId)),
+  );
+}
+
+async function groupSite(folder) {
+  const sets = groupsToMake(folder);
+  const results = await Promise.allSettled(
+    sets.map(async (tabs) => {
+      const id = await chrome.tabs.group({ tabIds: tabs.map((t) => t.id) });
+      await chrome.tabGroups.update(id, { title: folder.label });
+      return tabs.length;
+    }),
+  );
+  const done = results.filter((r) => r.status === 'fulfilled').reduce((sum, r) => sum + r.value, 0);
+  announce(done ? `Grouped ${plural(done, 'tab')} from ${folder.label}` : 'Chrome would not group these tabs');
   refresh();
 }
 
