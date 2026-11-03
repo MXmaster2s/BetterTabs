@@ -91,6 +91,15 @@
         tab.lastAccessed = Date.now();
         fire();
       },
+      create: async ({ url }) => {
+        const tab = { id: 2000 + tabs.length, windowId: 1, title: url, url, groupId: -1, index: 0, active: false, pinned: false, audible: false, lastAccessed: Date.now() };
+        for (const t of tabs) if (t.windowId === 1) t.active = false;
+        tab.active = true;
+        tabs.push(tab);
+        reindex();
+        fire();
+        return { ...tab };
+      },
       remove: async (ids) => {
         ids = [].concat(ids);
         tabs = tabs.filter((t) => !ids.includes(t.id));
@@ -159,6 +168,12 @@
         remove: async (key) => delete sessionStore[key],
       },
       onChanged: { addListener: () => {} },
+    },
+    commands: {
+      getAll: async () => [
+        { name: 'open-panel', shortcut: 'Alt+Shift+B' },
+        { name: 'search-tabs', shortcut: 'Alt+Shift+F' },
+      ],
     },
     runtime: {},
   };

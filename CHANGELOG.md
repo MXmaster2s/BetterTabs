@@ -4,6 +4,9 @@ What changed in BetterTabs, newest first. The version being worked on is in `ext
 
 ## 1.7.0
 
+- **Favourites stay when you close the tab.** The icon remains in the row above the search box, faded with a dashed edge, and a click opens the page again. Remove it from its right-click menu. A favourite now keeps the page's title and address on your computer until you remove it, so favourites you made in an earlier version are not carried over.
+- Clicking a favourite also scrolls the list to its tab and pulses the row, as **Show current tab** does.
+- Every button, tab and menu item has a hover tooltip that says what it does and which key does the same. The search box and the toolbar icon show the shortcuts you have set in Chrome.
 - **Automatic backups**, a setting that is off until you turn it on. While it is on, BetterTabs keeps copies of the titles and addresses of your open tabs on your computer: a new copy about every five minutes while your tabs change, every copy of the last hour, then one an hour for about half a day more. Nothing is sent anywhere. Turning the setting off deletes the copies.
 - **Restore from a backup** in the settings lists the copies, newest first. **Restore** opens each saved window as a new window, skips pages you already have open, and loads only the first tab of each window: the rest wait, suspended, until you click them. **Save as file** turns a copy into a bookmarks file, and **Delete all backups** removes them.
 

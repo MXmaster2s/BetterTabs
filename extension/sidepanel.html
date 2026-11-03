@@ -13,36 +13,36 @@
     <div class="finder">
       <div class="search">
         <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.75" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m10.5 10.5 3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-        <input id="search" type="search" placeholder="Search tabs" aria-label="Search tabs" aria-keyshortcuts="/" autocomplete="off" spellcheck="false">
+        <input id="search" type="search" placeholder="Search tabs" aria-label="Search tabs" aria-keyshortcuts="/" title="Search tabs by name, title or address. Press / to jump here." autocomplete="off" spellcheck="false">
       </div>
-      <button id="locate" class="icon-button" type="button" aria-label="Show current tab" title="Show current tab">
+      <button id="locate" class="icon-button" type="button" aria-label="Show current tab" title="Show current tab: scrolls the list to the tab you are on">
         <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.5v3M8 11.5v3M1.5 8h3M11.5 8h3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
       </button>
     </div>
     <fieldset class="views">
       <legend class="visually-hidden">Organise tabs by</legend>
-      <label><input type="radio" name="view" value="site" checked><span>Sites</span></label>
-      <label><input type="radio" name="view" value="window"><span>Windows</span></label>
-      <label><input type="radio" name="view" value="recent"><span>Recent</span></label>
-      <label><input type="radio" name="view" value="group"><span>Groups</span></label>
+      <label title="Group tabs by website, busiest site first"><input type="radio" name="view" value="site" checked><span>Sites</span></label>
+      <label title="Show tabs by browser window"><input type="radio" name="view" value="window"><span>Windows</span></label>
+      <label title="Show tabs by when you last used them"><input type="radio" name="view" value="recent"><span>Recent</span></label>
+      <label title="Show tabs by Chrome tab group"><input type="radio" name="view" value="group"><span>Groups</span></label>
     </fieldset>
     <div class="summary">
       <p id="count"></p>
-      <button id="close-dupes" class="text-button" type="button" hidden></button>
+      <button id="close-dupes" class="text-button" type="button" title="Close extra copies of tabs with the same address. Keeps the one you are on." hidden></button>
     </div>
   </header>
   <main id="list"></main>
-  <button id="settings-button" class="icon-button settings-button" type="button" popovertarget="settings" aria-label="Settings" title="Settings">
+  <button id="settings-button" class="icon-button settings-button" type="button" popovertarget="settings" aria-label="Settings" title="Settings: backups, the starting view and more">
     <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4.5h12M2 11.5h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="10.5" cy="4.5" r="1.9" fill="var(--field)" stroke="currentColor" stroke-width="1.6"/><circle cx="5.5" cy="11.5" r="1.9" fill="var(--field)" stroke="currentColor" stroke-width="1.6"/></svg>
   </button>
   <section id="settings" popover aria-labelledby="settings-title">
     <h2 id="settings-title">Settings</h2>
-    <label class="setting">
+    <label class="setting" title="Shows the Add to longbook button on billing and price pages. Needs the longbook app on your Mac.">
       <input id="setting-longbook" type="checkbox">
       <span>Show Add to longbook on billing and price pages</span>
     </label>
-    <p class="setting-hint">Needs the longbook app on your Mac. <a href="https://longbook.app/?utm_source=bettertabs&amp;utm_medium=extension&amp;utm_campaign=add-to-longbook" target="_blank" rel="noopener">Get longbook</a></p>
-    <label class="setting-field">
+    <p class="setting-hint">Needs the longbook app on your Mac. <a title="Open longbook.app in a new tab" href="https://longbook.app/?utm_source=bettertabs&amp;utm_medium=extension&amp;utm_campaign=add-to-longbook" target="_blank" rel="noopener">Get longbook</a></p>
+    <label class="setting-field" title="Which view the panel shows when it opens">
       <span>Open the panel in</span>
       <select id="setting-view">
         <option value="last">The view I used last</option>
@@ -53,15 +53,15 @@
       </select>
     </label>
     <div class="setting-action">
-      <label class="setting">
+      <label class="setting" title="Off by default. Keeps the titles and addresses of your open tabs on this computer. Turning it off deletes them.">
         <input id="setting-backup" type="checkbox">
         <span>Keep automatic backups of my open tabs</span>
       </label>
       <p class="setting-hint">Keeps the titles and addresses of your tabs on this computer, about every five minutes, for around half a day. Turning this off deletes them.</p>
-      <button id="open-backups" class="text-button" type="button">Restore from a backup</button>
+      <button id="open-backups" class="text-button" type="button" title="See your saved copies, and restore or save one">Restore from a backup</button>
     </div>
     <div class="setting-action">
-      <button id="export-tabs" class="text-button" type="button">Export open tabs</button>
+      <button id="export-tabs" class="text-button" type="button" title="Save the name and address of every open tab as a bookmarks file you keep">Export open tabs</button>
       <p class="setting-hint">Saves a file with the name and address of every open tab. Open it in any browser, or import it as bookmarks.</p>
     </div>
   </section>
@@ -69,15 +69,15 @@
     <h2 id="backups-title" tabindex="-1">Backups</h2>
     <p id="backups-note" class="setting-hint"></p>
     <ul id="backup-list" class="backup-list"></ul>
-    <button id="delete-backups" class="text-button" type="button" hidden>Delete all backups</button>
+    <button id="delete-backups" class="text-button" type="button" title="Delete every saved copy from this computer" hidden>Delete all backups</button>
   </section>
   <div id="menu" popover role="menu" aria-label="Tab actions">
-    <button type="button" role="menuitem" data-action="rename">Edit name</button>
-    <button type="button" role="menuitem" data-action="reset" hidden>Reset name</button>
+    <button type="button" role="menuitem" data-action="rename" title="Give this tab a name you will recognise (F2)">Edit name</button>
+    <button type="button" role="menuitem" data-action="reset" title="Bring back the page's own title" hidden>Reset name</button>
     <button type="button" role="menuitem" data-action="favourite">Add to favourites</button>
-    <button type="button" role="menuitem" data-action="suspend" hidden>Suspend tab</button>
-    <button type="button" role="menuitem" data-action="longbook" hidden>Add to longbook</button>
-    <a role="menuitem" id="menu-get-longbook" href="https://longbook.app/?utm_source=bettertabs&amp;utm_medium=extension&amp;utm_campaign=add-to-longbook" target="_blank" rel="noopener" hidden>Get longbook</a>
+    <button type="button" role="menuitem" data-action="suspend" title="Unload this tab from memory. It reloads when you click it." hidden>Suspend tab</button>
+    <button type="button" role="menuitem" data-action="longbook" title="Open longbook on your Mac with this site's name filled in" hidden>Add to longbook</button>
+    <a role="menuitem" id="menu-get-longbook" title="Open longbook.app in a new tab" href="https://longbook.app/?utm_source=bettertabs&amp;utm_medium=extension&amp;utm_campaign=add-to-longbook" target="_blank" rel="noopener" hidden>Get longbook</a>
   </div>
   <!-- Announces search results and closed tabs. Kept separate so routine tab updates stay silent. -->
   <p id="status" class="visually-hidden" role="status"></p>

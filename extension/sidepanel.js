@@ -21,11 +21,12 @@ const BILLING_SEGMENT = /^(billing|pricing|prices?|plans?|subscriptions?|subscri
 const BILLING_HOST = /^(billing|pricing|checkout)\./i;
 // longbook is a Mac and iPhone app; Chrome extensions only exist on desktop, so this is the Mac button.
 const IS_MAC = /mac/i.test(navigator.userAgentData?.platform ?? navigator.platform ?? '');
+const REOPEN = IS_MAC ? 'Cmd+Shift+T' : 'Ctrl+Shift+T';
 const SECOND_LEVEL = new Set(['co', 'com', 'org', 'net', 'gov', 'edu', 'ac']);
 // Only real pages are remembered by address: every new tab shares one address.
 const REMEMBERABLE = /^(https?|file):/i;
 const REMEMBER_NAMES = 300;
-const REMEMBER_FAVOURITES = 100;
+const MAX_FAVOURITES = 100;
 
 const state = {
   view: 'site',
@@ -37,12 +38,14 @@ const state = {
   duplicates: new Set(),
   extraCopies: [],
   names: new Map(), // tab id -> name typed by the user
-  favourites: [], // ids of favourite tabs, in the order they were added
+  favourites: [], // favourite pages { url, title }, in the order they were added; kept until removed
   prints: new Map(), // page address -> short hash of it, for pages that can be remembered
-  remembered: { names: {}, favourites: [] }, // names and favourites by hash, kept across restarts
+  remembered: { names: {} }, // names by hash, kept across restarts
   editing: null, // id of the tab whose name is being edited
-  menuTab: null, // id of the tab the context menu is open for
-  menuFromStrip: false, // whether that menu was opened on a favourite icon
+  menuTab: null, // id of the tab the context menu is open for (null on a closed favourite)
+  menuFavourite: null, // address of the favourite icon the menu is open on, if it was opened on one
+  found: null, // id of the tab whose row is pulsing after Show current tab or a favourite click
+  shortcuts: {}, // the keys Chrome has for the two commands, by command name
   settings: { showLongbook: true, startView: 'last', autoBackup: false },
 };
 
@@ -229,11 +232,12 @@ async function load() {
   // clean-up below decides what is still wanted.
   if (adoptRemembered()) saveSession();
   forgetClosedTabs();
+  refreshFavouriteTitles();
   findDuplicates();
   render();
 }
 
-// A name or a favourite belongs to its tab and goes when the tab does. The page's hash
+// A name belongs to its tab and goes when the tab does. The page's hash
 // (see rememberChoices) is what brings it back if the same page opens again.
 function forgetClosedTabs() {
   const open = new Set(state.tabs.map((t) => t.id));
@@ -244,20 +248,15 @@ function forgetClosedTabs() {
       changed = true;
     }
   }
-  const kept = state.favourites.filter((id) => open.has(id));
-  if (kept.length !== state.favourites.length) {
-    state.favourites = kept;
-    changed = true;
-  }
   if (changed) saveSession();
 }
 
-// ---------- Remembering names and favourites ----------
+// ---------- Remembering names ----------
 
-// A tab id dies with the tab, so names and favourites are also kept under a short hash of
-// the page address. The address itself is never saved, and only pages you named or starred
-// are kept. When the same page opens again, whether after a restart or in a new tab, it
-// gets its name and its place among the favourites back.
+// A tab id dies with the tab, so names are also kept under a short hash of the page address.
+// The address itself is never saved for a name, and only pages you named are kept. When the
+// same page opens again, whether after a restart or in a new tab, it gets its name back.
+// Favourites are different: you chose them to come back to, so they keep the address.
 
 async function fingerprint(tabs) {
   if (state.prints.size > 1000) state.prints.clear();
@@ -275,7 +274,7 @@ function printOf(tab) {
   return tab && state.prints.get(urlOf(tab));
 }
 
-// Gives open tabs the names and favourite spots remembered for their pages. True if anything changed.
+// Gives open tabs the names remembered for their pages. True if anything changed.
 function adoptRemembered() {
   let changed = false;
   for (const tab of state.tabs) {
@@ -284,15 +283,6 @@ function adoptRemembered() {
       state.names.set(tab.id, name);
       changed = true;
     }
-  }
-  const starred = new Set(state.favourites.map((id) => printOf(state.tabs.find((t) => t.id === id))));
-  for (const print of state.remembered.favourites) {
-    if (starred.has(print)) continue;
-    const tab = state.tabs.find((t) => printOf(t) === print);
-    if (!tab) continue;
-    state.favourites.push(tab.id);
-    starred.add(print);
-    changed = true;
   }
   return changed;
 }
@@ -309,12 +299,7 @@ function rememberChoices() {
     if (named.has(print)) names[print] = named.get(print);
     else delete names[print];
   }
-  const starred = state.favourites.map((id) => printOf(state.tabs.find((t) => t.id === id))).filter(Boolean);
-  const favourites = [...new Set([...state.remembered.favourites.filter((p) => !open.has(p)), ...starred])];
-  state.remembered = {
-    names: Object.fromEntries(Object.entries(names).slice(-REMEMBER_NAMES)),
-    favourites: favourites.slice(-REMEMBER_FAVOURITES),
-  };
+  state.remembered = { names: Object.fromEntries(Object.entries(names).slice(-REMEMBER_NAMES)) };
   chrome.storage.local.set({ remembered: state.remembered });
 }
 
@@ -468,7 +453,7 @@ function foldersFor(tabs) {
 
 function render() {
   const focusedId = document.activeElement?.closest?.('.tab')?.dataset.id;
-  const focusedFavourite = document.activeElement?.closest?.('.fav')?.dataset.id;
+  const focusedFavourite = document.activeElement?.closest?.('.fav')?.dataset.url;
   const words = state.query.toLowerCase().split(/\s+/).filter(Boolean);
   const shown = words.length
     ? state.tabs.filter((t) => {
@@ -497,31 +482,46 @@ function render() {
   } else if (focusedId) {
     list.querySelector(`.tab[data-id="${focusedId}"] .tab-main`)?.focus();
   } else if (focusedFavourite) {
-    strip.querySelector(`.fav[data-id="${focusedFavourite}"]`)?.focus();
+    [...strip.children].find((b) => b.dataset.url === focusedFavourite)?.focus();
   }
 }
 
-// The favourites: one icon per tab, above the search box. A click goes to the tab.
+// The open tab that stands for a favourite: the one you are on, else one in this window, else the first.
+function tabForFavourite(fav) {
+  const open = state.tabs.filter((t) => urlOf(t) === fav.url);
+  return (
+    open.find((t) => t.active && t.windowId === state.windowId) ??
+    open.find((t) => t.active) ??
+    open.find((t) => t.windowId === state.windowId) ??
+    open[0]
+  );
+}
+
+function favouriteFor(tab) {
+  return state.favourites.find((f) => f.url === urlOf(tab) && tabForFavourite(f)?.id === tab.id);
+}
+
+// The favourites: one icon per page, above the search box. A click goes to the tab, or opens
+// the page again if you closed it. The icon stays until you remove it.
 function renderFavourites() {
-  const tabs = state.favourites.map((id) => state.tabs.find((t) => t.id === id)).filter(Boolean);
-  strip.hidden = tabs.length === 0;
+  strip.hidden = state.favourites.length === 0;
   strip.replaceChildren(
-    ...tabs.map((tab) => {
-      const url = urlOf(tab);
-      const title = labelOf(tab);
+    ...state.favourites.map((fav) => {
+      const tab = tabForFavourite(fav);
+      const title = tab ? labelOf(tab) : fav.title;
       return h(
         'button',
         {
-          class: 'fav',
+          class: tab ? 'fav' : 'fav fav-closed',
           type: 'button',
-          'data-id': tab.id,
-          style: `--base: hsl(${hueOf(siteOf(url).key)} 62% 50%)`,
-          title: `${title}\n${url}`,
-          'aria-label': title,
-          'aria-current': tab.active && tab.windowId === state.windowId ? 'true' : null,
-          onclick: () => activate(tab),
+          'data-url': fav.url,
+          style: `--base: hsl(${hueOf(siteOf(fav.url).key)} 62% 50%)`,
+          title: `${title}\n${fav.url}\n${tab ? 'Favourite: click to go to this tab' : 'Favourite, closed: click to open it again'}\nRight-click to remove it`,
+          'aria-label': tab ? title : `${title}, closed`,
+          'aria-current': tab?.active && tab.windowId === state.windowId ? 'true' : null,
+          onclick: () => openFavourite(fav),
         },
-        favicon(url),
+        favicon(fav.url),
       );
     }),
   );
@@ -548,7 +548,13 @@ function renderFolder(folder) {
         null,
         h(
           'button',
-          { class: 'folder-tab', type: 'button', 'aria-expanded': String(!collapsed), onclick: () => toggle(id) },
+          {
+            class: 'folder-tab',
+            type: 'button',
+            title: `${collapsed ? 'Expand' : 'Collapse'} ${folder.label}`,
+            'aria-expanded': String(!collapsed),
+            onclick: () => toggle(id),
+          },
           svg(ICON_CHEVRON),
           folder.icon && favicon(folder.icon),
           h('span', { class: 'folder-name' }, folder.label),
@@ -564,7 +570,7 @@ function renderFolder(folder) {
             {
               class: 'text-button close-all',
               type: 'button',
-              title: 'Unload these tabs from memory. They reload when you click them.',
+              title: 'Unload these tabs from memory. They reload when you click them. The tab you are on, pinned tabs and tabs playing sound are left alone.',
               'aria-label': `Suspend ${plural(folder.tabs.filter(canSuspend).length, 'tab')} in ${folder.label}`,
               onclick: () => suspendTabs(folder.tabs),
             },
@@ -575,6 +581,7 @@ function renderFolder(folder) {
           {
             class: 'text-button close-all',
             type: 'button',
+            title: `Close every tab in ${folder.label}. ${REOPEN} reopens the last one.`,
             'aria-label': `Close all ${plural(n, 'tab')} in ${folder.label}`,
             onclick: () => closeTabs(folder.tabs.map((t) => t.id)),
           },
@@ -594,6 +601,7 @@ function renderTab(tab) {
   const rowProps = {
     class: 'tab',
     'data-id': tab.id,
+    'data-found': state.found === tab.id ? '' : null,
     style: state.view === 'site' ? null : `--base: hsl(${hueOf(siteOf(url).key)} 62% 50%)`,
   };
 
@@ -612,7 +620,7 @@ function renderTab(tab) {
       {
         class: 'tab-main',
         type: 'button',
-        title: renamed ? `${title}\nOriginal name: ${originalTitle(tab)}\n${url}` : url,
+        title: [title, renamed && `Original name: ${originalTitle(tab)}`, url, 'Click to switch to this tab. F2 renames it.'].filter(Boolean).join('\n'),
         'aria-current': current ? 'true' : null,
         'aria-keyshortcuts': 'F2',
         onclick: () => activate(tab),
@@ -627,7 +635,7 @@ function renderTab(tab) {
           { class: 'tab-detail' },
           detail,
           renamed && h('span', { class: 'badge' }, 'Renamed'),
-          state.favourites.includes(tab.id) && h('span', { class: 'badge' }, 'Favourite'),
+          favouriteFor(tab) && h('span', { class: 'badge' }, 'Favourite'),
           state.duplicates.has(tab.id) && h('span', { class: 'badge badge-duplicate' }, 'Duplicate'),
           tab.pinned && h('span', { class: 'badge' }, 'Pinned'),
           tab.audible && h('span', { class: 'badge' }, 'Playing'),
@@ -641,7 +649,7 @@ function renderTab(tab) {
         {
           class: 'tab-longbook',
           type: 'button',
-          title: `Add ${serviceName(url)} to longbook`,
+          title: `Add ${serviceName(url)} to longbook: opens the app on your Mac with the name filled in`,
           'aria-label': `Add ${serviceName(url)} to longbook`,
           onclick: () => addToLongbook(tab),
         },
@@ -653,7 +661,7 @@ function renderTab(tab) {
         class: 'tab-close',
         type: 'button',
         'aria-label': `Close ${title}`,
-        title: 'Close tab',
+        title: 'Close tab (Delete key). It closes straight away.',
         onclick: (e) => closeTabs([tab.id], visibleRows().indexOf(e.currentTarget.closest('.tab').querySelector('.tab-main'))),
       },
       svg(ICON_CLOSE),
@@ -761,9 +769,9 @@ function clearName(id) {
   announce('Original name restored');
 }
 
-// By tab id in session storage while Chrome runs, and by page hash on disk across restarts.
+// Names: by tab id in session storage while Chrome runs, and by page hash on disk across restarts.
 function storeSession() {
-  chrome.storage.session.set({ names: Object.fromEntries(state.names), favourites: state.favourites });
+  chrome.storage.session.set({ names: Object.fromEntries(state.names) });
 }
 
 function saveSession() {
@@ -773,14 +781,53 @@ function saveSession() {
 
 // ----- Favourites -----
 
-function toggleFavourite(id, { fromStrip = false } = {}) {
-  const adding = !state.favourites.includes(id);
-  state.favourites = adding ? [...state.favourites, id] : state.favourites.filter((f) => f !== id);
-  saveSession();
+function saveFavourites() {
+  chrome.storage.local.set({ favourites: state.favourites });
+}
+
+// A page can be a favourite unless it has no address to come back to.
+const canFavourite = (tab) => !!urlOf(tab) && !/^(chrome|edge):\/\/newtab\/?$/.test(urlOf(tab));
+
+function addFavourite(tab) {
+  if (state.favourites.length >= MAX_FAVOURITES) {
+    announce(`You can have up to ${MAX_FAVOURITES} favourites`);
+    return;
+  }
+  state.favourites = [...state.favourites, { url: urlOf(tab), title: labelOf(tab) }];
+  saveFavourites();
+  render();
+  announce('Added to favourites');
+}
+
+function removeFavourite(url, { fromStrip = false } = {}) {
+  const tab = tabForFavourite({ url });
+  state.favourites = state.favourites.filter((f) => f.url !== url);
+  saveFavourites();
   render();
   // The icon that was just removed can't keep focus; hand it to the tab's row.
-  if (!adding && fromStrip) list.querySelector(`.tab[data-id="${id}"] button.tab-main`)?.focus();
-  announce(adding ? 'Added to favourites' : 'Removed from favourites');
+  if (fromStrip && tab) list.querySelector(`.tab[data-id="${tab.id}"] button.tab-main`)?.focus();
+  announce('Removed from favourites');
+}
+
+// Goes to the favourite's tab, or opens the page again if it was closed, then shows it in the list.
+async function openFavourite(fav) {
+  let tab = tabForFavourite(fav);
+  if (tab) await activate(tab);
+  else tab = await chrome.tabs.create({ url: fav.url });
+  await load();
+  revealTab(tab.id);
+}
+
+// A favourite's title follows its tab while it is open, so a closed one shows the last title seen.
+function refreshFavouriteTitles() {
+  let changed = false;
+  state.favourites = state.favourites.map((fav) => {
+    const tab = tabForFavourite(fav);
+    if (!tab || labelOf(tab) === fav.title) return fav;
+    changed = true;
+    return { ...fav, title: labelOf(tab) };
+  });
+  if (changed) saveFavourites();
 }
 
 // ----- longbook -----
@@ -798,16 +845,22 @@ function addToLongbook(tab) {
 
 // `row` is a tab row or a favourite icon. Favourite icons can only be removed.
 function openMenu(row, x, y) {
-  const id = Number(row.dataset.id);
   const fromStrip = row.classList.contains('fav');
+  const id = fromStrip ? null : Number(row.dataset.id);
+  const tab = state.tabs.find((t) => t.id === id) ?? {};
   state.menuTab = id;
-  state.menuFromStrip = fromStrip;
+  state.menuFavourite = fromStrip ? row.dataset.url : null;
   renameItem.hidden = fromStrip;
   resetName.hidden = fromStrip || !state.names.has(id);
-  favouriteItem.textContent = state.favourites.includes(id) ? 'Remove from favourites' : 'Add to favourites';
-  longbookItem.hidden = !offersLongbook(state.tabs.find((t) => t.id === id) ?? {});
+  const starred = fromStrip || state.favourites.some((f) => f.url === urlOf(tab));
+  favouriteItem.hidden = !fromStrip && !canFavourite(tab);
+  favouriteItem.textContent = starred ? 'Remove from favourites' : 'Add to favourites';
+  favouriteItem.title = starred
+    ? 'Take this page off the favourites row'
+    : 'Keep this page in the row above the search box, even after you close the tab';
+  longbookItem.hidden = !offersLongbook(tab);
   menuGetLongbook.hidden = longbookItem.hidden;
-  suspendItem.hidden = !canSuspend(state.tabs.find((t) => t.id === id) ?? {});
+  suspendItem.hidden = !canSuspend(tab);
 
   // Focus the row first so focus returns to it when the menu closes.
   (fromStrip ? row : row.querySelector('button.tab-main'))?.focus();
@@ -830,9 +883,12 @@ function menuItems() {
 
 function showCurrentTab() {
   const current = state.tabs.find((t) => t.active && t.windowId === state.windowId);
-  if (!current) return;
+  if (current) revealTab(current.id);
+}
 
-  const rowFor = () => list.querySelector(`.tab[data-id="${current.id}"]`);
+// Scrolls the list to a tab's row and pulses it.
+function revealTab(id) {
+  const rowFor = () => list.querySelector(`.tab[data-id="${id}"]`);
 
   // Undo whatever is hiding it: a search that filters it out, or a collapsed folder.
   if (state.query && !rowFor()) setQuery('');
@@ -850,8 +906,13 @@ function showCurrentTab() {
   row.querySelector('button.tab-main')?.focus({ preventScroll: true });
 
   // A short pulse shows where it landed. The highlighter stroke stays after it fades.
+  // Kept in state too, so a redraw in the middle of the pulse doesn't cut it short.
+  state.found = id;
   row.setAttribute('data-found', '');
-  setTimeout(() => row.removeAttribute('data-found'), 1400);
+  setTimeout(() => {
+    if (state.found === id) state.found = null;
+    list.querySelector(`.tab[data-id="${id}"]`)?.removeAttribute('data-found');
+  }, 1400);
 }
 
 async function closeTabs(ids, focusIndex = null) {
@@ -971,8 +1032,8 @@ async function showBackups() {
         h('p', { class: 'backup-when' }, whenText(backup.at)),
         h('p', { class: 'backup-size' }, `${plural(tabCount, 'tab')} in ${plural(backup.windows.length, 'window')}`),
         h('div', { class: 'backup-actions' },
-          h('button', { class: 'text-button', type: 'button', onclick: () => restoreBackup(backup) }, 'Restore'),
-          h('button', { class: 'text-button', type: 'button', onclick: () => saveBackup(backup) }, 'Save as file')));
+          h('button', { class: 'text-button', type: 'button', title: 'Open this copy as new windows. Pages that are already open are skipped.', onclick: () => restoreBackup(backup) }, 'Restore'),
+          h('button', { class: 'text-button', type: 'button', title: 'Download this copy as a bookmarks file', onclick: () => saveBackup(backup) }, 'Save as file')));
     }),
   );
   deleteBackups.hidden = !backups.length;
@@ -1038,8 +1099,20 @@ function saveSettings() {
   chrome.storage.local.set({ settings: state.settings });
 }
 
+// The keys Chrome has for the two commands (the user can change them), shown in the tooltips.
+async function loadShortcuts() {
+  try {
+    for (const command of await chrome.commands.getAll()) state.shortcuts[command.name] = command.shortcut;
+  } catch {
+    // Without them the tooltips just leave the shortcut out.
+  }
+  const find = state.shortcuts['search-tabs'];
+  search.title = `Search tabs by name, title or address. Press / to jump here${find ? `, or ${find} from any page to open BetterTabs with this box ready` : ''}.`;
+}
+
 async function restore() {
-  const saved = await chrome.storage.local.get(['view', 'collapsed', 'settings', 'remembered']);
+  loadShortcuts();
+  const saved = await chrome.storage.local.get(['view', 'collapsed', 'settings', 'remembered', 'favourites']);
   if (VIEWS.includes(saved.view)) state.view = saved.view;
   state.settings.showLongbook = saved.settings?.showLongbook !== false;
   state.settings.autoBackup = saved.settings?.autoBackup === true;
@@ -1052,13 +1125,13 @@ async function restore() {
   settingView.value = state.settings.startView;
   state.collapsed = new Set(saved.collapsed ?? []);
   const names = saved.remembered?.names;
-  state.remembered = {
-    names: names && typeof names === 'object' ? names : {},
-    favourites: Array.isArray(saved.remembered?.favourites) ? saved.remembered.favourites : [],
-  };
-  const session = await chrome.storage.session.get(['names', 'favourites']);
+  state.remembered = { names: names && typeof names === 'object' ? names : {} };
+  state.favourites = (Array.isArray(saved.favourites) ? saved.favourites : [])
+    .filter((f) => typeof f?.url === 'string')
+    .map((f) => ({ url: f.url, title: String(f.title || f.url) }))
+    .slice(0, MAX_FAVOURITES);
+  const session = await chrome.storage.session.get('names');
   state.names = new Map(Object.entries(session.names ?? {}).map(([id, name]) => [Number(id), name]));
-  state.favourites = (session.favourites ?? []).map(Number);
   document.querySelector(`input[name="view"][value="${state.view}"]`).checked = true;
 }
 
@@ -1125,7 +1198,11 @@ menu.addEventListener('click', (e) => {
   const id = state.menuTab;
   menu.hidePopover();
   if (action === 'rename') startEdit(id);
-  else if (action === 'favourite') toggleFavourite(id, { fromStrip: state.menuFromStrip });
+  else if (action === 'favourite') {
+    const url = state.menuFavourite ?? urlOf(state.tabs.find((t) => t.id === id) ?? {});
+    if (state.favourites.some((f) => f.url === url)) removeFavourite(url, { fromStrip: state.menuFavourite != null });
+    else addFavourite(state.tabs.find((t) => t.id === id));
+  }
   else if (action === 'longbook') addToLongbook(state.tabs.find((t) => t.id === id));
   else if (action === 'suspend') suspendTabs(state.tabs.filter((t) => t.id === id));
   else clearName(id);
@@ -1189,13 +1266,12 @@ document.addEventListener('keydown', (e) => {
 for (const event of ['onCreated', 'onRemoved', 'onActivated', 'onMoved', 'onAttached', 'onDetached']) {
   chrome.tabs[event].addListener(refresh);
 }
-// Suspending a tab can give it a new id: its name and favourite spot move with it.
+// Suspending a tab can give it a new id: its name moves with it.
 chrome.tabs.onReplaced.addListener((added, removed) => {
   if (state.names.has(removed)) {
     state.names.set(added, state.names.get(removed));
     state.names.delete(removed);
   }
-  state.favourites = state.favourites.map((id) => (id === removed ? added : id));
   storeSession();
   refresh();
 });

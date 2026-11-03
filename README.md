@@ -31,7 +31,7 @@ After changing a file, click the reload arrow on the extension's card.
 - Click any tab to switch to it, even if it's in another window.
 
 **Favourites**
-- Right-click a tab and choose **Add to favourites**. Its site icon appears in a row above the search box, and one click takes you to that tab, even in another window. Right-click the icon and choose **Remove from favourites**, or close the tab, to take it off. Favourite tabs are badged in the list, and favourites come back when the same page is open after you restart Chrome.
+- Right-click a tab and choose **Add to favourites**. Its site icon appears in a row above the search box, and one click takes you to that tab, even in another window. Clicking it also scrolls the list to that tab. Closing the tab does not remove the favourite: its icon stays, faded with a dashed edge, and a click opens the page again. Right-click the icon and choose **Remove from favourites** to take it off. Favourite tabs are badged in the list. A favourite keeps the page's title and address on your computer until you remove it.
 
 **longbook**
 - On a billing or price page (`/pricing`, `/billing`, `/plans`, `/subscription` and the like), a Mac shows an **Add to longbook** button on that tab's row, and the right-click menu has the same item. It opens the Add Commitment screen of the [longbook](https://longbook.app) app with the site's name filled in, ready for you to fill the rest and save. If you don't have the app yet, **Get longbook** in the right-click menu opens longbook.app. A setting turns the button off. BetterTabs decides from the address alone and never reads the page.
@@ -51,6 +51,7 @@ After changing a file, click the reload arrow on the extension's card.
 
 **Comfortable**
 - Updates live as you open, close and switch tabs.
+- Hover any button or tab for a tooltip that says what it does and which key does the same, including the shortcuts you set in Chrome.
 - Works with the keyboard alone, with screen readers, in light and dark mode, in high-contrast mode, and with Chrome's font-size setting.
 
 ### Keyboard

@@ -3,6 +3,15 @@ chrome.sidePanel
   .setPanelBehavior({ openPanelOnActionClick: true })
   .catch((error) => console.error(error));
 
+// The toolbar icon's tooltip names the shortcut for opening the panel, whatever the user set it to.
+chrome.commands
+  .getAll()
+  .then((commands) => {
+    const key = commands.find((c) => c.name === 'open-panel')?.shortcut;
+    return chrome.action.setTitle({ title: key ? `Open BetterTabs (${key})` : 'Open BetterTabs' });
+  })
+  .catch((error) => console.error(error));
+
 // The keyboard shortcuts (change them at chrome://extensions/shortcuts). Opening comes first:
 // Chrome only allows it while the key press still counts as the user's action.
 chrome.commands.onCommand.addListener(async (command, tab) => {

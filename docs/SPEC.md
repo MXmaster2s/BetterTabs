@@ -79,7 +79,7 @@ Every view produces folders. Tabs inside a folder keep the order given by the vi
 - Badges on the second line: **Renamed**, **Duplicate**, **Pinned**, **Playing** (`tab.audible`).
 - The tab you are looking at (active tab of the panel's window) has `aria-current="true"` and a yellow highlighter background behind its title. In forced-colours mode it gets an outline instead.
 - The close button is hidden until the row is hovered or focused. On devices with no hover it is always visible.
-- Hovering a row shows the full URL in a tooltip.
+- Hovering a row shows a tooltip with the name, the full URL and what a click and `F2` do.
 
 ## Behaviour
 
@@ -110,19 +110,19 @@ Two tabs are duplicates only if their URLs are exactly equal (including `#` frag
 - **Reset name** removes the custom name. Both actions are announced ("Name saved", "Original name restored").
 - A renamed tab shows the custom name and a **Renamed** badge. Its tooltip also shows the original title. Search matches the custom name, the original title and the URL.
 - While Chrome runs, names are kept in `chrome.storage.session`, keyed by tab id: they survive closing the panel and navigating inside the tab, and move with the tab if Chrome replaces its id (suspending can). They are also remembered across restarts (see Remembering).
-- **Remembering.** Each `http`, `https` or `file` page address is hashed (SHA-256, first 8 bytes as 16 hex digits). `chrome.storage.local` `remembered.names` maps that hash to the name, and `remembered.favourites` lists the hashes of favourite pages. A tab whose address hashes to a remembered name, and that has no name of its own, gets that name when the list loads; likewise a remembered favourite is added for the first open tab with that hash. Entries for pages that are not open are kept. Reset name or Remove from favourites deletes the entry. At most 300 names and 100 favourites are kept, oldest dropped first. Other pages (such as the new tab page, which every new tab shares) are never remembered. The address itself is never stored.
+- **Remembering.** Each `http`, `https` or `file` page address is hashed (SHA-256, first 8 bytes as 16 hex digits). `chrome.storage.local` `remembered.names` maps that hash to the name. A tab whose address hashes to a remembered name, and that has no name of its own, gets that name when the list loads. Entries for pages that are not open are kept. Reset name deletes the entry. At most 300 names are kept, oldest dropped first. Other pages (such as the new tab page, which every new tab shares) are never remembered. The address itself is never stored for a name. (Favourites are different: see below.)
 - While a name is being edited, the browser's own context menu (copy, paste) is left alone.
 
 ### Favourites
 
-- **Add to favourites** in a tab row's context menu adds that tab; the same item reads **Remove from favourites** for a tab that is already a favourite. Added tabs are shown in the order they were added.
-- Each favourite is a square icon button (the site's favicon, or the letter tile) in a row above the search box. The row wraps and is hidden when empty. The button's accessible name and tooltip are the tab's name (custom name if it has one), and the tooltip also shows the URL.
-- Clicking an icon switches to that tab, as clicking its row does, including focusing its window. The icon of the tab you are looking at has `aria-current="true"` and the highlighter background (an outline in forced-colours mode).
+- A favourite is a page, kept by its address: `{ url, title }`. **Add to favourites** in a tab row's context menu adds that tab's page; the same item reads **Remove from favourites** for a page that is already a favourite, and is hidden for tabs with no address and new-tab pages. Favourites are shown in the order they were added, up to 100 (adding more announces "You can have up to 100 favourites").
+- Each favourite is a square icon button (the site's favicon, or the letter tile) in a row above the search box. The row wraps and is hidden when empty. The button's accessible name is the tab's name (custom name if it has one); the tooltip shows the name, the address, what a click does ("Favourite: click to go to this tab", or "Favourite, closed: click to open it again") and "Right-click to remove it".
+- The tab a favourite stands for is the open tab with exactly that address: the one you are on, else one in this window, else the first. Clicking an icon switches to that tab, as clicking its row does, including focusing its window, and then scrolls the list to its row and pulses it, as **Show current tab** does (clearing a search or expanding a folder if either hides it). If no tab has that address, a click opens the page in a new tab and shows that row. The icon of the tab you are looking at has `aria-current="true"` and the highlighter background (an outline in forced-colours mode).
 - Right-clicking an icon (or pressing the context-menu key on it) opens a menu with only **Remove from favourites**. After removing from the row, keyboard focus moves to that tab's row in the list.
-- A tab that is a favourite shows a **Favourite** badge in the list.
-- When a favourite tab closes, it is removed from the favourites. Navigating inside the tab keeps it, and its icon follows the page.
+- The tab a favourite stands for shows a **Favourite** badge in the list.
+- Closing the tab does not remove the favourite. Its icon stays, faded with a dashed border and named "<title>, closed", until the user removes it. While a tab is open, the favourite's stored title follows the tab's name, so a closed favourite shows the last title seen. Navigating a tab to another address makes it stop standing for the favourite.
 - Added and removed are announced ("Added to favourites", "Removed from favourites").
-- Favourites are tab ids in `chrome.storage.session` while Chrome runs, and page hashes in `chrome.storage.local` across restarts (see Remembering under Renaming).
+- Favourites are stored in `chrome.storage.local` under `favourites`, as an array of `{ url, title }`.
 
 ### Suspending
 
@@ -171,6 +171,15 @@ The icon button next to the search box finds the active tab of the panel's windo
 - The row is scrolled to the middle of the panel (smoothly, or instantly under `prefers-reduced-motion`), keyboard focus moves to it, and it pulses once with a focus-coloured halo for about a second. Under `prefers-reduced-motion` the pulse is skipped.
 - It works in every view.
 
+### Tooltips
+
+Every control has a native tooltip (the `title` attribute) that says what it does and, where one exists, the key that does the same. The shortcuts for **Open BetterTabs** and **Search tabs** come from `chrome.commands.getAll()`, so they show whatever the user set at `chrome://extensions/shortcuts`; if the call fails the shortcut is left out. The toolbar icon's tooltip is set the same way by the service worker ("Open BetterTabs (Alt+Shift+B)"). Tooltips on:
+
+- The search box (`/`, and the search shortcut), **Show current tab**, each view label, **Close N duplicates** and the settings button.
+- Each folder's header (**Collapse** or **Expand** plus its name), **Suspend** (what it unloads and what it leaves alone) and **Close all** (and the reopen key, `Cmd+Shift+T` on a Mac, `Ctrl+Shift+T` elsewhere).
+- Each tab row (name, original name if renamed, address, "Click to switch to this tab. F2 renames it."), its close button ("Close tab (Delete key). It closes straight away."), and its **Add to longbook** button.
+- Every item in the right-click menu (including `F2` on **Edit name**), every control in the settings and the Backups popover, and each favourite icon (see Favourites).
+
 ### Search
 
 - Case-insensitive. The query is split on whitespace; a tab matches when every word appears in its custom name, its title or its URL.
@@ -188,7 +197,7 @@ The list redraws (debounced by 60 ms) when tabs are created, removed, moved, att
 
 ### Persistence
 
-`chrome.storage.local` holds `{ view, collapsed: string[], settings: { showLongbook: boolean, startView: 'last' | 'site' | 'window' | 'recent' | 'group', autoBackup: boolean }, remembered: { names: { [pageHash]: string }, favourites: string[] }, backups?: Backup[] }` (`backups` exists only while automatic backups are on; see Backups) where each collapsed id is `<view>:<folder key>`. `chrome.storage.session` holds `{ names: { [tabId]: string }, favourites: number[] }`, the custom tab names and the favourite tab ids for this run of Chrome, plus a short-lived `focusSearch` timestamp that the keyboard shortcut leaves for the panel. Nothing else is stored.
+`chrome.storage.local` holds `{ view, collapsed: string[], settings: { showLongbook: boolean, startView: 'last' | 'site' | 'window' | 'recent' | 'group', autoBackup: boolean }, remembered: { names: { [pageHash]: string } }, favourites: { url: string, title: string }[], backups?: Backup[] }` (`backups` exists only while automatic backups are on; see Backups) where each collapsed id is `<view>:<folder key>`. `chrome.storage.session` holds `{ names: { [tabId]: string }, favourites: number[] }`, the custom tab names and the favourite tab ids for this run of Chrome, plus a short-lived `focusSearch` timestamp that the keyboard shortcut leaves for the panel. Nothing else is stored.
 
 ## Keyboard
 
@@ -223,7 +232,7 @@ Two shortcuts are declared in the manifest as `commands` and handled by the serv
 
 ## Privacy
 
-No network requests and no analytics. The only links that leave the browser are ones you click: the longbook link, and Get longbook (in the right-click menu and the settings), which opens a web page in a new tab. Tab titles and URLs are read to display them and are never sent anywhere. They are stored only if the user turns on automatic backups, and then only on the computer, until the setting is turned off or the backups are deleted. Names the user types and the tabs they favourite are saved on the computer under a hash of the page address, never the address, and never sent anywhere.
+No network requests and no analytics. The only links that leave the browser are ones you click: the longbook link, and Get longbook (in the right-click menu and the settings), which opens a web page in a new tab. Tab titles and URLs are read to display them and are never sent anywhere. They are stored only if the user turns on automatic backups, and then only on the computer, until the setting is turned off or the backups are deleted. Names the user types are saved on the computer under a hash of the page address, never the address. The pages the user favourites are saved on the computer with their title and address, until the user removes them. Nothing saved is ever sent anywhere.
 
 ## Out of scope
 

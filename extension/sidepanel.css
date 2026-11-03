@@ -103,6 +103,15 @@ button {
   background: var(--hover);
 }
 
+/* A favourite whose tab is closed: faded with a dashed edge (not colour alone). Click opens it again. */
+.fav-closed {
+  border-style: dashed;
+}
+
+.fav-closed .favicon {
+  opacity: 0.5;
+}
+
 .fav .favicon {
   width: 1.25rem;
   height: 1.25rem;
