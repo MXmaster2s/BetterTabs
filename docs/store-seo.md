@@ -59,7 +59,7 @@ Each image answers a pain people raised most in the Reddit research (`docs/resea
 | 4 | Privacy, local only (about 16) | Nothing leaves your browser. | The five permissions and "no host permissions" |
 | 5 | Hundreds of tabs, duplicates (about 7) | Hundreds of tabs, under control. | The Sites view with Close duplicates |
 
-The images are made by `scripts/capture-170.mjs`, `scripts/capture-memory.mjs` and `scripts/store-170.mjs` in `~/Developer/BetterTabs-video`, from the real panel on fake tabs.
+The images are made outside this repository, in the film project at `~/Developer/BetterTabs-video` (three small Playwright scripts), from the real panel on fake tabs.
 
 ### Promo tile and marquee text
 
