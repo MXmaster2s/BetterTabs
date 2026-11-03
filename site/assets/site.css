@@ -218,13 +218,6 @@ kbd {
   text-wrap: balance;
 }
 
-.hero .subhead {
-  max-width: 28rem;
-  margin-top: 1.25rem;
-  font: 700 clamp(1.25rem, 2.6vw, 1.625rem) / 1.25 var(--serif);
-  text-wrap: balance;
-}
-
 .hero .lede {
   max-width: 40rem;
   margin-top: 1.5rem;
