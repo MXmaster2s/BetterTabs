@@ -2,6 +2,13 @@
 
 What changed in BetterTabs, newest first. The version being worked on is in `extension/manifest.json`.
 
+## 1.6.0
+
+- Names you give tabs and your favourites now survive restarting Chrome. They come back when the same page is open again, and Chrome's **Reopen closed tab** brings a closed one back with its name. They are saved under a short hash of the page address; the address itself is never stored.
+- **Suspend**: a button on each folder, and **Suspend tab** in the right-click menu, unload tabs you are not using from memory. They stay in the list, marked **Suspended**, and reload when you click them. The tab you are on, pinned tabs and tabs playing sound are left alone.
+- **Export open tabs** in the settings saves a bookmarks file with the name and address of every open tab, grouped by window. Open it in any browser to see clickable links, or import it into Chrome's bookmarks. It is a file you keep; BetterTabs stores nothing and asks for no new permission.
+- Two keyboard shortcuts: `Alt+Shift+B` opens the panel and `Alt+Shift+F` opens it with the search box focused. Change them at `chrome://extensions/shortcuts`.
+
 ## 1.5.0
 
 - A **Settings** button at the bottom right of the panel. It can hide the **Add to longbook** button, and set which view the panel opens in. Settings are saved on your computer.

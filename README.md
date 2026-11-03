@@ -24,25 +24,27 @@ After changing a file, click the reload arrow on the extension's card.
 - Pinned and playing tabs are labelled.
 
 **Find**
-- Search by name, page title or address as you type.
+- Search by name, page title or address as you type. `Alt+Shift+F` opens the panel with the search box ready.
 - **Show current tab**: the target button next to the search box scrolls the list to the tab you're on. It clears a search or expands a folder if either is hiding it.
 - Click any tab to switch to it, even if it's in another window.
 
 **Favourites**
-- Right-click a tab and choose **Add to favourites**. Its site icon appears in a row above the search box, and one click takes you to that tab, even in another window. Right-click the icon and choose **Remove from favourites**, or close the tab, to take it off. Favourite tabs are badged in the list, and favourites last until Chrome closes.
+- Right-click a tab and choose **Add to favourites**. Its site icon appears in a row above the search box, and one click takes you to that tab, even in another window. Right-click the icon and choose **Remove from favourites**, or close the tab, to take it off. Favourite tabs are badged in the list, and favourites come back when the same page is open after you restart Chrome.
 
 **longbook**
 - On a billing or price page (`/pricing`, `/billing`, `/plans`, `/subscription` and the like), a Mac shows an **Add to longbook** button on that tab's row, and the right-click menu has the same item. It opens the Add Commitment screen of the [longbook](https://longbook.app) app with the site's name filled in, ready for you to fill the rest and save. If you don't have the app yet, **Get longbook** in the right-click menu opens longbook.app. A setting turns the button off. BetterTabs decides from the address alone and never reads the page.
 
 **Rename**
-- Right-click a tab and choose **Edit name** (or select it and press `F2`) to give it a name you'll recognise. Renamed tabs are badged, and **Reset name** brings the original back. Names last until Chrome closes.
+- Right-click a tab and choose **Edit name** (or select it and press `F2`) to give it a name you'll recognise. Renamed tabs are badged, and **Reset name** brings the original back. Names come back when the same page is open after you restart Chrome, and with **Reopen closed tab**.
 
 **Clean up**
 - Tabs with exactly the same address are marked **Duplicate**. **Close duplicates** keeps one copy of each, preferring the tab you're looking at.
+- **Suspend** (on each folder, or in the right-click menu) unloads tabs you aren't using to free memory. They stay in the list, marked **Suspended**, and reload when you click them. The tab you're on, pinned tabs and tabs playing sound are left alone.
 - Close a tab with its × button, or close every tab in a folder with **Close all**. Closing happens straight away, and Chrome's **Reopen closed tab** (`Ctrl/Cmd+Shift+T`) undoes it.
 
 **Settings**
 - The icon button at the bottom right opens the settings: hide the **Add to longbook** button, and choose which view the panel opens in (the one you used last, or always Sites, Windows, Recent or Groups). Settings are saved on your computer and take effect at once.
+- **Export open tabs** saves a file with the name and address of every open tab, grouped by window. Open it in any browser to click through the links, or import it into Chrome's bookmarks (**Bookmarks → Import bookmarks and settings → Bookmarks HTML file**). Your backup if Chrome loses a session; BetterTabs itself stores no addresses.
 
 **Comfortable**
 - Updates live as you open, close and switch tabs.
@@ -58,6 +60,10 @@ After changing a file, click the reload arrow on the extension's card.
 | `Enter` | Switch to the tab (from search: the first match) |
 | `F2` | Rename the tab (or right-click it and choose **Edit name**) |
 | `Delete` | Close the tab |
+| `Alt+Shift+B` | Open the panel from anywhere in Chrome |
+| `Alt+Shift+F` | Open the panel with the search box focused |
+
+The two `Alt+Shift` shortcuts are Chrome extension shortcuts: change them at `chrome://extensions/shortcuts`.
 
 ## Work on it with your coding agent
 

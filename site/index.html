@@ -26,7 +26,7 @@
     "operatingSystem": "Chrome 121 or later",
     "description": "A Chrome extension that lists every open tab in the side panel, grouped by website.",
     "url": "https://bettertabs.fyi/",
-    "softwareVersion": "1.5.0",
+    "softwareVersion": "1.6.0",
     "license": "https://opensource.org/licenses/MIT",
     "installUrl": "https://github.com/MXmaster2s/BetterTabs#install",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
@@ -126,7 +126,7 @@
           </li>
           <li class="card" style="--base: hsl(28 62% 50%)">
             <h3>Find</h3>
-            <p>Search by name, title or address as you type. Press <kbd>/</kbd> to jump to the box, and the target button scrolls the list to the tab you are on.</p>
+            <p>Search by name, title or address as you type. Press <kbd>/</kbd> to jump to the box, or <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd> from anywhere in Chrome, and the target button scrolls the list to the tab you are on.</p>
           </li>
           <li class="card" style="--base: hsl(300 62% 50%)">
             <h3>Rename</h3>
@@ -134,11 +134,11 @@
           </li>
           <li class="card" style="--base: hsl(48 80% 48%)">
             <h3>Favourites</h3>
-            <p>Right-click a tab and choose Add to favourites. Its site icon sits above the search box, one click from that tab. Close the tab and it goes.</p>
+            <p>Right-click a tab and choose Add to favourites. Its site icon sits above the search box, one click from that tab. They are still there after you restart Chrome.</p>
           </li>
           <li class="card" style="--base: hsl(340 62% 50%)">
             <h3>Clean up</h3>
-            <p>Tabs with the same address are marked Duplicate, and one click closes the extra copies. Chrome's Reopen closed tab undoes a close.</p>
+            <p>Tabs with the same address are marked Duplicate, and one click closes the extra copies. Suspend frees the memory of tabs you are not using; they stay in the list and reload when you click them. Chrome's Reopen closed tab undoes a close. Export open tabs, in the settings, saves every tab's name and address to a file you keep, as a backup.</p>
           </li>
           <li class="card card-wide" style="--base: hsl(262 52% 56%)">
             <h3>Add to longbook</h3>
@@ -162,7 +162,7 @@
             <li><code>tabs</code><span>Read each tab's title and address, switch to a tab, and close the tabs you ask it to close.</span></li>
             <li><code>tabGroups</code><span>Read the names and colours of your tab groups for the Groups view.</span></li>
             <li><code>sidePanel</code><span>Show the list in Chrome's side panel and open it from the toolbar icon.</span></li>
-            <li><code>storage</code><span>Remember your view, collapsed folders and settings. Names and favourites stay in memory until Chrome closes.</span></li>
+            <li><code>storage</code><span>Remember your view, collapsed folders, settings, tab names and favourites. Pages are kept as a short hash, never as an address.</span></li>
             <li><code>favicon</code><span>Show each site's icon from Chrome's own cache.</span></li>
           </ul>
         </div>
@@ -209,7 +209,7 @@
           </details>
           <details>
             <summary>What does it save?</summary>
-            <p>Your chosen view, which folders you collapsed and your settings, kept on your computer with Chrome's extension storage. Tab names and favourites are kept in memory only, so they are gone when Chrome closes.</p>
+            <p>Your chosen view, which folders you collapsed and your settings, kept on your computer with Chrome's extension storage. The names you give tabs and your favourites are saved too, under a short hash of the page address, never the address, so they come back when the page is open again after you restart Chrome.</p>
           </details>
           <details>
             <summary>What is the Add to longbook button?</summary>

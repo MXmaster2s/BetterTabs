@@ -52,11 +52,16 @@
         <option value="group">Groups</option>
       </select>
     </label>
+    <div class="setting-action">
+      <button id="export-tabs" class="text-button" type="button">Export open tabs</button>
+      <p class="setting-hint">Saves a file with the name and address of every open tab. Open it in any browser, or import it as bookmarks.</p>
+    </div>
   </section>
   <div id="menu" popover role="menu" aria-label="Tab actions">
     <button type="button" role="menuitem" data-action="rename">Edit name</button>
     <button type="button" role="menuitem" data-action="reset" hidden>Reset name</button>
     <button type="button" role="menuitem" data-action="favourite">Add to favourites</button>
+    <button type="button" role="menuitem" data-action="suspend" hidden>Suspend tab</button>
     <button type="button" role="menuitem" data-action="longbook" hidden>Add to longbook</button>
     <a role="menuitem" id="menu-get-longbook" href="https://longbook.app/?utm_source=bettertabs&amp;utm_medium=extension&amp;utm_campaign=add-to-longbook" target="_blank" rel="noopener" hidden>Get longbook</a>
   </div>

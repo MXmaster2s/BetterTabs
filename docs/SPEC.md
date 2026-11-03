@@ -109,7 +109,8 @@ Two tabs are duplicates only if their URLs are exactly equal (including `#` frag
 - While the box is open, live tab updates are held back so typing is never redrawn away; they apply once editing ends. `/`, arrows and `Delete` type normally in the box.
 - **Reset name** removes the custom name. Both actions are announced ("Name saved", "Original name restored").
 - A renamed tab shows the custom name and a **Renamed** badge. Its tooltip also shows the original title. Search matches the custom name, the original title and the URL.
-- Names are kept in `chrome.storage.session`, keyed by tab id: in memory only, they survive closing the panel and navigating inside the tab, and are dropped when the tab closes or Chrome quits.
+- While Chrome runs, names are kept in `chrome.storage.session`, keyed by tab id: they survive closing the panel and navigating inside the tab, and move with the tab if Chrome replaces its id (suspending can). They are also remembered across restarts (see Remembering).
+- **Remembering.** Each `http`, `https` or `file` page address is hashed (SHA-256, first 8 bytes as 16 hex digits). `chrome.storage.local` `remembered.names` maps that hash to the name, and `remembered.favourites` lists the hashes of favourite pages. A tab whose address hashes to a remembered name, and that has no name of its own, gets that name when the list loads; likewise a remembered favourite is added for the first open tab with that hash. Entries for pages that are not open are kept. Reset name or Remove from favourites deletes the entry. At most 300 names and 100 favourites are kept, oldest dropped first. Other pages (such as the new tab page, which every new tab shares) are never remembered. The address itself is never stored.
 - While a name is being edited, the browser's own context menu (copy, paste) is left alone.
 
 ### Favourites
@@ -121,7 +122,11 @@ Two tabs are duplicates only if their URLs are exactly equal (including `#` frag
 - A tab that is a favourite shows a **Favourite** badge in the list.
 - When a favourite tab closes, it is removed from the favourites. Navigating inside the tab keeps it, and its icon follows the page.
 - Added and removed are announced ("Added to favourites", "Removed from favourites").
-- Favourites are tab ids in `chrome.storage.session`: in memory only, gone when Chrome quits.
+- Favourites are tab ids in `chrome.storage.session` while Chrome runs, and page hashes in `chrome.storage.local` across restarts (see Remembering under Renaming).
+
+### Suspending
+
+Chrome keeps a suspended (discarded) tab in the strip and reloads it when it is used. **Suspend** is shown at the right of each folder header (with **Close all**) when the folder has at least one tab that can be suspended, and as **Suspend tab** in a tab's right-click menu. A tab can be suspended unless it is the active tab of its window, already suspended, playing sound, pinned, or not an `http`, `https` or `file` page. The folder button suspends every such tab in the folder through `chrome.tabs.discard`; it is announced "Suspended N tabs", or "Chrome would not suspend these tabs" when Chrome declined. A suspended tab shows a **Suspended** badge. If Chrome gives the tab a new id, its name and favourite place move to it (`chrome.tabs.onReplaced`).
 
 ### Add to longbook
 
@@ -138,6 +143,8 @@ Two tabs are duplicates only if their URLs are exactly equal (including `#` frag
 ### Settings
 
 A **Settings** icon button sits fixed at the bottom right of the panel (`aria-label` "Settings"; the list has extra bottom padding so it never covers a row). It opens a popover above it, which closes on `Esc` or an outside click and puts focus on the first control when it opens. Changes apply and are saved at once. There is no save button.
+
+Below the settings, behind a rule, is the **Export open tabs** button (`#export-tabs`). It builds a bookmarks file (Netscape bookmark HTML, which Chrome can import) from the tabs the panel lists and offers it as a download named `bettertabs-` plus the date, ending `.html`, using a Blob and a download link, so no permission is needed. Tabs are grouped by window, the current window first as "This window (N tabs)", the rest "Window 2" and so on; each link shows the tab's list label (the user's own name if set) and its address. Tabs with no address and new-tab pages are left out. The status line announces "Exported N tabs to a file". Nothing is stored; the file is the user's.
 
 - **Show Add to longbook on billing and price pages**: a checkbox, on by default. Beneath it, "Needs the longbook app on your Mac" and a **Get longbook** link to `https://longbook.app/?utm_source=bettertabs&utm_medium=extension&utm_campaign=add-to-longbook`, opened in a new tab.
 - **Open the panel in**: a select with **The view I used last** (default), **Sites**, **Windows**, **Recent** and **Groups**. A fixed choice is applied each time the panel opens, instead of the remembered view.
@@ -164,11 +171,11 @@ Clicking a folder header toggles it. The toggle button has `aria-expanded`. Coll
 
 ### Live updates
 
-The list redraws (debounced by 60 ms) when tabs are created, removed, moved, attached, detached, replaced or activated, when a tab's `title`, `url`, `pinned`, `audible`, `groupId` or `status` changes, when tab groups change, and when window focus changes. While the panel is hidden, updates are deferred until it is shown again. Keyboard focus is kept on the same tab across redraws.
+The list redraws (debounced by 60 ms) when tabs are created, removed, moved, attached, detached, replaced or activated, when a tab's `title`, `url`, `pinned`, `audible`, `groupId` or `status` or `discarded` changes, when tab groups change, and when window focus changes. While the panel is hidden, updates are deferred until it is shown again. Keyboard focus is kept on the same tab across redraws.
 
 ### Persistence
 
-`chrome.storage.local` holds `{ view, collapsed: string[], settings: { showLongbook: boolean, startView: 'last' | 'site' | 'window' | 'recent' | 'group' } }` where each collapsed id is `<view>:<folder key>`. `chrome.storage.session` holds `{ names: { [tabId]: string }, favourites: number[] }`, the custom tab names and the favourite tab ids. Nothing else is stored.
+`chrome.storage.local` holds `{ view, collapsed: string[], settings: { showLongbook: boolean, startView: 'last' | 'site' | 'window' | 'recent' | 'group' }, remembered: { names: { [pageHash]: string }, favourites: string[] } }` where each collapsed id is `<view>:<folder key>`. `chrome.storage.session` holds `{ names: { [tabId]: string }, favourites: number[] }`, the custom tab names and the favourite tab ids for this run of Chrome, plus a short-lived `focusSearch` timestamp that the keyboard shortcut leaves for the panel. Nothing else is stored.
 
 ## Keyboard
 
@@ -181,6 +188,8 @@ The list redraws (debounced by 60 ms) when tabs are created, removed, moved, att
 | `↓` / `↑` (on a tab) | Next / previous visible tab; `↑` from the first tab returns to search |
 | `F2` (on a tab) | Rename the tab |
 | `Delete` (on a tab) | Close the tab |
+
+Two shortcuts are declared in the manifest as `commands` and handled by the service worker, which opens the panel with `chrome.sidePanel.open` before doing anything else, so the key press still counts as the user's action. `Alt+Shift+B` (`open-panel`) opens the panel. `Alt+Shift+F` (`search-tabs`) opens it and leaves a `focusSearch` note in session storage; the panel focuses and selects the search box when it reads a note under five seconds old, and removes the note. Users can change both at `chrome://extensions/shortcuts`.
 
 ## Visual design
 
@@ -201,8 +210,8 @@ The list redraws (debounced by 60 ms) when tabs are created, removed, moved, att
 
 ## Privacy
 
-No network requests and no analytics. The only links that leave the browser are ones you click: the longbook link, and Get longbook (in the right-click menu and the settings), which opens a web page in a new tab. Tab titles and URLs are read to display them and are never stored or sent anywhere. Names the user types and the tabs they favourite are held in memory for the browser session and never written to disk or sent anywhere.
+No network requests and no analytics. The only links that leave the browser are ones you click: the longbook link, and Get longbook (in the right-click menu and the settings), which opens a web page in a new tab. Tab titles and URLs are read to display them and are never stored or sent anywhere. Names the user types and the tabs they favourite are saved on the computer under a hash of the page address, never the address, and never sent anywhere.
 
 ## Out of scope
 
-Reading page content to find prices, filling in more than the name, knowing whether longbook is installed, Windows or Linux support for the longbook button, syncing between devices, names that survive restarting Chrome, saving or restoring sessions, undoing a close (Chrome's **Reopen closed tab**, `Ctrl/Cmd+Shift+T`, does that), tab suspension, and page content access.
+Reading page content to find prices, filling in more than the name, knowing whether longbook is installed, Windows or Linux support for the longbook button, syncing between devices, saving or restoring sessions, closing or suspending tabs automatically, undoing a close (Chrome's **Reopen closed tab**, `Ctrl/Cmd+Shift+T`, does that), and page content access.

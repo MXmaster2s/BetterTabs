@@ -17,6 +17,7 @@ Exits 0 when everything passes and 1 with one `✗` line per problem. It checks:
 - `extension/manifest.json` is Manifest V3 and every file it names exists.
 - Every script parses (`node --check`).
 - Every permission is used by the code, and every `chrome.*` API the code calls is requested.
+- Every keyboard shortcut in the manifest is handled by `extension/background.js`.
 - `CHANGELOG.md` has an entry for the manifest's version.
 - `docs/store-listing.md` justifies every permission.
 - Every relative link in a document resolves, and every file path written in `code` in a document exists. Renaming or deleting a file without updating the docs fails the check.

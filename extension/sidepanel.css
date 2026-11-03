@@ -317,6 +317,13 @@ main {
   rotate: -90deg;
 }
 
+.folder-actions {
+  display: flex;
+  flex: none;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
 .close-all {
   flex: none;
   margin-bottom: 0.125rem;
@@ -638,6 +645,20 @@ main {
   background: var(--paper);
   color: var(--ink);
   font: inherit;
+}
+
+.setting-action {
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--rule);
+}
+
+.setting-action .text-button {
+  margin-left: -0.5rem;
+}
+
+.setting-action .setting-hint {
+  margin: 0.125rem 0 0;
 }
 
 /* Empty search */

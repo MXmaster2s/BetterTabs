@@ -57,7 +57,15 @@
   const listeners = [];
   const event = () => ({ addListener: (fn) => listeners.push(fn) });
   const fire = () => listeners.forEach((fn) => fn());
-  const store = {};
+  // Like Chrome: what is saved to disk (local) survives a reload, and memory (session) does not.
+  // Tab storage stands in for the disk, so the preview shows what a restart brings back.
+  const store = (() => {
+    try {
+      return JSON.parse(sessionStorage.getItem('mock-local') ?? '{}');
+    } catch {
+      return {};
+    }
+  })();
   const sessionStore = {};
 
   window.chrome = {
@@ -83,7 +91,14 @@
       onMoved: event(),
       onAttached: event(),
       onDetached: event(),
-      onReplaced: event(),
+      onReplaced: { addListener: () => {} },
+      discard: async (id) => {
+        const tab = tabs.find((t) => t.id === id);
+        if (!tab || tab.active) return undefined;
+        tab.discarded = true;
+        fire();
+        return { ...tab };
+      },
     },
     tabGroups: {
       query: async () => groups,
@@ -100,12 +115,21 @@
     storage: {
       local: {
         get: async () => ({ ...store }),
-        set: async (values) => Object.assign(store, values),
+        set: async (values) => {
+          Object.assign(store, values);
+          try {
+            sessionStorage.setItem('mock-local', JSON.stringify(store));
+          } catch {
+            // Storage is blocked: the preview still works, it just forgets on reload.
+          }
+        },
       },
       session: {
         get: async () => ({ ...sessionStore }),
         set: async (values) => Object.assign(sessionStore, values),
+        remove: async (key) => delete sessionStore[key],
       },
+      onChanged: { addListener: () => {} },
     },
     runtime: {},
   };

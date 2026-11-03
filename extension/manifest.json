@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "BetterTabs",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "All your open tabs in Chrome's side panel, grouped by website.",
   "homepage_url": "https://github.com/MXmaster2s/BetterTabs",
   "minimum_chrome_version": "121",
@@ -11,6 +11,16 @@
   },
   "side_panel": {
     "default_path": "sidepanel.html"
+  },
+  "commands": {
+    "open-panel": {
+      "suggested_key": { "default": "Alt+Shift+B" },
+      "description": "Open BetterTabs"
+    },
+    "search-tabs": {
+      "suggested_key": { "default": "Alt+Shift+F" },
+      "description": "Open BetterTabs and search your tabs"
+    }
   },
   "action": {
     "default_title": "Open BetterTabs",

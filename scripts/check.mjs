@@ -2,6 +2,7 @@
 //   - extension/manifest.json parses and every file it points to exists
 //   - every script is valid JavaScript
 //   - every permission is used, and every chrome.* API that needs one is requested
+//   - every keyboard shortcut in the manifest is handled by the service worker
 //   - the changelog and the store listing cover the current version and permissions
 //   - every file a document links to or names in `code` exists, so the docs cannot drift
 //   - the website's links resolve, its icon is the extension's, and its version matches
@@ -67,6 +68,12 @@ for (const [permission, pattern] of Object.entries(usage)) {
 }
 for (const permission of requested) {
   if (!(permission in usage)) fail(`permission ${permission} has no usage check in scripts/check.mjs`);
+}
+
+// Every keyboard shortcut in the manifest is handled by the service worker
+const background = readFileSync(join(extension, 'background.js'), 'utf8');
+for (const command of Object.keys(manifest.commands ?? {})) {
+  if (!background.includes(`'${command}'`)) fail(`manifest.json declares the ${command} command but background.js does not handle it`);
 }
 
 // The changelog covers the current version
