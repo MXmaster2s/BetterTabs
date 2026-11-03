@@ -47,13 +47,19 @@ BetterTabs covers every row. The name takes "tab manager" and "side panel"; the 
 
 The small tile and marquee cannot be localised.
 
-### Screenshot plan (replace the five taken before 1.7.0)
+### Screenshot plan
 
-1. Sites: "Every open tab, grouped by site." The panel with a long list.
-2. Search: "Find any tab as you type." One search and its matches highlighted.
-3. Select mode: "Select, then close, suspend or group." Ticked tabs and the selection bar.
-4. Saved lists and backups: "Save a list. Restore after a crash." The lists popover or backups popover.
-5. Privacy: "No account. No server. Nothing leaves your browser." The permission list.
+Each image answers a pain people raised most in the Reddit research (`docs/research/`), in the order they raised it. A person scrolling the listing sees their own problem first.
+
+| # | Pain (threads out of 64) | Headline | Shows |
+| --- | --- | --- | --- |
+| 1 | Lost tabs after a crash or restart (about 30) | Never lose your tabs. | Saved lists and the backups popover |
+| 2 | Memory, Chrome slowing down (about 17) | Too many tabs slowing Chrome? | Tabs marked Suspended, still in the list |
+| 3 | Search across windows (about 14) | Find any tab in any window. | A search with its matches |
+| 4 | Privacy, local only (about 16) | Nothing leaves your browser. | The five permissions and "no host permissions" |
+| 5 | Hundreds of tabs, duplicates (about 7) | Hundreds of tabs, under control. | The Sites view with Close duplicates |
+
+The images are made by `scripts/capture-170.mjs`, `scripts/capture-memory.mjs` and `scripts/store-170.mjs` in `~/Developer/BetterTabs-video`, from the real panel on fake tabs.
 
 ### Promo tile and marquee text
 
