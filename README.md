@@ -8,7 +8,9 @@ It is built for heavy tab use, including the hundreds of tabs that AI assistants
 
 ## Install
 
-No build step. Chrome 121 or later.
+**From the Chrome Web Store (recommended):** open the [BetterTabs page](https://chromewebstore.google.com/detail/bettertabs/gghmnehinhdlfcppjgaaokgiloppniep) and click **Add to Chrome**. Chrome keeps it up to date. Chrome 121 or later.
+
+The Store has version 1.6.0. Newer changes on `main` (Select mode, saved lists, Group, automatic backups) reach the Store once a new version is reviewed. To use them now, or to read and change the code, load the source. There is no build step.
 
 1. Download this repository (**Code → Download ZIP**, then unzip it) or clone it.
 2. Open `chrome://extensions` and turn on **Developer mode** (top right).
@@ -133,7 +135,7 @@ python3 scripts/make-icons.py      # redraw the toolbar icons
 
 What other tab managers do that BetterTabs does not do yet, easiest first (also on [bettertabs.fyi](https://bettertabs.fyi/#roadmap)):
 
-- **Next:** drag to reorder and move between windows; close idle tabs automatically; the Chrome Web Store, Edge and Brave.
+- **Next:** drag to reorder and move between windows; close idle tabs automatically; an Edge listing and a check in Edge and Brave.
 - **Later:** workspaces; notes on tabs; a warning when you open a duplicate; a tree view.
 - **Not planned:** syncing between devices, because it would send your tab list off your computer.
 

@@ -29,6 +29,10 @@ BetterTabs ships as a zip uploaded to the Chrome Web Store. Anyone can also load
 
 8. Upload the same zip in the [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole). Paste the listing text and permission justifications from `docs/store-listing.md`.
 
+## The live listing
+
+BetterTabs is live at <https://chromewebstore.google.com/detail/bettertabs/gghmnehinhdlfcppjgaaokgiloppniep>. When a new version is approved, update the version note in the site's install section (`site/index.html`, "The Store has version ...") and the same line in the README, or remove them once the Store matches `main`.
+
 ## Before the first store submission
 
 - A Web Store developer account (one-time registration fee).

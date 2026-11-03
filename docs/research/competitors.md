@@ -56,7 +56,7 @@ Google autocomplete, 2 November 2026. Full list: [data/search-phrases.csv](data/
 
 **Ahead:** groups by site (not a headline feature in any article), duplicate cleanup that keeps the tab you are on, nothing leaves your browser, stays open as a side panel, small and open source, rename and favourites, suspend without reading pages, names and favourites that survive a restart, export of every open tab, opt-in automatic backups with restore, keyboard shortcuts.
 
-**Behind:** not on the Web Store yet, Chrome only, no workspaces, no sync, no automatic closing of idle tabs, no select-several or drag and drop.
+**Behind:** only just on the Web Store (live with 1.6.0 on 3 November 2026), Chrome only, no workspaces, no sync, no automatic closing of idle tabs, no select-several or drag and drop.
 
 ## Roadmap, easiest first
 
@@ -74,7 +74,7 @@ Effort is a guess for the current code, which has no build step, no network and 
 | 8 | Select several tabs, then close, suspend or move | Tab Manager Plus | Medium | Built in 1.7.0 (close, suspend, group; moving comes with drag and drop) |
 | 9 | Drag to reorder and move between windows | Tab Manager Plus, Toby | Medium | Next |
 | 10 | Close idle tabs automatically | Tab Wrangler | Medium | Next |
-| 11 | Edge Add-ons listing, Brave note | VertiTab (cross-browser) | Small, plus store admin | Next, with the Web Store |
+| 11 | Edge Add-ons listing, Brave note | VertiTab (cross-browser) | Small, plus store admin | Next, now the Web Store listing is live |
 | 12 | Rolling snapshots for crash recovery | Session Buddy, SuperchargeNavigation | Medium to large | Built in 1.7.0, as an opt-in setting because it stores addresses |
 | 13 | Workspaces | Workona, SuperchargeNavigation | Large | Later |
 | 14 | Notes on tabs; warn on duplicate; tree view | Reddit threads, Tabs Outliner | Medium | Later |

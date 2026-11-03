@@ -22,7 +22,7 @@ Open <http://localhost:8742/>. The build copies `site/`, `extension/` and `previ
 
 - The version in the JSON-LD block of `site/index.html` must match `extension/manifest.json`; the check fails otherwise. Update it with each release.
 - When a feature changes, update its card, the FAQ and the permission lines on the home page along with the README and spec.
-- Say only what is true today. The page says BetterTabs is not on the Chrome Web Store yet; change the install section and that FAQ answer when it is.
+- Say only what is true today. The install section links the Chrome Web Store listing and says which version the Store has; update that note and the Store link when a new version is published, and drop the note once the Store has the version this site describes.
 - Prices, testimonials and download counts do not belong here: the extension is free and has no analytics to count with.
 
 ## Publishing

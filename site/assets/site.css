@@ -635,6 +635,26 @@ section > .wrap > h2,
   font-size: 1.125rem;
 }
 
+.install-note {
+  margin: 1.25rem 0 0;
+  font-size: 0.9375rem;
+}
+
+.install-source {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--ink);
+}
+
+.install-source summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.install-source ol {
+  margin-top: 0.875rem;
+}
+
 @media (max-width: 52rem) {
   .install {
     grid-template-columns: 1fr;
