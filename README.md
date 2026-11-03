@@ -128,6 +128,7 @@ python3 scripts/make-icons.py      # redraw the toolbar icons
 | [docs/scripts.md](docs/scripts.md) | What each command checks or changes |
 | [docs/RELEASING.md](docs/RELEASING.md) | Cutting a release and submitting to the Chrome Web Store |
 | [docs/store-listing.md](docs/store-listing.md) | Store text, privacy policy and a justification for each permission |
+| [docs/store-seo.md](docs/store-seo.md) | How to be found on the Chrome Web Store: search phrases, name, images |
 | [CHANGELOG.md](CHANGELOG.md) | What changed in each version |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How to propose and submit a change |
 

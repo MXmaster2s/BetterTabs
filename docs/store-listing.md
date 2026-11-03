@@ -4,11 +4,15 @@ Copy these into the Chrome Web Store Developer Dashboard. The live listing is <h
 
 ## Name
 
-BetterTabs
+BetterTabs: Side Panel Tab Manager
+
+The Store shows the `name` from `extension/manifest.json`, so change it there (75 characters at most). "Tab Manager" and "Side Panel" are the phrases people search for; the brand stays first. See [store-seo.md](store-seo.md) for why.
 
 ## Summary (132 characters max)
 
-See all your open tabs in Chrome's side panel, grouped by website, with search and one-click cleanup.
+Tab manager in Chrome's side panel: group tabs by site, search, suspend and save them. Private, no account.
+
+The Store shows the `description` from `extension/manifest.json` as the summary. Keep the two the same.
 
 ## Single purpose
 
@@ -16,26 +20,35 @@ Show and organise the user's open tabs in a side panel.
 
 ## Description
 
-BetterTabs puts every open tab, from every window, in Chrome's side panel and organises them so you can find the one you want. It is built for heavy tab use, including the hundreds of tabs that AI assistants and browser agents open while they work: group them by site, search them, suspend them and close them in bulk.
+Paste as plain text; the Store does not render formatting. The first two sentences are what search results and Google show, so they carry the main phrases.
 
-- Sites: tabs grouped by website, busiest first.
-- Windows, Recent and Groups: the same tabs by window, by when you last used them, or by Chrome tab group.
-- Search by title or address.
-- Rename any tab: right-click it and choose Edit name. Names come back after you restart Chrome.
-- On a billing or price page (Mac), "Add to longbook" opens the longbook app's Add Commitment screen with the site's name filled in.
-- Favourite a tab: right-click it and choose Add to favourites. Its site icon sits above the search box, one click away, and stays there after you close the tab so you can open the page again.
-- Hover any button for a tooltip that says what it does and which key does the same.
-- One button scrolls the list to the tab you're on.
-- Duplicate tabs are marked, and one click closes the extra copies.
-- Select several tabs, then close, suspend or group them together, or save them as a named list to open again later.
-- Group a site's tabs into a Chrome tab group in one click.
-- Suspend tabs you are not using to free memory. They stay in the list and reload when you click them.
-- Export every open tab to a file you keep, to open in any browser or import as bookmarks.
-- Keyboard shortcuts: Alt+Shift+B opens the panel, Alt+Shift+F opens it with search ready.
-- Click a tab to switch to it, even in another window. Close one tab, or every tab on a site, in one click.
-- Updates as you browse. Works with the keyboard and in light and dark mode.
+```
+BetterTabs is a better tab manager for Chrome. It lists every open tab, from every window, in the side panel, grouped by website, so you can find the one you want even with hundreds open.
 
-BetterTabs has no account and no server. It never sends anything anywhere.
+Built for too many tabs, including the ones AI assistants and browser agents open while they research for you. Search them, group them, suspend them to free memory, close duplicates, and save a set of tabs to open again later.
+
+WHAT YOU CAN DO
+• See your tabs by site, by window, by when you last used them, or by Chrome tab group
+• Search tabs by title or address as you type (Alt+Shift+F opens the panel with search ready)
+• Close duplicate tabs in one click, keeping the one you are on
+• Select several tabs, then close, suspend or group them together
+• Group all of a site's tabs into one Chrome tab group in one click
+• Suspend tabs you are not using to free memory; they stay in the list and reload when you click them
+• Save tabs as a named list and open it again later, or export every open tab as a bookmarks file
+• Favourite a tab and keep it one click away, even after you close it
+• Rename any tab so you recognise it
+• Optional automatic backups, off until you turn them on, so a crash or a restart does not lose your tabs
+• Jump to the tab you are on, switch to a tab in another window, use it with the keyboard, in light and dark mode
+
+PRIVATE BY DESIGN
+No account, no server, no analytics. BetterTabs has no host permissions, so it cannot read or change the pages you visit. It is open source (MIT): github.com/MXmaster2s/BetterTabs
+
+WHY DOES CHROME SAY "READ YOUR BROWSING HISTORY"?
+Chrome shows that warning for every extension that can see tab titles and addresses. BetterTabs uses that only to draw your tab list. Nothing leaves your computer.
+
+WHAT'S NEW IN 1.7.0
+Select mode, saved lists, Group this site, optional automatic backups, favourites that stay after you close the tab, and a tooltip on every button.
+```
 
 ## Permission justifications
 

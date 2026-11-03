@@ -4,6 +4,7 @@ What changed in BetterTabs, newest first. The version being worked on is in `ext
 
 ## 1.7.0
 
+- **Clearer Store name and summary.** The extension is now named "BetterTabs: Side Panel Tab Manager", with a one-line summary that says what it does, so people searching the Chrome Web Store for a tab manager can find it. Nothing changes in how it works.
 - **Saved lists.** With tabs ticked in Select mode, **Save list** names them and keeps each tab's title and address on your computer; tick **Close these tabs after saving** to clear them away. **Saved lists** in the settings shows every list: **Open** puts it in a new window (only the first tab loads), **Save as file** downloads it as bookmarks, and **Delete** removes it after a second click. Lists stay until you delete them.
 - **Select several tabs.** **Select** (or Ctrl or Cmd-click a tab) puts a tick box on every row. Tick tabs one by one, Shift-click for a range, or **Select all** on a folder (after a search, that picks everything that matches), then **Close**, **Suspend** or **Group** them together from the bar at the bottom. **Done** or `Esc` leaves Select mode.
 - **Group** on each site's folder (Sites view) puts that site's tabs into one Chrome tab group named after the site, one group per window. Pinned tabs are left out, and it hides once a window's tabs are already together.
