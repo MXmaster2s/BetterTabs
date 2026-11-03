@@ -29,7 +29,7 @@ Each figure says where it came from. In short:
 | [search-phrases.csv](data/search-phrases.csv) | Search seed | What Google autocomplete suggested |
 | [reddit-threads.csv](data/reddit-threads.csv) | Extension named in a thread | Subreddit, posted date, thread title, products named, what they dislike or miss, the feature they wish for, themes |
 
-`reddit-threads.csv` has 80 rows covering 64 distinct threads, because a thread that names several extensions has a row for each. The `products_named` and `themes` columns were added by keyword matching over the two text columns (the keywords are listed in [reddit-complaints.md](reddit-complaints.md)), so they are a rough tag, not a judgement.
+`reddit-threads.csv` has 80 rows covering 64 distinct threads, because a thread that names several extensions has a row for each. The `products_named` and `themes` columns were added by keyword matching over the two text columns (the keywords are listed in [reddit-complaints.md](reddit-complaints.md)), so they are a rough tag, not a judgement. One thread title names specific AI products; they are replaced with [AI assistants] here, because this repository does not name AI products.
 
 ## Refreshing it
 
