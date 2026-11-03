@@ -721,6 +721,27 @@ footer nav {
   gap: 0.5rem 1.25rem;
 }
 
+/* Blog list */
+
+.posts {
+  margin: 2rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.posts li {
+  padding: 1.25rem 0;
+  border-top: 1px solid var(--rule);
+}
+
+.posts h2 {
+  margin: 0;
+}
+
+.posts p {
+  margin-top: 0.25rem;
+}
+
 /* Privacy page and other plain pages */
 
 .doc {

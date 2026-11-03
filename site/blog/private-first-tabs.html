@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A private-first way to manage your browser tabs | BetterTabs</title>
+  <meta name="description" content="Why BetterTabs is built so you can check its privacy instead of trusting it: five permissions, no host access, no network, open source.">
+  <link rel="canonical" href="https://bettertabs.fyi/blog/private-first-tabs.html">
+  <meta name="theme-color" content="#ffe45c">
+  <link rel="icon" type="image/png" href="../assets/icon.png">
+  <link rel="apple-touch-icon" href="../assets/icon.png">
+  <meta property="og:site_name" content="BetterTabs">
+  <meta property="og:title" content="A private-first way to manage your browser tabs">
+  <meta property="og:description" content="Why BetterTabs is built so you can check its privacy instead of trusting it: five permissions, no host access, no network, open source.">
+  <meta property="og:url" content="https://bettertabs.fyi/blog/private-first-tabs.html">
+  <meta property="og:type" content="article">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="A private-first way to manage your browser tabs">
+  <meta name="twitter:description" content="Why BetterTabs is built so you can check its privacy instead of trusting it: five permissions, no host access, no network, open source.">
+  <link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="../"><img src="../assets/icon.png" alt="" width="28" height="28">BetterTabs</a>
+      <a class="button button-primary" href="../#install">Get BetterTabs</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <article class="doc">
+    <h1>A private-first way to manage your browser tabs</h1>
+    <p class="updated">3 November 2026</p>
+
+    <p>Most tab managers ask you to trust them with the most revealing list on your computer: every page you have open right now. That list shows your bank, your doctor and the job you are quietly looking at. A tab manager has to read it to do its job. The question is what happens next.</p>
+
+    <h2>Where tab managers go wrong</h2>
+    <p>Some tab tools keep your tabs in an account on their servers so they can sync them. That is a fair design, and it means your list of pages lives somewhere you do not control.</p>
+    <p>Others are trusted once and then change hands. The Great Suspender was a popular tab suspender that was sold to a new owner. An update then shipped code its users never agreed to, and Chrome removed it. "Trust the developer" is a promise that can expire without you noticing.</p>
+    <p>The list also matters more now. Browser agents and AI assistants open pages for you while they research and compare, and an hour of that can leave hundreds of tabs open across several windows. The more tabs there are, the more a manager sees, and the more it matters that it keeps what it sees to itself.</p>
+
+    <h2>What BetterTabs does instead</h2>
+    <p>BetterTabs shows every open tab, from every window, in Chrome's side panel, grouped by website. It is built so that you do not have to take its privacy on trust:</p>
+    <ul>
+      <li><strong>It cannot read your pages.</strong> It asks Chrome for five permissions (<code>tabs</code>, <code>tabGroups</code>, <code>sidePanel</code>, <code>storage</code> and <code>favicon</code>), no host permissions and no content scripts. It sees the title and address Chrome shows for each tab, and has no way to look inside a page.</li>
+      <li><strong>It makes no network requests.</strong> There is no server, account or analytics. The code contains no <code>fetch</code>, <code>XMLHttpRequest</code> or <code>WebSocket</code>.</li>
+      <li><strong>It stores almost nothing.</strong> Your view, collapsed folders and settings stay on your computer. Names and favourites are remembered under a short hash of the page address, never the address itself. It keeps no history of pages you visited.</li>
+      <li><strong>You choose when anything leaves.</strong> Export open tabs writes a file you keep, only when you click it.</li>
+      <li><strong>It is open source.</strong> The code is MIT licensed on GitHub, small, with no build step, so the files Chrome loads are the files you can read. If the project changed hands, anyone could see what changed, and anyone could keep the old version going.</li>
+    </ul>
+
+    <h2>The honest part</h2>
+    <p>Any extension that uses the <code>tabs</code> permission makes Chrome show "Read your browsing history". That label is broad. The permission lets an extension see each tab's title and address, which is the minimum a tab list needs. What matters is what the extension does with it, so the list above is about behaviour you can check.</p>
+    <p>BetterTabs is not on the Chrome Web Store yet. Until it is, you install it by loading the folder in Chrome's developer mode, which is also the way to read exactly what you are running first.</p>
+
+    <h2>Check it yourself</h2>
+    <ol>
+      <li>Open <code>extension/manifest.json</code> and read the permissions. There are five, and no host permissions.</li>
+      <li>Search the extension's JavaScript for <code>fetch</code>, <code>XMLHttpRequest</code> and <code>WebSocket</code>. You will find none.</li>
+      <li>Run <code>node scripts/check.mjs</code> in the repository. It fails if a permission is used without being justified in the store listing.</li>
+    </ol>
+
+    <h2>Private first, then useful</h2>
+    <p>None of this makes BetterTabs less capable. It groups tabs by site, searches across windows, suspends tabs you are not using, closes duplicates and keeps your names and favourites after a restart, all on your computer. If you let an AI work in your browser and the tabs pile up, you get one list of all of them, and it keeps that list to itself.</p>
+    <p><a href="https://github.com/MXmaster2s/BetterTabs">Read the code on GitHub</a>, or <a href="../#install">get BetterTabs</a>.</p>
+    </article>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <p>© 2026 BetterTabs contributors. MIT license.</p>
+      <nav aria-label="Footer">
+        <a href="../">Home</a>
+        <a href="https://github.com/MXmaster2s/BetterTabs">GitHub</a>
+      </nav>
+      <p class="credit">Competitor research and lead generation by <a href="https://lighteningly.com/?utm_source=bettertabs&amp;utm_medium=website&amp;utm_campaign=research-credit" target="_blank" rel="noopener">Lighteningly</a>.</p>
+    </div>
+  </footer>
+</body>
+</html>
