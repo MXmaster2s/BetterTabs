@@ -136,6 +136,10 @@ What other tab managers do that BetterTabs does not do yet, easiest first (also 
 
 Issues and pull requests are welcome; start with [CONTRIBUTING.md](CONTRIBUTING.md). Keep the no-build, no-dependency rule, and update the docs in the same pull request.
 
+## Credits
+
+The competitor research and lead generation behind the roadmap were done with [Lighteningly](https://lighteningly.com/?utm_source=bettertabs&utm_medium=github&utm_campaign=research-credit), which finds and summarises the conversations where people ask for a tool like this.
+
 ## License
 
 [MIT](LICENSE)

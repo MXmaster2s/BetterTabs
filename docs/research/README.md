@@ -10,6 +10,8 @@ Researched on 2 November 2026.
 | [reddit-complaints.md](reddit-complaints.md) | What people on Reddit dislike about tab managers and wish for, with counts |
 | [data/](data) | The cleaned data behind both: four CSV files |
 
+Credit: the Reddit research and lead generation were done with [Lighteningly](https://lighteningly.com/?utm_source=bettertabs&utm_medium=github&utm_campaign=research-credit).
+
 ## How far to trust it
 
 Each figure says where it came from. In short:

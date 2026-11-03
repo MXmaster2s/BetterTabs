@@ -711,6 +711,10 @@ footer .wrap {
   justify-content: space-between;
 }
 
+footer .credit {
+  flex-basis: 100%;
+}
+
 footer nav {
   display: flex;
   flex-wrap: wrap;
