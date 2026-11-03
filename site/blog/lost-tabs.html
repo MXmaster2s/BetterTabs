@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Are you losing browser tabs in your tab manager? | BetterTabs</title>
+  <meta name="description" content="Why tabs disappear after a crash, a restart or a tab manager's own bug, and what to do about it today.">
+  <link rel="canonical" href="https://bettertabs.fyi/blog/lost-tabs.html">
+  <meta name="theme-color" content="#ffe45c">
+  <link rel="icon" type="image/png" href="../assets/icon.png">
+  <link rel="apple-touch-icon" href="../assets/icon.png">
+  <meta property="og:site_name" content="BetterTabs">
+  <meta property="og:title" content="Are you losing browser tabs in your tab manager?">
+  <meta property="og:description" content="Why tabs disappear after a crash, a restart or a tab manager's own bug, and what to do about it today.">
+  <meta property="og:url" content="https://bettertabs.fyi/blog/lost-tabs.html">
+  <meta property="og:type" content="article">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Are you losing browser tabs in your tab manager?">
+  <meta name="twitter:description" content="Why tabs disappear after a crash, a restart or a tab manager's own bug, and what to do about it today.">
+  <link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="../"><img src="../assets/icon.png" alt="" width="28" height="28">BetterTabs</a>
+      <a class="button button-primary" href="../#install">Get BetterTabs</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <article class="doc">
+    <h1>Are you losing browser tabs in your tab manager?</h1>
+    <p class="updated">3 November 2026</p>
+
+    <p>You had sixty tabs open, you closed Chrome or it crashed, and when you came back half of them were gone. If you use a tab manager and tabs still go missing, you are not unlucky. Losing tabs was the most common complaint in our research of what people say about tab managers: it came up in 22 of the 64 Reddit threads we looked at. (Those threads were summarised by an AI from search results, so read the number as a rough guide, not a count of people.)</p>
+
+    <h2>Why tabs go missing</h2>
+    <ul>
+      <li><strong>A crash or a forced restart.</strong> Chrome can only bring tabs back if it saved them first. After a hard crash or a power cut, that last save may be old or missing.</li>
+      <li><strong>Chrome is set to open a new tab page.</strong> Unless it is set to continue where you left off, a normal quit leaves nothing to restore.</li>
+      <li><strong>A single saved list.</strong> Some tab managers collapse everything into one list. If that list is the only copy, a bug, a reinstall or removing the extension can take it with it.</li>
+      <li><strong>An extension that changes hands.</strong> Tab extensions have been sold and then changed or abused. The data you trusted to one is only as safe as its owner.</li>
+      <li><strong>Closing a window by accident.</strong> Closing is instant, and it is easy to do it to the wrong window.</li>
+    </ul>
+
+    <h2>What to do today, with or without BetterTabs</h2>
+    <ol>
+      <li>In Chrome, open Settings, then On startup, and choose <strong>Continue where you left off</strong>.</li>
+      <li>Learn the undo: <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>T</kbd> reopens the last closed tab, and keeps going back, one tab or window at a time.</li>
+      <li>Check Chrome's History for <strong>Recently closed</strong> if a whole window disappeared.</li>
+      <li>Before anything risky (an update, a reinstall, a big cleanup), save a copy of what is open as a file you keep yourself.</li>
+      <li>Do not let one extension be your only copy of anything you care about.</li>
+    </ol>
+
+    <h2>What BetterTabs does about it</h2>
+    <p>BetterTabs is a list of your open tabs, not a place where tabs are stored, so closing it or removing it never deletes a tab. It adds some protection:</p>
+    <ul>
+      <li><strong>Export open tabs.</strong> In the settings, one click saves the name and address of every open tab, grouped by window, to a file you keep. Open it in any browser to click through the links, or import it into Chrome's bookmarks.</li>
+      <li><strong>Names and favourites survive a restart.</strong> The names you gave tabs and your favourites come back when the same page is open again. They are saved under a short hash of the page address, never the address itself.</li>
+      <li><strong>Reopen closed tab still works.</strong> Closing in BetterTabs is Chrome's own close, so Chrome's undo brings the tab back with its name.</li>
+      <li><strong>Nothing leaves your browser.</strong> There is no account and no server, so there is no company between you and your tabs.</li>
+    </ul>
+
+    <h2>What it does not do yet</h2>
+    <p>BetterTabs does not yet keep automatic backups of your open tabs, and it has no saved lists. Those are the most-requested features in our research, and they are on the <a href="../#roadmap">roadmap</a>. Automatic backups would store page addresses on your computer, so they would be a setting you turn on, not something that happens quietly.</p>
+
+    <h2>The short version</h2>
+    <p>Turn on Continue where you left off, remember the reopen shortcut, and export a copy before anything risky. Keep your tabs listed by something that cannot lose them, and your backup in a file that is yours.</p>
+    <p>The research behind this post, with its limits spelled out, is on <a href="https://github.com/MXmaster2s/BetterTabs/tree/main/docs/research">GitHub</a>.</p>
+    </article>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <p>© 2026 BetterTabs contributors. MIT license.</p>
+      <nav aria-label="Footer">
+        <a href="../">Home</a>
+        <a href="https://github.com/MXmaster2s/BetterTabs">GitHub</a>
+      </nav>
+      <p class="credit">Competitor research and lead generation by <a href="https://lighteningly.com/?utm_source=bettertabs&amp;utm_medium=website&amp;utm_campaign=research-credit" target="_blank" rel="noopener">Lighteningly</a>.</p>
+    </div>
+  </footer>
+</body>
+</html>
