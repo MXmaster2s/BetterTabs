@@ -27,7 +27,7 @@ From top to bottom:
 2. A row of favourite icons (see Favourites), shown only when there is at least one favourite.
 3. A row with a search box (`type="search"`, label "Search tabs") and, to its right, a square icon button (a target symbol) labelled **Show current tab**.
 4. A four-way view switch (radio group): **Sites**, **Windows**, **Recent**, **Groups**.
-5. A summary row: the tab count on the left; on the right, a "Close N duplicates" text button shown only when duplicates exist.
+5. A summary row: the tab count on the left; on the right, a "Close N duplicates" text button shown only when duplicates exist, and **Select** (`#select-toggle`, `aria-pressed`; it reads **Done** while Select mode is on).
 6. The list: a column of folders. Each folder has a header (`<h2>` wrapping a toggle button with the folder name and its tab count, plus a "Close all" button) and a `<ul>` of tab rows.
 7. A visually hidden `role="status"` element for screen reader announcements.
 8. A context menu (`<div popover role="menu">`) holding **Edit name**, **Reset name** (renamed tabs only) and **Add to favourites** / **Remove from favourites**.
@@ -124,6 +124,16 @@ Two tabs are duplicates only if their URLs are exactly equal (including `#` frag
 - Added and removed are announced ("Added to favourites", "Removed from favourites").
 - Favourites are stored in `chrome.storage.local` under `favourites`, as an array of `{ url, title }`.
 
+### Selecting several tabs
+
+**Select** (or Ctrl/Cmd-clicking a tab row) turns on Select mode (`body.selecting`). In it:
+
+- Each row's main button becomes a toggle (`aria-pressed`) with a tick box before the icon (a box with a check mark when ticked, outlined in forced-colours mode): a click ticks or unticks the tab instead of switching to it, and Shift-click ticks every tab shown between this one and the last one ticked. A Ctrl/Cmd-click outside Select mode turns it on and ticks that tab.
+- Each folder header shows **Select all** (or **Clear** when every shown tab in it is ticked) in place of Group, Suspend and Close all. Because folders hold only the tabs a search lets through, a search followed by **Select all** picks every match.
+- A bar (`#selection-bar`, a labelled region) is fixed at the bottom, left of the settings button. It says "N selected" (adding ", M hidden by the search" when ticked tabs are filtered out) and has **Close**, **Suspend**, **Group** and **Done**. Close is disabled with nothing ticked, Suspend when none of the ticked tabs can be suspended, Group when all are pinned. The actions apply to every ticked tab, including ones a search is hiding.
+- **Close** closes the ticked tabs straight away, like Close all (no confirmation), and says "Closed N tabs". **Suspend** works as in Suspending. **Group** makes one Chrome tab group per window from the ticked tabs, leaving out pinned ones, with no title (Chrome picks the colour); it says "Grouped N tabs". Afterwards Select mode turns off.
+- `Delete` on a ticked row closes every ticked tab. `Esc` (when the search box is not holding text) or **Done** leaves Select mode and clears the ticks. Tabs that close are dropped from the ticks.
+
 ### Group this site
 
 In the Sites view, a folder for a website (not Chrome pages or files) shows **Group** at the right of its header, before **Suspend**, when at least one window has two or more of its unpinned tabs that are not already all in the same tab group. It makes one Chrome tab group per window with `chrome.tabs.group`, holding that window's unpinned tabs from the folder, and titles it with the site name with `chrome.tabGroups.update` (Chrome picks the colour). Pinned tabs are left out, because Chrome cannot group them; a tab that is already in another group moves out of it. The status line says "Grouped N tabs from <site>", or "Chrome would not group these tabs" if every call failed. The folder then shows in the Groups view with Chrome's colour. No permission beyond `tabs` and `tabGroups` is used. Its accessible name is "Group N tabs from <site> into a Chrome tab group".
@@ -179,7 +189,7 @@ The icon button next to the search box finds the active tab of the panel's windo
 
 Every control has a native tooltip (the `title` attribute) that says what it does and, where one exists, the key that does the same. The shortcuts for **Open BetterTabs** and **Search tabs** come from `chrome.commands.getAll()`, so they show whatever the user set at `chrome://extensions/shortcuts`; if the call fails the shortcut is left out. The toolbar icon's tooltip is set the same way by the service worker ("Open BetterTabs (Alt+Shift+B)"). Tooltips on:
 
-- The search box (`/`, and the search shortcut), **Show current tab**, each view label, **Close N duplicates** and the settings button.
+- The search box (`/`, and the search shortcut), **Select**, the selection bar's buttons, **Show current tab**, each view label, **Close N duplicates** and the settings button.
 - Each folder's header (**Collapse** or **Expand** plus its name), **Group**, **Suspend** (what it unloads and what it leaves alone) and **Close all** (and the reopen key, `Cmd+Shift+T` on a Mac, `Ctrl+Shift+T` elsewhere).
 - Each tab row (name, original name if renamed, address, "Click to switch to this tab. F2 renames it."), its close button ("Close tab (Delete key). It closes straight away."), and its **Add to longbook** button.
 - Every item in the right-click menu (including `F2` on **Edit name**), every control in the settings and the Backups popover, and each favourite icon (see Favourites).

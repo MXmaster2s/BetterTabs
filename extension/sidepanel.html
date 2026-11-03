@@ -28,10 +28,22 @@
     </fieldset>
     <div class="summary">
       <p id="count"></p>
-      <button id="close-dupes" class="text-button" type="button" title="Close extra copies of tabs with the same address. Keeps the one you are on." hidden></button>
+      <div class="summary-actions">
+        <button id="close-dupes" class="text-button" type="button" title="Close extra copies of tabs with the same address. Keeps the one you are on." hidden></button>
+        <button id="select-toggle" class="text-button" type="button" aria-pressed="false" title="Pick several tabs, then close, suspend or group them together. Ctrl or Cmd-click a tab does the same.">Select</button>
+      </div>
     </div>
   </header>
   <main id="list"></main>
+  <div id="selection-bar" class="selection-bar" role="region" aria-label="Selected tabs" hidden>
+    <p id="selection-count"></p>
+    <div class="selection-actions">
+      <button id="selection-close" class="text-button" type="button" title="Close the selected tabs. They close straight away; Chrome's reopen key brings the last one back.">Close</button>
+      <button id="selection-suspend" class="text-button" type="button" title="Unload the selected tabs from memory. Pinned tabs, tabs playing sound and the tab you are on are left alone.">Suspend</button>
+      <button id="selection-group" class="text-button" type="button" title="Put the selected tabs into a Chrome tab group, one per window. Pinned tabs are left out.">Group</button>
+      <button id="selection-done" class="text-button" type="button" title="Stop selecting (Esc)">Done</button>
+    </div>
+  </div>
   <button id="settings-button" class="icon-button settings-button" type="button" popovertarget="settings" aria-label="Settings" title="Settings: backups, the starting view and more">
     <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4.5h12M2 11.5h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="10.5" cy="4.5" r="1.9" fill="var(--field)" stroke="currentColor" stroke-width="1.6"/><circle cx="5.5" cy="11.5" r="1.9" fill="var(--field)" stroke="currentColor" stroke-width="1.6"/></svg>
   </button>

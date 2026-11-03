@@ -71,7 +71,7 @@ Effort is a guess for the current code, which has no build step, no network and 
 | 5 | Export every open tab to a file | OneTab, Session Buddy | Small | Built in 1.6.0 |
 | 6 | Group this site into a Chrome tab group | VertiTab AI grouping | Small to medium | Built in 1.7.0 |
 | 7 | Saved lists, restored later | OneTab, Session Buddy, Toby | Medium | Next, kept on the computer only |
-| 8 | Select several tabs, then close, suspend or move | Tab Manager Plus | Medium | Next |
+| 8 | Select several tabs, then close, suspend or move | Tab Manager Plus | Medium | Built in 1.7.0 (close, suspend, group; moving comes with drag and drop) |
 | 9 | Drag to reorder and move between windows | Tab Manager Plus, Toby | Medium | Next |
 | 10 | Close idle tabs automatically | Tab Wrangler | Medium | Next |
 | 11 | Edge Add-ons listing, Brave note | VertiTab (cross-browser) | Small, plus store admin | Next, with the Web Store |

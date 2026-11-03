@@ -44,6 +44,10 @@ const state = {
   editing: null, // id of the tab whose name is being edited
   menuTab: null, // id of the tab the context menu is open for (null on a closed favourite)
   menuFavourite: null, // address of the favourite icon the menu is open on, if it was opened on one
+  selecting: false, // whether the list is in Select mode
+  selected: new Set(), // ids of the selected tabs
+  lastSelected: null, // the tab last ticked, for Shift-click ranges
+  shownIds: new Set(), // ids of the tabs the list shows right now (a search can hide some)
   found: null, // id of the tab whose row is pulsing after Show current tab or a favourite click
   shortcuts: {}, // the keys Chrome has for the two commands, by command name
   settings: { showLongbook: true, startView: 'last', autoBackup: false },
@@ -61,6 +65,13 @@ const settingsPanel = document.getElementById('settings');
 const settingLongbook = document.getElementById('setting-longbook');
 const settingView = document.getElementById('setting-view');
 const exportButton = document.getElementById('export-tabs');
+const selectToggle = document.getElementById('select-toggle');
+const selectionBar = document.getElementById('selection-bar');
+const selectionCount = document.getElementById('selection-count');
+const selectionClose = document.getElementById('selection-close');
+const selectionSuspend = document.getElementById('selection-suspend');
+const selectionGroup = document.getElementById('selection-group');
+const selectionDone = document.getElementById('selection-done');
 const settingBackup = document.getElementById('setting-backup');
 const openBackups = document.getElementById('open-backups');
 const backupsPanel = document.getElementById('backups');
@@ -102,6 +113,7 @@ function svg(markup) {
 }
 
 const ICON_CLOSE = '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 1.5l7 7m0-7l-7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+const ICON_CHECK = '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 5.2l2.2 2.2L8 3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_CHEVRON = '<svg class="chevron" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
 function plural(n, word) {
@@ -232,6 +244,7 @@ async function load() {
   // clean-up below decides what is still wanted.
   if (adoptRemembered()) saveSession();
   forgetClosedTabs();
+  for (const id of state.selected) if (!state.tabs.some((t) => t.id === id)) state.selected.delete(id);
   refreshFavouriteTitles();
   findDuplicates();
   render();
@@ -462,6 +475,7 @@ function render() {
       })
     : state.tabs;
 
+  state.shownIds = new Set(shown.map((t) => t.id));
   const windows = new Set(state.tabs.map((t) => t.windowId)).size;
   count.textContent = words.length
     ? `${shown.length} of ${plural(state.tabs.length, 'tab')} match`
@@ -471,6 +485,7 @@ function render() {
   closeDupes.textContent = `Close ${plural(state.extraCopies.length, 'duplicate')}`;
 
   renderFavourites();
+  renderSelection();
 
   const folders = foldersFor(shown);
   list.replaceChildren(...(folders.length ? folders.map(renderFolder) : [renderEmpty()]));
@@ -484,6 +499,77 @@ function render() {
   } else if (focusedFavourite) {
     [...strip.children].find((b) => b.dataset.url === focusedFavourite)?.focus();
   }
+}
+
+// ---------- Selecting several tabs ----------
+
+function renderSelection() {
+  selectToggle.textContent = state.selecting ? 'Done' : 'Select';
+  selectToggle.setAttribute('aria-pressed', String(state.selecting));
+  document.body.classList.toggle('selecting', state.selecting);
+  selectionBar.hidden = !state.selecting;
+  if (!state.selecting) return;
+  const chosen = state.tabs.filter((t) => state.selected.has(t.id));
+  const hidden = chosen.filter((t) => !state.shownIds.has(t.id)).length;
+  selectionCount.textContent = `${chosen.length} selected${hidden ? `, ${hidden} hidden by the search` : ''}`;
+  selectionClose.disabled = chosen.length === 0;
+  selectionSuspend.disabled = !chosen.some(canSuspend);
+  selectionGroup.disabled = !chosen.some((t) => !t.pinned);
+}
+
+function setSelecting(on, { silent = false } = {}) {
+  state.selecting = on;
+  if (!on) {
+    state.selected.clear();
+    state.lastSelected = null;
+  }
+  render();
+  if (!silent) announce(on ? 'Select mode: pick tabs, then choose an action' : 'Select mode off');
+}
+
+// Ticks or unticks a tab. With `range`, ticks every tab shown between this one and the last one ticked.
+function toggleSelected(id, range = false) {
+  const ids = visibleRows().map((row) => Number(row.closest('.tab').dataset.id));
+  if (range && state.lastSelected != null && ids.includes(state.lastSelected) && ids.includes(id)) {
+    const [from, to] = [ids.indexOf(state.lastSelected), ids.indexOf(id)].sort((a, b) => a - b);
+    for (const between of ids.slice(from, to + 1)) state.selected.add(between);
+  } else if (state.selected.has(id)) {
+    state.selected.delete(id);
+  } else {
+    state.selected.add(id);
+  }
+  state.lastSelected = id;
+  render();
+}
+
+function selectFolder(folder) {
+  const all = folder.tabs.every((t) => state.selected.has(t.id));
+  for (const tab of folder.tabs) {
+    if (all) state.selected.delete(tab.id);
+    else state.selected.add(tab.id);
+  }
+  render();
+}
+
+// Groups the given tabs, one Chrome tab group per window; pinned tabs can't be grouped.
+async function groupTabs(tabs) {
+  const byWindow = Map.groupBy(tabs.filter((t) => !t.pinned), (t) => t.windowId);
+  const results = await Promise.allSettled([...byWindow.values()].map(async (set) => {
+    await chrome.tabs.group({ tabIds: set.map((t) => t.id) });
+    return set.length;
+  }));
+  const done = results.filter((r) => r.status === 'fulfilled').reduce((sum, r) => sum + r.value, 0);
+  announce(done ? `Grouped ${plural(done, 'tab')}` : 'Chrome would not group these tabs');
+}
+
+async function actOnSelected(action) {
+  const chosen = state.tabs.filter((t) => state.selected.has(t.id));
+  if (!chosen.length) return;
+  if (action === 'close') await closeTabs(chosen.map((t) => t.id));
+  else if (action === 'suspend') await suspendTabs(chosen);
+  else await groupTabs(chosen);
+  setSelecting(false, { silent: true });
+  if (action === 'close') announce(`Closed ${plural(chosen.length, 'tab')}`);
 }
 
 // The open tab that stands for a favourite: the one you are on, else one in this window, else the first.
@@ -564,7 +650,19 @@ function renderFolder(folder) {
       h(
         'div',
         { class: 'folder-actions' },
-        groupsToMake(folder).length > 0 &&
+        state.selecting &&
+          h(
+            'button',
+            {
+              class: 'text-button close-all',
+              type: 'button',
+              title: `Select or clear all ${plural(n, 'tab')} in ${folder.label}`,
+              'aria-label': `${folder.tabs.every((t) => state.selected.has(t.id)) ? 'Clear' : 'Select all'} ${plural(n, 'tab')} in ${folder.label}`,
+              onclick: () => selectFolder(folder),
+            },
+            folder.tabs.every((t) => state.selected.has(t.id)) ? 'Clear' : 'Select all',
+          ),
+        !state.selecting && groupsToMake(folder).length > 0 &&
           h(
             'button',
             {
@@ -576,7 +674,7 @@ function renderFolder(folder) {
             },
             'Group',
           ),
-        folder.tabs.some(canSuspend) &&
+        !state.selecting && folder.tabs.some(canSuspend) &&
           h(
             'button',
             {
@@ -588,7 +686,7 @@ function renderFolder(folder) {
             },
             'Suspend',
           ),
-        h(
+        !state.selecting && h(
           'button',
           {
             class: 'text-button close-all',
@@ -632,11 +730,29 @@ function renderTab(tab) {
       {
         class: 'tab-main',
         type: 'button',
-        title: [title, renamed && `Original name: ${originalTitle(tab)}`, url, 'Click to switch to this tab. F2 renames it.'].filter(Boolean).join('\n'),
+        title: [
+          title,
+          renamed && `Original name: ${originalTitle(tab)}`,
+          url,
+          state.selecting
+            ? 'Click to tick or untick this tab. Shift-click ticks a range.'
+            : 'Click to switch to this tab. F2 renames it. Ctrl or Cmd-click to select several.',
+        ]
+          .filter(Boolean)
+          .join('\n'),
         'aria-current': current ? 'true' : null,
+        'aria-pressed': state.selecting ? String(state.selected.has(tab.id)) : null,
         'aria-keyshortcuts': 'F2',
-        onclick: () => activate(tab),
+        onclick: (e) => {
+          if (state.selecting) toggleSelected(tab.id, e.shiftKey);
+          else if (e.ctrlKey || e.metaKey) {
+            state.selecting = true;
+            announce('Select mode: pick tabs, then choose an action');
+            toggleSelected(tab.id);
+          } else activate(tab);
+        },
       },
+      state.selecting && h('span', { class: 'tab-check' }, state.selected.has(tab.id) && svg(ICON_CHECK)),
       favicon(url),
       h(
         'span',
@@ -1218,6 +1334,12 @@ deleteBackups.addEventListener('click', async () => {
   showBackups();
 });
 
+selectToggle.addEventListener('click', () => setSelecting(!state.selecting));
+selectionDone.addEventListener('click', () => setSelecting(false));
+selectionClose.addEventListener('click', () => actOnSelected('close'));
+selectionSuspend.addEventListener('click', () => actOnSelected('suspend'));
+selectionGroup.addEventListener('click', () => actOnSelected('group'));
+
 exportButton.addEventListener('click', exportTabs);
 
 locate.addEventListener('click', showCurrentTab);
@@ -1267,6 +1389,12 @@ document.addEventListener('keydown', (e) => {
   const rows = visibleRows();
   const typing = e.target === search;
 
+  if (e.key === 'Escape' && state.selecting && !(typing && search.value)) {
+    e.preventDefault();
+    setSelecting(false);
+    return;
+  }
+
   if (e.key === '/' && !typing) {
     e.preventDefault();
     search.focus();
@@ -1299,7 +1427,10 @@ document.addEventListener('keydown', (e) => {
     startEdit(Number(rows[i].closest('.tab').dataset.id));
   } else if (e.key === 'Delete') {
     e.preventDefault();
-    closeTabs([Number(rows[i].closest('.tab').dataset.id)], i);
+    const id = Number(rows[i].closest('.tab').dataset.id);
+    // On a ticked tab, Delete closes every ticked tab, as the Close button does.
+    if (state.selecting && state.selected.has(id)) actOnSelected('close');
+    else closeTabs([id], i);
   }
 });
 
