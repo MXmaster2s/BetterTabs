@@ -134,6 +134,16 @@ Two tabs are duplicates only if their URLs are exactly equal (including `#` frag
 - **Close** closes the ticked tabs straight away, like Close all (no confirmation), and says "Closed N tabs". **Suspend** works as in Suspending. **Group** makes one Chrome tab group per window from the ticked tabs, leaving out pinned ones, with no title (Chrome picks the colour); it says "Grouped N tabs". Afterwards Select mode turns off.
 - `Delete` on a ticked row closes every ticked tab. `Esc` (when the search box is not holding text) or **Done** leaves Select mode and clears the ticks. Tabs that close are dropped from the ticks.
 
+### Saved lists
+
+A list is a name and a set of tabs the user chose to keep: `{ id, name, at, tabs: [{ title, url }] }`, stored in `chrome.storage.local` under `lists`, newest first, up to 100 lists, until the user deletes them. Tabs with no address and new-tab pages are not saved.
+
+- **Save list** (`#selection-save`) in the selection bar, enabled when a ticked tab has an address, opens the **Save as a list** popover (`#save-list`): a **List name** text box (80 characters; prefilled with the site name when every ticked tab is from one site, otherwise "N tabs, <date>", and selected), **Close these tabs after saving** (off), a line saying how many tabs' titles and addresses will be saved on this computer, and **Save list** / **Cancel**. Saving puts the list first in `lists` and says "Saved the list <name> with N tabs" (adding " and closed them" when the box was ticked, which closes them straight away like Close all); Select mode then turns off. If storage refuses the write the status says "Could not save the list: Chrome's extension storage is full. Delete a list or a backup and try again."
+- **Saved lists** (`#open-lists`) in Settings, above the backups, closes Settings and opens the **Saved lists** popover (`#lists`, focus on its heading). It shows each list's name, "N tabs, saved <when>" and three buttons. With none it says "No saved lists yet. Select some tabs, then choose Save list."
+  - **Open** opens the list's `http` and `https` pages in one new, unfocused window (only the first tab loads; the rest are discarded; pages already open are not skipped) and says "Opened N tabs from <name>", noting how many were skipped for not being web pages.
+  - **Save as file** downloads a bookmarks file named `bettertabs-list-` plus the name as a lowercase slug (or "list"), ending `.html`, with one folder named after the list.
+  - **Delete** needs a second click within four seconds (the button reads "Delete it?" in between), then removes the list and says "Deleted the list <name>".
+
 ### Group this site
 
 In the Sites view, a folder for a website (not Chrome pages or files) shows **Group** at the right of its header, before **Suspend**, when at least one window has two or more of its unpinned tabs that are not already all in the same tab group. It makes one Chrome tab group per window with `chrome.tabs.group`, holding that window's unpinned tabs from the folder, and titles it with the site name with `chrome.tabGroups.update` (Chrome picks the colour). Pinned tabs are left out, because Chrome cannot group them; a tab that is already in another group moves out of it. The status line says "Grouped N tabs from <site>", or "Chrome would not group these tabs" if every call failed. The folder then shows in the Groups view with Chrome's colour. No permission beyond `tabs` and `tabGroups` is used. Its accessible name is "Group N tabs from <site> into a Chrome tab group".
@@ -189,7 +199,7 @@ The icon button next to the search box finds the active tab of the panel's windo
 
 Every control has a native tooltip (the `title` attribute) that says what it does and, where one exists, the key that does the same. The shortcuts for **Open BetterTabs** and **Search tabs** come from `chrome.commands.getAll()`, so they show whatever the user set at `chrome://extensions/shortcuts`; if the call fails the shortcut is left out. The toolbar icon's tooltip is set the same way by the service worker ("Open BetterTabs (Alt+Shift+B)"). Tooltips on:
 
-- The search box (`/`, and the search shortcut), **Select**, the selection bar's buttons, **Show current tab**, each view label, **Close N duplicates** and the settings button.
+- The search box (`/`, and the search shortcut), **Select**, the selection bar's buttons (including **Save list**), **Saved lists**, **Show current tab**, each view label, **Close N duplicates** and the settings button.
 - Each folder's header (**Collapse** or **Expand** plus its name), **Group**, **Suspend** (what it unloads and what it leaves alone) and **Close all** (and the reopen key, `Cmd+Shift+T` on a Mac, `Ctrl+Shift+T` elsewhere).
 - Each tab row (name, original name if renamed, address, "Click to switch to this tab. F2 renames it."), its close button ("Close tab (Delete key). It closes straight away."), and its **Add to longbook** button.
 - Every item in the right-click menu (including `F2` on **Edit name**), every control in the settings and the Backups popover, and each favourite icon (see Favourites).
@@ -211,7 +221,7 @@ The list redraws (debounced by 60 ms) when tabs are created, removed, moved, att
 
 ### Persistence
 
-`chrome.storage.local` holds `{ view, collapsed: string[], settings: { showLongbook: boolean, startView: 'last' | 'site' | 'window' | 'recent' | 'group', autoBackup: boolean }, remembered: { names: { [pageHash]: string } }, favourites: { url: string, title: string }[], backups?: Backup[] }` (`backups` exists only while automatic backups are on; see Backups) where each collapsed id is `<view>:<folder key>`. `chrome.storage.session` holds `{ names: { [tabId]: string }, favourites: number[] }`, the custom tab names and the favourite tab ids for this run of Chrome, plus a short-lived `focusSearch` timestamp that the keyboard shortcut leaves for the panel. Nothing else is stored.
+`chrome.storage.local` holds `{ lists?: List[] (see Saved lists), view, collapsed: string[], settings: { showLongbook: boolean, startView: 'last' | 'site' | 'window' | 'recent' | 'group', autoBackup: boolean }, remembered: { names: { [pageHash]: string } }, favourites: { url: string, title: string }[], backups?: Backup[] }` (`backups` exists only while automatic backups are on; see Backups) where each collapsed id is `<view>:<folder key>`. `chrome.storage.session` holds `{ names: { [tabId]: string }, favourites: number[] }`, the custom tab names and the favourite tab ids for this run of Chrome, plus a short-lived `focusSearch` timestamp that the keyboard shortcut leaves for the panel. Nothing else is stored.
 
 ## Keyboard
 

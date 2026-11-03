@@ -27,6 +27,7 @@ const SECOND_LEVEL = new Set(['co', 'com', 'org', 'net', 'gov', 'edu', 'ac']);
 const REMEMBERABLE = /^(https?|file):/i;
 const REMEMBER_NAMES = 300;
 const MAX_FAVOURITES = 100;
+const MAX_LISTS = 100;
 
 const state = {
   view: 'site',
@@ -42,6 +43,7 @@ const state = {
   prints: new Map(), // page address -> short hash of it, for pages that can be remembered
   remembered: { names: {} }, // names by hash, kept across restarts
   editing: null, // id of the tab whose name is being edited
+  lists: [], // saved lists { id, name, at, tabs: [{ title, url }] }, newest first; kept until deleted
   menuTab: null, // id of the tab the context menu is open for (null on a closed favourite)
   menuFavourite: null, // address of the favourite icon the menu is open on, if it was opened on one
   selecting: false, // whether the list is in Select mode
@@ -68,12 +70,23 @@ const exportButton = document.getElementById('export-tabs');
 const selectToggle = document.getElementById('select-toggle');
 const selectionBar = document.getElementById('selection-bar');
 const selectionCount = document.getElementById('selection-count');
+const selectionSave = document.getElementById('selection-save');
 const selectionClose = document.getElementById('selection-close');
 const selectionSuspend = document.getElementById('selection-suspend');
 const selectionGroup = document.getElementById('selection-group');
 const selectionDone = document.getElementById('selection-done');
 const settingBackup = document.getElementById('setting-backup');
 const openBackups = document.getElementById('open-backups');
+const openLists = document.getElementById('open-lists');
+const listsPanel = document.getElementById('lists');
+const listsTitle = document.getElementById('lists-title');
+const listsNote = document.getElementById('lists-note');
+const listItems = document.getElementById('list-items');
+const saveListPanel = document.getElementById('save-list');
+const saveListForm = document.getElementById('save-list-form');
+const listName = document.getElementById('list-name');
+const listClose = document.getElementById('list-close');
+const listSize = document.getElementById('list-size');
 const backupsPanel = document.getElementById('backups');
 const backupsTitle = document.getElementById('backups-title');
 const backupsNote = document.getElementById('backups-note');
@@ -512,6 +525,7 @@ function renderSelection() {
   const chosen = state.tabs.filter((t) => state.selected.has(t.id));
   const hidden = chosen.filter((t) => !state.shownIds.has(t.id)).length;
   selectionCount.textContent = `${chosen.length} selected${hidden ? `, ${hidden} hidden by the search` : ''}`;
+  selectionSave.disabled = !chosen.some(canFavourite);
   selectionClose.disabled = chosen.length === 0;
   selectionSuspend.disabled = !chosen.some(canSuspend);
   selectionGroup.disabled = !chosen.some((t) => !t.pinned);
@@ -1202,11 +1216,10 @@ async function showBackups() {
 
 // Opens each saved window as a new window. Pages that are already open are skipped, and only the
 // first tab of each window loads: the rest are suspended so hundreds of tabs don't load at once.
-async function restoreBackup(backup) {
-  const open = new Set(state.tabs.map(urlOf));
+async function openPages(windows, skip = new Set()) {
   let opened = 0;
-  for (const saved of backup.windows) {
-    const entries = saved.filter((t) => /^https?:/i.test(t.url) && !open.has(t.url));
+  for (const saved of windows) {
+    const entries = saved.filter((t) => /^https?:/i.test(t.url) && !skip.has(t.url));
     if (!entries.length) continue;
     const win = await chrome.windows.create({ url: entries.map((t) => t.url), focused: false });
     const created = (await chrome.tabs.query({ windowId: win.id })).sort((a, b) => a.index - b.index);
@@ -1216,6 +1229,11 @@ async function restoreBackup(backup) {
     });
     opened += entries.length;
   }
+  return opened;
+}
+
+async function restoreBackup(backup) {
+  const opened = await openPages(backup.windows, new Set(state.tabs.map(urlOf)));
   backupsPanel.hidePopover();
   const total = backup.windows.reduce((sum, w) => sum + w.length, 0);
   announce(
@@ -1223,6 +1241,89 @@ async function restoreBackup(backup) {
       ? `Restored ${plural(opened, 'tab')}${opened < total ? `, skipping ${total - opened} already open or not a web page` : ''}`
       : 'Nothing to restore: every web page in this backup is already open',
   );
+}
+
+// ---------- Saved lists ----------
+// Tabs the user picked and named, kept until deleted (see AGENTS.md rule 6). Opened from Settings.
+
+const listChoice = () => state.tabs.filter((t) => state.selected.has(t.id) && canFavourite(t));
+
+function openSaveList() {
+  const chosen = listChoice();
+  if (!chosen.length) return;
+  const sites = new Set(chosen.map((t) => siteOf(urlOf(t)).label));
+  listName.value = sites.size === 1 ? [...sites][0] : `${plural(chosen.length, 'tab')}, ${dayOf(new Date())}`;
+  listClose.checked = false;
+  listSize.textContent = `Saves the title and address of ${plural(chosen.length, 'tab')} on this computer.`;
+  saveListPanel.showPopover();
+  listName.focus();
+  listName.select();
+}
+
+async function saveList(e) {
+  e.preventDefault();
+  const chosen = listChoice();
+  const name = listName.value.trim();
+  if (!chosen.length || !name) return;
+  const list = { id: crypto.randomUUID(), name, at: Date.now(), tabs: chosen.map((t) => ({ title: labelOf(t), url: urlOf(t) })) };
+  try {
+    await chrome.storage.local.set({ lists: [list, ...state.lists].slice(0, MAX_LISTS) });
+  } catch {
+    announce('Could not save the list: Chrome\'s extension storage is full. Delete a list or a backup and try again.');
+    return;
+  }
+  state.lists = [list, ...state.lists].slice(0, MAX_LISTS);
+  saveListPanel.hidePopover();
+  const closing = listClose.checked;
+  if (closing) await closeTabs(chosen.map((t) => t.id));
+  setSelecting(false, { silent: true });
+  announce(`Saved the list ${name} with ${plural(chosen.length, 'tab')}${closing ? ' and closed them' : ''}`);
+}
+
+function showLists() {
+  listItems.replaceChildren(
+    ...state.lists.map((list) => {
+      const remove = h('button', { class: 'text-button', type: 'button', title: 'Delete this list from this computer. Click twice to confirm.' }, 'Delete');
+      let armed;
+      remove.addEventListener('click', async () => {
+        if (!armed) {
+          armed = setTimeout(() => {
+            armed = null;
+            remove.textContent = 'Delete';
+          }, 4000);
+          remove.textContent = 'Delete it?';
+          return;
+        }
+        clearTimeout(armed);
+        state.lists = state.lists.filter((l) => l.id !== list.id);
+        await chrome.storage.local.set({ lists: state.lists });
+        announce(`Deleted the list ${list.name}`);
+        showLists();
+      });
+      return h('li', { class: 'backup' },
+        h('p', { class: 'backup-when' }, list.name),
+        h('p', { class: 'backup-size' }, `${plural(list.tabs.length, 'tab')}, saved ${whenText(list.at)}`),
+        h('div', { class: 'backup-actions' },
+          h('button', { class: 'text-button', type: 'button', title: 'Open every page in this list in a new window. Only the first tab loads; the rest wait, suspended, until you click them.', onclick: () => openList(list) }, 'Open'),
+          h('button', { class: 'text-button', type: 'button', title: 'Download this list as a bookmarks file', onclick: () => saveListFile(list) }, 'Save as file'),
+          remove));
+    }),
+  );
+  listsNote.textContent = state.lists.length
+    ? 'Lists you saved, kept on this computer until you delete them.'
+    : 'No saved lists yet. Select some tabs, then choose Save list.';
+}
+
+async function openList(list) {
+  const opened = await openPages([list.tabs]);
+  listsPanel.hidePopover();
+  announce(opened ? `Opened ${plural(opened, 'tab')} from ${list.name}${opened < list.tabs.length ? `, skipping ${list.tabs.length - opened} that are not web pages` : ''}` : 'This list has no web pages to open');
+}
+
+function saveListFile(list) {
+  const slug = list.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'list';
+  const total = downloadBookmarks([{ name: list.name, tabs: list.tabs }], dayOf(new Date(list.at)), `bettertabs-list-${slug}.html`);
+  announce(`Saved ${plural(total, 'tab')} from ${list.name} to a file`);
 }
 
 function saveBackup(backup) {
@@ -1268,7 +1369,7 @@ async function loadShortcuts() {
 
 async function restore() {
   loadShortcuts();
-  const saved = await chrome.storage.local.get(['view', 'collapsed', 'settings', 'remembered', 'favourites']);
+  const saved = await chrome.storage.local.get(['view', 'collapsed', 'settings', 'remembered', 'favourites', 'lists']);
   if (VIEWS.includes(saved.view)) state.view = saved.view;
   state.settings.showLongbook = saved.settings?.showLongbook !== false;
   state.settings.autoBackup = saved.settings?.autoBackup === true;
@@ -1286,6 +1387,9 @@ async function restore() {
     .filter((f) => typeof f?.url === 'string')
     .map((f) => ({ url: f.url, title: String(f.title || f.url) }))
     .slice(0, MAX_FAVOURITES);
+  state.lists = (Array.isArray(saved.lists) ? saved.lists : [])
+    .filter((l) => typeof l?.id === 'string' && Array.isArray(l.tabs))
+    .slice(0, MAX_LISTS);
   const session = await chrome.storage.session.get('names');
   state.names = new Map(Object.entries(session.names ?? {}).map(([id, name]) => [Number(id), name]));
   document.querySelector(`input[name="view"][value="${state.view}"]`).checked = true;
@@ -1336,7 +1440,19 @@ deleteBackups.addEventListener('click', async () => {
 
 selectToggle.addEventListener('click', () => setSelecting(!state.selecting));
 selectionDone.addEventListener('click', () => setSelecting(false));
+selectionSave.addEventListener('click', openSaveList);
 selectionClose.addEventListener('click', () => actOnSelected('close'));
+saveListForm.addEventListener('submit', saveList);
+document.getElementById('list-cancel').addEventListener('click', () => saveListPanel.hidePopover());
+openLists.addEventListener('click', () => {
+  settingsPanel.hidePopover();
+  listsPanel.showPopover();
+});
+listsPanel.addEventListener('toggle', (e) => {
+  if (e.newState !== 'open') return;
+  showLists();
+  listsTitle.focus();
+});
 selectionSuspend.addEventListener('click', () => actOnSelected('suspend'));
 selectionGroup.addEventListener('click', () => actOnSelected('group'));
 
@@ -1384,7 +1500,7 @@ menu.addEventListener('keydown', (e) => {
 
 document.addEventListener('keydown', (e) => {
   // The rename box, the context menu and the settings handle their own keys.
-  if (e.target.closest?.('.rename-input, #menu, #settings, #backups')) return;
+  if (e.target.closest?.('.rename-input, #menu, #settings, #backups, #lists, #save-list')) return;
 
   const rows = visibleRows();
   const typing = e.target === search;

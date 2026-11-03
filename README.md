@@ -42,6 +42,7 @@ After changing a file, click the reload arrow on the extension's card.
 **Clean up**
 - Tabs with exactly the same address are marked **Duplicate**. **Close duplicates** keeps one copy of each, preferring the tab you're looking at.
 - **Select** (a button beside the tab count, or Ctrl or Cmd-click a tab) lets you tick several tabs and then **Close**, **Suspend** or **Group** them together. Each row gets a tick box, Shift-click ticks a range, and **Select all** on a folder ticks every tab shown in it, so a search plus Select all picks everything that matches. **Done** or `Esc` leaves Select mode.
+- **Saved lists**: with tabs ticked in Select mode, **Save list** names them and keeps each tab's title and address on your computer (tick **Close these tabs after saving** to clear them away, the way OneTab does). **Saved lists** in the settings shows every list; **Open** puts one into a new window (only the first tab loads, the rest wait, suspended), **Save as file** downloads it as bookmarks, and **Delete** removes it after a second click. Lists stay until you delete them.
 - **Group** (on each site's folder, in the Sites view) puts that site's tabs into one Chrome tab group named after the site, one group per window. Pinned tabs are left out, and the button hides once a window's tabs are already together.
 - **Suspend** (on each folder, or in the right-click menu) unloads tabs you aren't using to free memory. They stay in the list, marked **Suspended**, and reload when you click them. The tab you're on, pinned tabs and tabs playing sound are left alone.
 - Close a tab with its × button, or close every tab in a folder with **Close all**. Closing happens straight away, and Chrome's **Reopen closed tab** (`Ctrl/Cmd+Shift+T`) undoes it.
@@ -132,7 +133,7 @@ python3 scripts/make-icons.py      # redraw the toolbar icons
 
 What other tab managers do that BetterTabs does not do yet, easiest first (also on [bettertabs.fyi](https://bettertabs.fyi/#roadmap)):
 
-- **Next:** drag to reorder and move between windows; saved lists; close idle tabs automatically; the Chrome Web Store, Edge and Brave.
+- **Next:** drag to reorder and move between windows; close idle tabs automatically; the Chrome Web Store, Edge and Brave.
 - **Later:** workspaces; notes on tabs; a warning when you open a duplicate; a tree view.
 - **Not planned:** syncing between devices, because it would send your tab list off your computer.
 

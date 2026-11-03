@@ -675,7 +675,9 @@ main {
 }
 
 #settings,
-#backups {
+#backups,
+#save-list,
+#lists {
   position: fixed;
   inset: auto 0.5rem 3rem auto;
   width: min(17rem, calc(100vw - 1rem));
@@ -689,13 +691,17 @@ main {
 }
 
 #settings h2,
-#backups h2 {
+#backups h2,
+#save-list h2,
+#lists h2 {
   margin: 0 0 0.625rem;
   font-size: 0.8125rem;
 }
 
 #settings a,
-#backups a {
+#backups a,
+#save-list a,
+#lists a {
   color: var(--focus);
 }
 
@@ -753,16 +759,20 @@ main {
 
 /* Backups: the copies of the open tabs, newest first. */
 
-#backups {
+#backups,
+#lists {
   max-height: min(24rem, calc(100vh - 4rem));
   overflow-y: auto;
 }
 
-#backups h2 {
+#backups h2,
+#lists h2 {
   outline: none;
 }
 
-#backups .setting-hint {
+#backups .setting-hint,
+#lists .setting-hint,
+#save-list .setting-hint {
   margin: 0 0 0.5rem;
 }
 
@@ -794,6 +804,24 @@ main {
   flex-wrap: wrap;
   gap: 0.25rem;
   margin: 0.125rem 0 0 -0.5rem;
+}
+
+#save-list .setting-field input {
+  min-height: var(--target);
+  padding: 0.25rem 0.375rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.3125rem;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+}
+
+#save-list .list-close {
+  margin-top: 0.5rem;
+}
+
+#save-list .text-button:first-of-type {
+  margin-left: -0.5rem;
 }
 
 #delete-backups {

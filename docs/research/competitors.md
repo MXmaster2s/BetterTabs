@@ -56,7 +56,7 @@ Google autocomplete, 2 November 2026. Full list: [data/search-phrases.csv](data/
 
 **Ahead:** groups by site (not a headline feature in any article), duplicate cleanup that keeps the tab you are on, nothing leaves your browser, stays open as a side panel, small and open source, rename and favourites, suspend without reading pages, names and favourites that survive a restart, export of every open tab, opt-in automatic backups with restore, keyboard shortcuts.
 
-**Behind:** not on the Web Store yet, Chrome only, no saved lists, no workspaces, no sync, no automatic closing of idle tabs, no select-several or drag and drop.
+**Behind:** not on the Web Store yet, Chrome only, no workspaces, no sync, no automatic closing of idle tabs, no select-several or drag and drop.
 
 ## Roadmap, easiest first
 
@@ -70,7 +70,7 @@ Effort is a guess for the current code, which has no build step, no network and 
 | 4 | Close old tabs from the Recent view | Tab Wrangler (manual) | Small | Already there: Close all on the Older folder |
 | 5 | Export every open tab to a file | OneTab, Session Buddy | Small | Built in 1.6.0 |
 | 6 | Group this site into a Chrome tab group | VertiTab AI grouping | Small to medium | Built in 1.7.0 |
-| 7 | Saved lists, restored later | OneTab, Session Buddy, Toby | Medium | Next, kept on the computer only |
+| 7 | Saved lists, restored later | OneTab, Session Buddy, Toby | Medium | Built in 1.7.0, kept on the computer only |
 | 8 | Select several tabs, then close, suspend or move | Tab Manager Plus | Medium | Built in 1.7.0 (close, suspend, group; moving comes with drag and drop) |
 | 9 | Drag to reorder and move between windows | Tab Manager Plus, Toby | Medium | Next |
 | 10 | Close idle tabs automatically | Tab Wrangler | Medium | Next |
