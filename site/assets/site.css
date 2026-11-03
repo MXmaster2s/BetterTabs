@@ -549,6 +549,54 @@ section > .wrap > h2,
   }
 }
 
+/* Roadmap: two plain lists, what is next and what is later */
+
+.roadmap {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  gap: 3rem 4rem;
+  margin-top: 3rem;
+}
+
+.roadmap h3 {
+  margin: 0 0 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--ink);
+  font: 800 1.25rem/1.2 var(--serif);
+}
+
+.roadmap ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.roadmap li {
+  display: grid;
+  gap: 0.125rem;
+  padding: 0.875rem 0;
+  border-top: 1px solid var(--rule);
+}
+
+.roadmap li:first-child {
+  border-top: 0;
+}
+
+.roadmap span,
+.roadmap-note {
+  color: var(--muted);
+}
+
+.roadmap-note {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 2px solid var(--rule);
+}
+
+.roadmap-note strong {
+  color: var(--ink);
+}
+
 /* Install */
 
 .install {

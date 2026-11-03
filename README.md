@@ -123,6 +123,14 @@ python3 scripts/make-icons.py      # redraw the toolbar icons
 | [CHANGELOG.md](CHANGELOG.md) | What changed in each version |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How to propose and submit a change |
 
+## Roadmap
+
+What other tab managers do that BetterTabs does not do yet, easiest first (also on [bettertabs.fyi](https://bettertabs.fyi/#roadmap)):
+
+- **Next:** Group this site into a Chrome tab group; select several tabs and act on them together; drag to reorder and move between windows; saved lists; close idle tabs automatically; the Chrome Web Store, Edge and Brave.
+- **Later:** automatic local backups (a setting, because they store addresses); workspaces; notes on tabs; a warning when you open a duplicate; a tree view.
+- **Not planned:** syncing between devices, because it would send your tab list off your computer.
+
 ## Contributing
 
 Issues and pull requests are welcome; start with [CONTRIBUTING.md](CONTRIBUTING.md). Keep the no-build, no-dependency rule, and update the docs in the same pull request.
