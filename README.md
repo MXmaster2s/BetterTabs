@@ -4,6 +4,8 @@ Every open tab, from every window, in Chrome's side panel, grouped by website.
 
 Click the toolbar icon and the panel opens on the right and stays open while you browse. Nothing leaves your browser: there is no server, account or analytics.
 
+It is built for heavy tab use, including the hundreds of tabs that AI assistants and browser agents open while they research for you. One list shows them all grouped by site; you can search them, suspend them to free memory, and close them in bulk. BetterTabs does not connect to any AI: it shows what Chrome has open.
+
 ## Install
 
 No build step. Chrome 121 or later.

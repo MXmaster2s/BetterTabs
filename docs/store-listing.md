@@ -16,7 +16,7 @@ Show and organise the user's open tabs in a side panel.
 
 ## Description
 
-BetterTabs puts every open tab, from every window, in Chrome's side panel and organises them so you can find the one you want.
+BetterTabs puts every open tab, from every window, in Chrome's side panel and organises them so you can find the one you want. It is built for heavy tab use, including the hundreds of tabs that AI assistants and browser agents open while they work: group them by site, search them, suspend them and close them in bulk.
 
 - Sites: tabs grouped by website, busiest first.
 - Windows, Recent and Groups: the same tabs by window, by when you last used them, or by Chrome tab group.
