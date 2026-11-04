@@ -68,6 +68,9 @@ const settingsPanel = document.getElementById('settings');
 const settingLongbook = document.getElementById('setting-longbook');
 const settingView = document.getElementById('setting-view');
 const exportButton = document.getElementById('export-tabs');
+const saveEverything = document.getElementById('save-everything');
+const restoreFile = document.getElementById('restore-file');
+const restoreInput = document.getElementById('restore-input');
 const selectToggle = document.getElementById('select-toggle');
 const tidy = document.getElementById('tidy');
 const selectionBar = document.getElementById('selection-bar');
@@ -1220,6 +1223,120 @@ function exportTabs() {
   announce(`Exported ${plural(total, 'tab')} to a file`);
 }
 
+// ---------- One file with everything ----------
+// A file the user keeps, so favourites, lists, names, settings and backups survive removing or
+// reinstalling the extension (Chrome deletes its storage then). Written only when the button is
+// clicked. Reading it back trusts nothing: every field is checked and trimmed, and nothing the
+// user has now is deleted.
+
+const FILE_FORMAT = 'bettertabs-everything';
+const MAX_FILE_BYTES = 20e6;
+const MAX_BACKUPS = 24; // as background.js keeps: BACKUP_RECENT + BACKUP_HOURLY
+
+async function saveEverythingFile() {
+  const { backups = [] } = await chrome.storage.local.get('backups');
+  const date = dayOf(new Date());
+  const file = {
+    format: FILE_FORMAT,
+    version: 1,
+    extensionVersion: chrome.runtime.getManifest().version,
+    savedAt: new Date().toISOString(),
+    settings: state.settings,
+    favourites: state.favourites,
+    lists: state.lists,
+    names: state.remembered.names,
+    backups,
+  };
+  const link = h('a', {
+    href: URL.createObjectURL(new Blob([JSON.stringify(file)], { type: 'application/json' })),
+    download: `bettertabs-everything-${date}.json`,
+  });
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(link.href), 10000);
+  announce(`Saved ${plural(state.favourites.length, 'favourite')}, ${plural(state.lists.length, 'list')}, ${plural(Object.keys(state.remembered.names).length, 'name')} and ${plural(backups.length, 'backup')} to a file`);
+}
+
+const clip = (value, max) => (typeof value === 'string' ? value.slice(0, max) : '');
+const cleanTabs = (tabs, keep) =>
+  (Array.isArray(tabs) ? tabs : [])
+    .filter((t) => typeof t?.url === 'string' && keep.test(t.url))
+    .slice(0, 5000)
+    .map((t) => ({ title: clip(t.title, 200) || clip(t.url, 200), url: clip(t.url, 2000), ...(t.pinned === true && { pinned: true }) }));
+
+async function restoreEverythingFile(file) {
+  if (file.size > MAX_FILE_BYTES) return announce('That file is too big to be a BetterTabs file');
+  let data;
+  try {
+    data = JSON.parse(await file.text());
+  } catch {
+    return announce('That is not a BetterTabs file');
+  }
+  if (data?.format !== FILE_FORMAT || data.version !== 1) return announce('That is not a BetterTabs file');
+
+  // Favourites and lists the user does not have yet; the ones they have stay.
+  const haveUrls = new Set(state.favourites.map((f) => f.url));
+  const favourites = [
+    ...state.favourites,
+    ...cleanTabs(data.favourites, REMEMBERABLE).filter((f) => !haveUrls.has(f.url)),
+  ].slice(0, MAX_FAVOURITES);
+  const haveIds = new Set(state.lists.map((l) => l.id));
+  const lists = [
+    ...state.lists,
+    ...(Array.isArray(data.lists) ? data.lists : [])
+      .filter((l) => typeof l?.id === 'string' && l.id.length <= 80 && !haveIds.has(l.id) && Array.isArray(l.tabs))
+      .map((l) => ({ id: l.id, name: clip(l.name, 80) || 'Saved list', at: Number.isFinite(l.at) ? l.at : Date.now(), tabs: cleanTabs(l.tabs, REMEMBERABLE) }))
+      .filter((l) => l.tabs.length),
+  ]
+    .sort((a, b) => b.at - a.at)
+    .slice(0, MAX_LISTS);
+  const names = { ...state.remembered.names };
+  if (data.names && typeof data.names === 'object') {
+    for (const [print, name] of Object.entries(data.names)) {
+      if (!(print in names) && print.length <= 100 && typeof name === 'string') names[print] = name.slice(0, 200);
+    }
+  }
+  const { backups: haveBackups = [] } = await chrome.storage.local.get('backups');
+  const haveAt = new Set(haveBackups.map((b) => b.at));
+  const backups = [
+    ...haveBackups,
+    ...(Array.isArray(data.backups) ? data.backups : [])
+      .filter((b) => Number.isFinite(b?.at) && !haveAt.has(b.at) && Array.isArray(b.windows))
+      .map((b) => ({ at: b.at, windows: b.windows.slice(0, 50).map((w) => cleanTabs(w, /./)).filter((w) => w.length) }))
+      .filter((b) => b.windows.length),
+  ]
+    .sort((a, b) => b.at - a.at)
+    .slice(0, MAX_BACKUPS);
+
+  const settings = { ...state.settings };
+  if (typeof data.settings?.showLongbook === 'boolean') settings.showLongbook = data.settings.showLongbook;
+  if (VIEWS.includes(data.settings?.startView)) settings.startView = data.settings.startView;
+  if (typeof data.settings?.autoBackup === 'boolean') settings.autoBackup = data.settings.autoBackup;
+  // Backups only live while the setting is on.
+  const keepBackups = settings.autoBackup ? { backups } : {};
+
+  try {
+    await chrome.storage.local.set({ favourites, lists, remembered: { names }, settings, ...keepBackups });
+  } catch {
+    return announce('Could not restore: Chrome\'s extension storage is full');
+  }
+  const gained = {
+    favourites: favourites.length - state.favourites.length,
+    lists: lists.length - state.lists.length,
+    names: Object.keys(names).length - Object.keys(state.remembered.names).length,
+    backups: settings.autoBackup ? backups.length - haveBackups.length : 0,
+  };
+  state.favourites = favourites;
+  state.lists = lists;
+  state.remembered = { names };
+  state.settings = settings;
+  settingLongbook.checked = settings.showLongbook;
+  settingBackup.checked = settings.autoBackup;
+  settingView.value = settings.startView;
+  settingsPanel.hidePopover();
+  await load(); // open pages take their remembered names, and the favourites strip draws again
+  announce(`Restored ${plural(gained.favourites, 'favourite')}, ${plural(gained.lists, 'list')}, ${plural(gained.names, 'name')} and ${plural(gained.backups, 'backup')}`);
+}
+
 // ---------- Backups ----------
 // background.js keeps the copies in chrome.storage.local while the setting is on; the panel lists,
 // restores, saves and deletes them.
@@ -1477,6 +1594,17 @@ deleteBackups.addEventListener('click', async () => {
   await chrome.storage.local.remove('backups');
   announce('Deleted all backups');
   showBackups();
+});
+
+saveEverything.addEventListener('click', () => saveEverythingFile().catch(console.error));
+restoreFile.addEventListener('click', () => restoreInput.click());
+restoreInput.addEventListener('change', () => {
+  const [file] = restoreInput.files;
+  restoreInput.value = '';
+  if (file) restoreEverythingFile(file).catch((error) => {
+    console.error(error);
+    announce('Could not read that file');
+  });
 });
 
 selectToggle.addEventListener('click', () => setSelecting(!state.selecting));

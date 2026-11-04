@@ -38,6 +38,7 @@ WHAT YOU CAN DO
 • Favourite a tab and keep it one click away, even after you close it
 • Rename any tab so you recognise it
 • Optional automatic backups, off until you turn them on, so a crash or a restart does not lose your tabs
+• Save your favourites, lists, names and settings to one file you keep, and restore it after a reinstall
 • The list keeps its order while you work, so rows never move under your mouse; Tidy up sorts it again when you want
 • Jump to the tab you are on, switch to a tab in another window, use it with the keyboard, in light and dark mode
 
@@ -51,7 +52,7 @@ IF CHROME SAYS "PROCEED WITH CAUTION"
 People who use Enhanced Safe Browsing see that message for any extension from a new developer. BetterTabs has no host permissions and makes no network requests, and its code is open for anyone to read.
 
 WHAT'S NEW IN 1.7
-Select mode, saved lists, Group this site, optional automatic backups, favourites that stay after you close the tab, a list that holds still while tabs change, and a tooltip on every button.
+Select mode, saved lists, Group this site, optional automatic backups, one file for everything you save, favourites that stay after you close the tab, a list that holds still while tabs change, and a tooltip on every button.
 ```
 
 ## Permission justifications

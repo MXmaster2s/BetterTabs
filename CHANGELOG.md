@@ -4,6 +4,7 @@ What changed in BetterTabs, newest first. The version being worked on is in `ext
 
 ## 1.7.1
 
+- **Save everything to a file, and restore it.** Settings has **Save everything to a file** (favourites, saved lists, tab names, settings and backups in one file you keep) and **Restore from a file**, which merges it back without deleting anything you have. It survives removing or reinstalling the extension, which Chrome otherwise wipes. The backups hint now says automatic backups hold open tabs only.
 - **The list holds still.** Rows no longer move under your mouse when a tab closes or opens: folders and tabs keep their places (in Recent too, so clicking a tab does not make it jump). When the list is no longer in sorted order, **Tidy up** appears next to Select and sorts it again.
 
 ## 1.7.0

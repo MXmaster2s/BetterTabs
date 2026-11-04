@@ -187,6 +187,6 @@
         { name: 'search-tabs', shortcut: 'Alt+Shift+F' },
       ],
     },
-    runtime: {},
+    runtime: { getManifest: () => ({ version: 'preview' }) },
   };
 })();
