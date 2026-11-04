@@ -46,6 +46,7 @@ const state = {
   lists: [], // saved lists { id, name, at, tabs: [{ title, url }] }, newest first; kept until deleted
   menuTab: null, // id of the tab the context menu is open for (null on a closed favourite)
   menuFavourite: null, // address of the favourite icon the menu is open on, if it was opened on one
+  layout: null, // the order the list was last drawn in (see stabilise); null sorts it afresh
   selecting: false, // whether the list is in Select mode
   selected: new Set(), // ids of the selected tabs
   lastSelected: null, // the tab last ticked, for Shift-click ranges
@@ -68,6 +69,7 @@ const settingLongbook = document.getElementById('setting-longbook');
 const settingView = document.getElementById('setting-view');
 const exportButton = document.getElementById('export-tabs');
 const selectToggle = document.getElementById('select-toggle');
+const tidy = document.getElementById('tidy');
 const selectionBar = document.getElementById('selection-bar');
 const selectionCount = document.getElementById('selection-count');
 const selectionSave = document.getElementById('selection-save');
@@ -421,7 +423,7 @@ function byWindow(tabs) {
     .filter((folder) => folder.tabs.length);
 }
 
-function byRecent(tabs) {
+function byRecent(tabs, layout) {
   const now = Date.now();
   const startOfDay = new Date().setHours(0, 0, 0, 0);
   const spans = [
@@ -436,6 +438,9 @@ function byRecent(tabs) {
       key: span.key,
       label: span.label,
       tabs: sorted.filter((t) => {
+        // A tab stays in the bucket it was drawn in until Tidy up, so clicking it does not make it jump.
+        const home = layout?.home.get(t.id);
+        if (home) return home === span.key;
         const seen = t.lastAccessed ?? 0;
         return seen >= span.from && (i === 0 || seen < spans[i - 1].from);
       }),
@@ -462,17 +467,48 @@ function byGroup(tabs) {
   return [...folders.values()].sort((a, b) => (a.key === 'none') - (b.key === 'none'));
 }
 
-function foldersFor(tabs) {
+function foldersFor(tabs, layout) {
   switch (state.view) {
     case 'window':
       return byWindow(tabs);
     case 'recent':
-      return byRecent(tabs);
+      return byRecent(tabs, layout);
     case 'group':
       return byGroup(tabs);
     default:
       return bySite(tabs);
   }
+}
+
+// The list keeps the order it was drawn in, so rows do not move under the mouse while tabs open and
+// close. A folder or tab that is already on screen keeps its place; a new one goes at the end (at the
+// top in Recent, where the newest comes first); an empty folder goes. Tidy up sorts it afresh.
+const NEW_LAST = 1e9;
+function stabilise(folders, layout) {
+  if (!layout) return folders;
+  const newRank = state.view === 'recent' ? -1 : NEW_LAST;
+  const rank = (order, key) => {
+    const i = order.indexOf(key);
+    return i === -1 ? newRank : i;
+  };
+  return [...folders]
+    .sort((a, b) => rank(layout.folders, a.key) - rank(layout.folders, b.key))
+    .map((folder) => {
+      const order = layout.tabs.get(folder.key) ?? [];
+      return { ...folder, tabs: [...folder.tabs].sort((a, b) => rank(order, a.id) - rank(order, b.id)) };
+    });
+}
+
+function layoutOf(folders) {
+  return {
+    folders: folders.map((f) => f.key),
+    tabs: new Map(folders.map((f) => [f.key, f.tabs.map((t) => t.id)])),
+    home: new Map(folders.flatMap((f) => f.tabs.map((t) => [t.id, f.key]))),
+  };
+}
+
+function sameOrder(a, b) {
+  return a.length === b.length && a.every((f, i) => f.key === b[i].key && f.tabs.length === b[i].tabs.length && f.tabs.every((t, j) => t.id === b[i].tabs[j].id));
 }
 
 // ---------- Drawing the list ----------
@@ -500,7 +536,11 @@ function render() {
   renderFavourites();
   renderSelection();
 
-  const folders = foldersFor(shown);
+  // Order every tab first, so the layout covers the ones a search hides too.
+  const all = stabilise(foldersFor(state.tabs, state.layout), state.layout);
+  tidy.hidden = sameOrder(all, foldersFor(state.tabs, null));
+  state.layout = layoutOf(all);
+  const folders = words.length ? stabilise(foldersFor(shown, state.layout), state.layout) : all;
   list.replaceChildren(...(folders.length ? folders.map(renderFolder) : [renderEmpty()]));
 
   const rows = visibleRows();
@@ -1343,6 +1383,7 @@ function setQuery(value) {
 
 function setView(view) {
   state.view = view;
+  state.layout = null;
   save();
   render();
   window.scrollTo(0, 0);
@@ -1439,6 +1480,11 @@ deleteBackups.addEventListener('click', async () => {
 });
 
 selectToggle.addEventListener('click', () => setSelecting(!state.selecting));
+tidy.addEventListener('click', () => {
+  state.layout = null;
+  render();
+  announce('List tidied');
+});
 selectionDone.addEventListener('click', () => setSelecting(false));
 selectionSave.addEventListener('click', openSaveList);
 selectionClose.addEventListener('click', () => actOnSelected('close'));

@@ -100,7 +100,7 @@ Requires Chrome 121 or later. After editing any file, click the reload arrow on 
 Reading Chrome → organising → drawing → acting → wiring, in that order in the file.
 
 - `load()` reads tabs, tab groups and the current window, then calls `render()`. `refresh()` is the debounced, visibility-aware way to call it.
-- `bySite`, `byWindow`, `byRecent`, `byGroup` each turn a tab list into folders `{ key, label, colour?, icon?, tabs }`. `foldersFor()` picks one by `state.view`.
+- `bySite`, `byWindow`, `byRecent`, `byGroup` each turn a tab list into folders `{ key, label, colour?, icon?, tabs }`. `foldersFor()` picks one by `state.view`. `stabilise()` and `layoutOf()` keep the order the list was last drawn in (`state.layout`) so rows do not move while tabs change; `#tidy` clears it. Any new view must put its folders through `stabilise()` in `render()` and give each folder a stable `key`.
 - `render()` filters by the search query, then draws folders (`renderFolder`) and rows (`renderTab`).
 - `findDuplicates()` fills `state.duplicates` and `state.extraCopies`.
 - `closeTabs`, `activate`, `toggle`, `setView`, `setQuery` are the user actions.

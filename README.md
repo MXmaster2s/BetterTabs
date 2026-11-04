@@ -55,7 +55,7 @@ After changing a file, click the reload arrow on the extension's card.
 - **Automatic backups** (off until you turn them on in the settings) keep copies of your open tabs' titles and addresses on your computer: a new copy about every five minutes while your tabs change, every copy of the last hour, then one an hour for about half a day. **Restore from a backup** lists them. **Restore** opens each saved window, skips pages you already have open, and loads only the first tab of each window so hundreds of tabs don't load at once. **Save as file** exports a copy, and **Delete all backups** removes them. Turning the setting off deletes the copies. Nothing leaves your computer.
 
 **Comfortable**
-- Updates live as you open, close and switch tabs.
+- Updates live as you open, close and switch tabs, without moving the rows you are pointing at: the list keeps its order, and a **Tidy up** button next to Select sorts it afresh when you want.
 - Hover any button or tab for a tooltip that says what it does and which key does the same, including the shortcuts you set in Chrome.
 - Works with the keyboard alone, with screen readers, in light and dark mode, in high-contrast mode, and with Chrome's font-size setting.
 

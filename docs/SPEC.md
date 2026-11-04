@@ -27,7 +27,7 @@ From top to bottom:
 2. A row of favourite icons (see Favourites), shown only when there is at least one favourite.
 3. A row with a search box (`type="search"`, label "Search tabs") and, to its right, a square icon button (a target symbol) labelled **Show current tab**.
 4. A four-way view switch (radio group): **Sites**, **Windows**, **Recent**, **Groups**.
-5. A summary row: the tab count on the left; on the right, a "Close N duplicates" text button shown only when duplicates exist, and **Select** (`#select-toggle`, `aria-pressed`; it reads **Done** while Select mode is on).
+5. A summary row: the tab count on the left; on the right, a "Close N duplicates" text button shown only when duplicates exist, **Tidy up** (`#tidy`, shown only when the list is not in the order a fresh sort would give; see Keeping the order) and **Select** (`#select-toggle`, `aria-pressed`; it reads **Done** while Select mode is on).
 6. The list: a column of folders. Each folder has a header (`<h2>` wrapping a toggle button with the folder name and its tab count, plus a "Close all" button) and a `<ul>` of tab rows.
 7. A visually hidden `role="status"` element for screen reader announcements.
 8. A context menu (`<div popover role="menu">`) holding **Edit name**, **Reset name** (renamed tabs only) and **Add to favourites** / **Remove from favourites**.
@@ -44,6 +44,10 @@ The toolbar (items 1 to 5) stays pinned to the top while the list scrolls.
 ## Views
 
 Every view produces folders. Tabs inside a folder keep the order given by the view.
+
+### Keeping the order
+
+The list does not reorder itself while tabs open, close and change, so rows never move under the mouse. The panel remembers the order it last drew (`state.layout`): folders and the tabs inside them keep their places; a new folder or tab goes at the end (at the top in Recent, where the newest comes first); a folder with no tabs left disappears. In Recent a tab also keeps the folder it was drawn in, so clicking a tab does not make it jump to Last hour. Switching view, reopening the panel and **Tidy up** sort the list afresh (busiest site first in Sites; Chrome's own order inside folders). **Tidy up** says "List tidied" and is hidden while the list already matches a fresh sort.
 
 ### Sites (default)
 
