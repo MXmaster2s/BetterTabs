@@ -770,6 +770,13 @@ main {
   outline: none;
 }
 
+.backups-sub {
+  margin: 0.75rem 0 0.25rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--rule);
+  font-size: 0.875rem;
+}
+
 #backups .setting-hint,
 #lists .setting-hint,
 #save-list .setting-hint {

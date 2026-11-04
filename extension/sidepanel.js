@@ -53,7 +53,7 @@ const state = {
   shownIds: new Set(), // ids of the tabs the list shows right now (a search can hide some)
   found: null, // id of the tab whose row is pulsing after Show current tab or a favourite click
   shortcuts: {}, // the keys Chrome has for the two commands, by command name
-  settings: { showLongbook: true, startView: 'last', autoBackup: false },
+  settings: { showLongbook: true, startView: 'last' },
 };
 
 const list = document.getElementById('list');
@@ -67,7 +67,6 @@ const menu = document.getElementById('menu');
 const settingsPanel = document.getElementById('settings');
 const settingLongbook = document.getElementById('setting-longbook');
 const settingView = document.getElementById('setting-view');
-const exportButton = document.getElementById('export-tabs');
 const saveEverything = document.getElementById('save-everything');
 const restoreFile = document.getElementById('restore-file');
 const restoreInput = document.getElementById('restore-input');
@@ -80,7 +79,6 @@ const selectionClose = document.getElementById('selection-close');
 const selectionSuspend = document.getElementById('selection-suspend');
 const selectionGroup = document.getElementById('selection-group');
 const selectionDone = document.getElementById('selection-done');
-const settingBackup = document.getElementById('setting-backup');
 const openBackups = document.getElementById('open-backups');
 const openLists = document.getElementById('open-lists');
 const listsPanel = document.getElementById('lists');
@@ -134,8 +132,8 @@ const ICON_CLOSE = '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 1.
 const ICON_CHECK = '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 5.2l2.2 2.2L8 3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_CHEVRON = '<svg class="chevron" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
-function plural(n, word) {
-  return `${n} ${word}${n === 1 ? '' : 's'}`;
+function plural(n, word, many = `${word}s`) {
+  return `${n} ${n === 1 ? word : many}`;
 }
 
 function urlOf(tab) {
@@ -1204,34 +1202,15 @@ function downloadBookmarks(windows, stamp, fileName) {
   return total;
 }
 
-function exportTabs() {
-  const exportable = state.tabs
-    .filter((t) => urlOf(t) && !/^(chrome|edge):\/\/newtab\/?$/.test(urlOf(t)))
-    .sort((a, b) => a.windowId - b.windowId || a.index - b.index);
-  if (!exportable.length) {
-    announce('There are no tabs to export');
-    return;
-  }
-  const byWindow = Map.groupBy(exportable, (t) => t.windowId);
-  const order = [...byWindow.keys()].sort((a, b) => (b === state.windowId) - (a === state.windowId));
-  const date = dayOf(new Date());
-  const windows = order.map((windowId, i) => ({
-    name: windowId === state.windowId ? 'This window' : `Window ${i + 1}`,
-    tabs: byWindow.get(windowId).map((tab) => ({ title: labelOf(tab), url: urlOf(tab) })),
-  }));
-  const total = downloadBookmarks(windows, date, `bettertabs-${date}.html`);
-  announce(`Exported ${plural(total, 'tab')} to a file`);
-}
-
 // ---------- One file with everything ----------
-// A file the user keeps, so favourites, lists, names, settings and backups survive removing or
+// A file the user keeps, so favourites, lists, names, settings and recent tabs survive removing or
 // reinstalling the extension (Chrome deletes its storage then). Written only when the button is
 // clicked. Reading it back trusts nothing: every field is checked and trimmed, and nothing the
 // user has now is deleted.
 
 const FILE_FORMAT = 'bettertabs-everything';
 const MAX_FILE_BYTES = 20e6;
-const MAX_BACKUPS = 24; // as background.js keeps: BACKUP_RECENT + BACKUP_HOURLY
+const MAX_BACKUPS = 24; // as background.js keeps: BACKUP_RECENT + BACKUP_HOURLY (the recent-tab copies)
 
 async function saveEverythingFile() {
   const { backups = [] } = await chrome.storage.local.get('backups');
@@ -1249,11 +1228,11 @@ async function saveEverythingFile() {
   };
   const link = h('a', {
     href: URL.createObjectURL(new Blob([JSON.stringify(file)], { type: 'application/json' })),
-    download: `bettertabs-everything-${date}.json`,
+    download: `bettertabs-backup-${date}.json`,
   });
   link.click();
   setTimeout(() => URL.revokeObjectURL(link.href), 10000);
-  announce(`Saved ${plural(state.favourites.length, 'favourite')}, ${plural(state.lists.length, 'list')}, ${plural(Object.keys(state.remembered.names).length, 'name')} and ${plural(backups.length, 'backup')} to a file`);
+  announce(`Saved a backup file with ${plural(state.favourites.length, 'favourite')}, ${plural(state.lists.length, 'list')}, ${plural(Object.keys(state.remembered.names).length, 'name')} and ${plural(backups.length, 'recent-tab copy', 'recent-tab copies')}`);
 }
 
 const clip = (value, max) => (typeof value === 'string' ? value.slice(0, max) : '');
@@ -1310,12 +1289,9 @@ async function restoreEverythingFile(file) {
   const settings = { ...state.settings };
   if (typeof data.settings?.showLongbook === 'boolean') settings.showLongbook = data.settings.showLongbook;
   if (VIEWS.includes(data.settings?.startView)) settings.startView = data.settings.startView;
-  if (typeof data.settings?.autoBackup === 'boolean') settings.autoBackup = data.settings.autoBackup;
-  // Backups only live while the setting is on.
-  const keepBackups = settings.autoBackup ? { backups } : {};
 
   try {
-    await chrome.storage.local.set({ favourites, lists, remembered: { names }, settings, ...keepBackups });
+    await chrome.storage.local.set({ favourites, lists, remembered: { names }, settings, backups });
   } catch {
     return announce('Could not restore: Chrome\'s extension storage is full');
   }
@@ -1323,23 +1299,22 @@ async function restoreEverythingFile(file) {
     favourites: favourites.length - state.favourites.length,
     lists: lists.length - state.lists.length,
     names: Object.keys(names).length - Object.keys(state.remembered.names).length,
-    backups: settings.autoBackup ? backups.length - haveBackups.length : 0,
+    backups: backups.length - haveBackups.length,
   };
   state.favourites = favourites;
   state.lists = lists;
   state.remembered = { names };
   state.settings = settings;
   settingLongbook.checked = settings.showLongbook;
-  settingBackup.checked = settings.autoBackup;
   settingView.value = settings.startView;
-  settingsPanel.hidePopover();
+  backupsPanel.hidePopover();
   await load(); // open pages take their remembered names, and the favourites strip draws again
-  announce(`Restored ${plural(gained.favourites, 'favourite')}, ${plural(gained.lists, 'list')}, ${plural(gained.names, 'name')} and ${plural(gained.backups, 'backup')}`);
+  announce(`Restored ${plural(gained.favourites, 'favourite')}, ${plural(gained.lists, 'list')}, ${plural(gained.names, 'name')} and ${plural(gained.backups, 'recent-tab copy', 'recent-tab copies')}`);
 }
 
-// ---------- Backups ----------
-// background.js keeps the copies in chrome.storage.local while the setting is on; the panel lists,
-// restores, saves and deletes them.
+// ---------- Recent tabs ----------
+// background.js keeps a copy of the open tabs in chrome.storage.local, automatically; the panel lists,
+// restores, saves and deletes them. Stored as `backups`; the user sees them as recent tabs.
 
 function whenText(at) {
   const date = new Date(at);
@@ -1360,15 +1335,13 @@ async function showBackups() {
         h('p', { class: 'backup-size' }, `${plural(tabCount, 'tab')} in ${plural(backup.windows.length, 'window')}`),
         h('div', { class: 'backup-actions' },
           h('button', { class: 'text-button', type: 'button', title: 'Open this copy as new windows. Pages that are already open are skipped.', onclick: () => restoreBackup(backup) }, 'Restore'),
-          h('button', { class: 'text-button', type: 'button', title: 'Download this copy as a bookmarks file', onclick: () => saveBackup(backup) }, 'Save as file')));
+          h('button', { class: 'text-button', type: 'button', title: 'Download this copy as a bookmarks file', onclick: () => saveBackup(backup) }, 'Save as bookmarks')));
     }),
   );
   deleteBackups.hidden = !backups.length;
-  backupsNote.textContent = !state.settings.autoBackup
-    ? 'Backups are off. Turn them on in Settings.'
-    : backups.length
-      ? 'Copies of your open tabs, kept on this computer. Restore opens each window with its tabs.'
-      : 'No copies yet. The first one is taken when you open, close or change a tab.';
+  backupsNote.textContent = backups.length
+    ? 'Copies of your open tabs, kept on this computer for about half a day. Restore opens each window with its tabs.'
+    : 'No copies yet. The first one is taken when you open, close or change a tab.';
 }
 
 // Opens each saved window as a new window. Pages that are already open are skipped, and only the
@@ -1396,7 +1369,7 @@ async function restoreBackup(backup) {
   announce(
     opened
       ? `Restored ${plural(opened, 'tab')}${opened < total ? `, skipping ${total - opened} already open or not a web page` : ''}`
-      : 'Nothing to restore: every web page in this backup is already open',
+      : 'Nothing to restore: every web page in this copy is already open',
   );
 }
 
@@ -1426,7 +1399,7 @@ async function saveList(e) {
   try {
     await chrome.storage.local.set({ lists: [list, ...state.lists].slice(0, MAX_LISTS) });
   } catch {
-    announce('Could not save the list: Chrome\'s extension storage is full. Delete a list or a backup and try again.');
+    announce('Could not save the list: Chrome\'s extension storage is full. Delete a list or the recent tabs and try again.');
     return;
   }
   state.lists = [list, ...state.lists].slice(0, MAX_LISTS);
@@ -1488,7 +1461,7 @@ function saveBackup(backup) {
   const windows = backup.windows.map((tabs, i) => ({ name: `Window ${i + 1}`, tabs }));
   const total = downloadBookmarks(windows, `${dayOf(when)} ${pad(when.getHours())}:${pad(when.getMinutes())}`,
     `bettertabs-backup-${dayOf(when)}-${pad(when.getHours())}${pad(when.getMinutes())}.html`);
-  announce(`Saved ${plural(total, 'tab')} from this backup to a file`);
+  announce(`Saved ${plural(total, 'tab')} from this copy to a bookmarks file`);
 }
 
 function setQuery(value) {
@@ -1530,13 +1503,11 @@ async function restore() {
   const saved = await chrome.storage.local.get(['view', 'collapsed', 'settings', 'remembered', 'favourites', 'lists']);
   if (VIEWS.includes(saved.view)) state.view = saved.view;
   state.settings.showLongbook = saved.settings?.showLongbook !== false;
-  state.settings.autoBackup = saved.settings?.autoBackup === true;
   if (VIEWS.includes(saved.settings?.startView)) {
     state.settings.startView = saved.settings.startView;
     state.view = saved.settings.startView;
   }
   settingLongbook.checked = state.settings.showLongbook;
-  settingBackup.checked = state.settings.autoBackup;
   settingView.value = state.settings.startView;
   state.collapsed = new Set(saved.collapsed ?? []);
   const names = saved.remembered?.names;
@@ -1576,12 +1547,6 @@ settingView.addEventListener('change', () => {
   saveSettings();
 });
 
-settingBackup.addEventListener('change', () => {
-  state.settings.autoBackup = settingBackup.checked;
-  saveSettings();
-  // Off means nothing is kept: the saved copies go with the setting.
-  if (!settingBackup.checked) chrome.storage.local.remove('backups');
-});
 openBackups.addEventListener('click', () => {
   settingsPanel.hidePopover();
   backupsPanel.showPopover();
@@ -1592,7 +1557,7 @@ backupsPanel.addEventListener('toggle', (e) => {
 });
 deleteBackups.addEventListener('click', async () => {
   await chrome.storage.local.remove('backups');
-  announce('Deleted all backups');
+  announce('Deleted all recent tabs');
   showBackups();
 });
 
@@ -1630,7 +1595,6 @@ listsPanel.addEventListener('toggle', (e) => {
 selectionSuspend.addEventListener('click', () => actOnSelected('suspend'));
 selectionGroup.addEventListener('click', () => actOnSelected('group'));
 
-exportButton.addEventListener('click', exportTabs);
 
 locate.addEventListener('click', showCurrentTab);
 

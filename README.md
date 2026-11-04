@@ -10,7 +10,7 @@ It is built for heavy tab use, including the hundreds of tabs that AI assistants
 
 **From the Chrome Web Store (recommended):** open the [BetterTabs page](https://chromewebstore.google.com/detail/bettertabs/gghmnehinhdlfcppjgaaokgiloppniep) and click **Add to Chrome**. Chrome keeps it up to date. Chrome 121 or later.
 
-The Store has version 1.6.0. Newer changes on `main` (Select mode, saved lists, Group, automatic backups) reach the Store once a new version is reviewed. To use them now, or to read and change the code, load the source. There is no build step.
+The Store has version 1.6.0. Newer changes on `main` (Select mode, saved lists, Group, recent tabs) reach the Store once a new version is reviewed. To use them now, or to read and change the code, load the source. There is no build step.
 
 1. Download this repository (**Code → Download ZIP**, then unzip it) or clone it.
 2. Open `chrome://extensions` and turn on **Developer mode** (top right).
@@ -51,9 +51,8 @@ After changing a file, click the reload arrow on the extension's card.
 
 **Settings**
 - The icon button at the bottom right opens the settings: hide the **Add to longbook** button, and choose which view the panel opens in (the one you used last, or always Sites, Windows, Recent or Groups). Settings are saved on your computer and take effect at once.
-- **Save everything to a file** keeps your favourites, saved lists, tab names, settings and backups in one file you choose to keep. It survives removing or reinstalling BetterTabs: **Restore from a file** brings it all back and deletes nothing you have now. (The automatic backups below hold only your open tabs, so use this file for the rest.)
-- **Export open tabs** saves a file with the name and address of every open tab, grouped by window. Open it in any browser to click through the links, or import it into Chrome's bookmarks (**Bookmarks → Import bookmarks and settings → Bookmarks HTML file**). A file you keep, whatever happens to Chrome.
-- **Automatic backups** (off until you turn them on in the settings) keep copies of your open tabs' titles and addresses on your computer: a new copy about every five minutes while your tabs change, every copy of the last hour, then one an hour for about half a day. **Restore from a backup** lists them. **Restore** opens each saved window, skips pages you already have open, and loads only the first tab of each window so hundreds of tabs don't load at once. **Save as file** exports a copy, and **Delete all backups** removes them. Turning the setting off deletes the copies. Nothing leaves your computer.
+- **Save backup to a file** keeps your favourites, saved lists, tab names, settings and recent tabs in one file you choose to keep. It survives removing or reinstalling BetterTabs: **Restore from a file** brings it all back and deletes nothing you have now.
+- **Recent tabs** are kept for you automatically: BetterTabs keeps a copy of your open tabs' titles and addresses on your computer, a new one about every five minutes while your tabs change, every copy of the last hour, then one an hour for about half a day. **Restore from a file** also lists them: **Restore** opens each saved window, skips pages you already have open, and loads only the first tab of each window so hundreds of tabs don't load at once, **Save as bookmarks** exports a copy, and **Delete recent tabs** removes them. Nothing leaves your computer.
 
 **Comfortable**
 - Updates live as you open, close and switch tabs, without moving the rows you are pointing at: the list keeps its order, and a **Tidy up** button next to Select sorts it afresh when you want.

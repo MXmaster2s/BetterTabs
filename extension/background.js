@@ -22,9 +22,10 @@ chrome.commands.onCommand.addListener(async (command, tab) => {
   await opened.catch((error) => console.error(error));
 });
 
-// ---------- Automatic backups (a setting, off by default) ----------
-// Only when the user turns it on: a copy of the open tabs' titles and addresses is kept in
-// chrome.storage.local, on this computer. Turning the setting off deletes the copies.
+// ---------- Recent tabs (automatic) ----------
+// A copy of the open tabs' titles and addresses is kept in chrome.storage.local, on this computer,
+// so tabs lost to a crash or a restart can be reopened. The user can delete the copies from the panel.
+// Stored as `backups`; the panel calls them recent tabs.
 
 const BACKUP_GAP = 5 * 60 * 1000; // at most one copy every five minutes
 const BACKUP_RECENT = 12; // every copy of the last hour or so is kept ...
@@ -56,8 +57,7 @@ async function backUp(now = false) {
   backing = true;
   lastLook = Date.now();
   try {
-    const { settings, backups = [] } = await chrome.storage.local.get(['settings', 'backups']);
-    if (!settings?.autoBackup) return;
+    const { backups = [] } = await chrome.storage.local.get('backups');
     if (backups.length && Date.now() - backups[0].at < BACKUP_GAP) return;
     const open = await chrome.tabs.query({});
     const byWindow = new Map();
@@ -92,9 +92,3 @@ for (const event of ['onCreated', 'onRemoved', 'onUpdated', 'onAttached']) {
   chrome.tabs[event].addListener(() => backUp().catch((error) => console.error(error)));
 }
 chrome.runtime.onStartup.addListener(() => backUp().catch((error) => console.error(error)));
-// Turning the setting on takes the first copy at once.
-chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === 'local' && changes.settings?.newValue?.autoBackup && !changes.settings.oldValue?.autoBackup) {
-    backUp(true).catch((error) => console.error(error));
-  }
-});

@@ -37,8 +37,8 @@ WHAT YOU CAN DO
 • Save tabs as a named list and open it again later, or export every open tab as a bookmarks file
 • Favourite a tab and keep it one click away, even after you close it
 • Rename any tab so you recognise it
-• Optional automatic backups, off until you turn them on, so a crash or a restart does not lose your tabs
-• Save your favourites, lists, names and settings to one file you keep, and restore it after a reinstall
+• Recent tabs are kept for you automatically, so a crash or a restart does not lose your tabs: reopen them from the Restore screen
+• Save a backup of your favourites, lists, names and settings to one file you keep, and restore it after a reinstall
 • The list keeps its order while you work, so rows never move under your mouse; Tidy up sorts it again when you want
 • Jump to the tab you are on, switch to a tab in another window, use it with the keyboard, in light and dark mode
 
@@ -52,7 +52,7 @@ IF CHROME SAYS "PROCEED WITH CAUTION"
 People who use Enhanced Safe Browsing see that message for any extension from a new developer. BetterTabs has no host permissions and makes no network requests, and its code is open for anyone to read.
 
 WHAT'S NEW IN 1.7
-Select mode, saved lists, Group this site, optional automatic backups, one file for everything you save, favourites that stay after you close the tab, a list that holds still while tabs change, and a tooltip on every button.
+Select mode, saved lists, Group this site, recent tabs kept automatically, a backup file for everything you save, favourites that stay after you close the tab, a list that holds still while tabs change, and a tooltip on every button.
 ```
 
 ## Permission justifications
@@ -71,7 +71,7 @@ Needed to show the tab list in Chrome's side panel, and to open it when the tool
 
 ### `storage`
 
-Needed to remember the selected view, which folders the user collapsed and their settings, the names the user gives their tabs, the pages the user favourites, and the lists of tabs the user saves by name. Everything is saved locally in the browser. Names are filed under a short hash of the page address, never the address, so they come back when the page is open again after a restart. A favourite keeps the page's title and address until the user removes it, so its icon stays after the tab is closed and a click can open the page again. A saved list keeps the title and address of each tab the user put in it until the user deletes the list. If the user turns on the optional automatic backups setting (off by default), it also keeps copies of the open tabs' titles and addresses there, so they can be restored after a crash. Turning the setting off deletes them.
+Needed to remember the selected view, which folders the user collapsed and their settings, the names the user gives their tabs, the pages the user favourites, and the lists of tabs the user saves by name. Everything is saved locally in the browser. Names are filed under a short hash of the page address, never the address, so they come back when the page is open again after a restart. A favourite keeps the page's title and address until the user removes it, so its icon stays after the tab is closed and a click can open the page again. A saved list keeps the title and address of each tab the user put in it until the user deletes the list. It also keeps copies of the open tabs' titles and addresses there automatically (about half a day's worth), so they can be reopened after a crash. The user can delete them from the panel.
 
 ### `favicon`
 
@@ -87,10 +87,10 @@ No. All code ships inside the extension package.
 
 ## Data usage
 
-- Collects: nothing. Tab titles and addresses are read to display them and are never transmitted. By default they are not stored either: names the user types are saved under a hash of the page address. What is kept is what the user chooses to keep: each page they favourite and each list of tabs they save (the titles and addresses, on the user's own computer, until the user removes them). Only if the user turns on the optional automatic backups setting are the titles and addresses of the open tabs kept, on the user's own computer (Chrome's local extension storage, never synced), until the user turns the setting off or deletes the backups. On the Web Store's privacy tab, this is web history that is stored locally and never transmitted.
+- Collects: nothing. Tab titles and addresses are read to display them and are never transmitted. Names the user types are saved under a hash of the page address. What is kept is what the user chooses to keep: each page they favourite and each list of tabs they save (the titles and addresses, on the user's own computer, until the user removes them). The titles and addresses of the open tabs are also kept automatically as recent tabs, for about half a day, on the user's own computer (Chrome's local extension storage, never synced), until the user deletes them. On the Web Store's privacy tab, this is web history that is stored locally and never transmitted.
 - Sells or transfers user data: no.
 - Uses data for anything unrelated to the single purpose: no.
 
 ## Privacy policy
 
-BetterTabs does not collect, share or transmit personal data. The tab titles and web addresses it reads stay in your browser and are used only to show your tab list, and to make backups if you turn that setting on. The only things saved are your chosen view, the folders you collapsed, your settings, the names you give tabs and your favourite pages, kept locally with Chrome's extension storage. Names are filed under a short hash of the page address, not the address itself, so they come back when the same page is open after a restart. A favourite keeps its title and address until you remove it, so it stays after you close the tab, and a list you save keeps the title and address of each tab in it until you delete the list. If you turn on automatic backups, which are off by default, it also keeps copies of the titles and addresses of your open tabs on your computer, so you can restore them after a crash; they are never sent anywhere, and turning the setting off deletes them. There is no account, server or analytics. Clicking "Add to longbook" on a billing or price page opens the longbook app on your Mac with the site's name; if it is not installed, a link to longbook.app opens only if you click it. A setting turns the button off.
+BetterTabs does not collect, share or transmit personal data. The tab titles and web addresses it reads stay in your browser and are used only to show your tab list, and to keep your recent tabs. The only things saved are your chosen view, the folders you collapsed, your settings, the names you give tabs and your favourite pages, kept locally with Chrome's extension storage. Names are filed under a short hash of the page address, not the address itself, so they come back when the same page is open after a restart. A favourite keeps its title and address until you remove it, so it stays after you close the tab, and a list you save keeps the title and address of each tab in it until you delete the list. It also keeps copies of the titles and addresses of your open tabs on your computer automatically, for about half a day, so you can reopen them after a crash; they are never sent anywhere, and you can delete them from the panel. There is no account, server or analytics. Clicking "Add to longbook" on a billing or price page opens the longbook app on your Mac with the site's name; if it is not installed, a link to longbook.app opens only if you click it. A setting turns the button off.
