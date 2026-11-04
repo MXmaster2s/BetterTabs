@@ -50,7 +50,7 @@ Chrome shows that warning for every extension that can see tab titles and addres
 IF CHROME SAYS "PROCEED WITH CAUTION"
 People who use Enhanced Safe Browsing see that message for any extension from a new developer. BetterTabs has no host permissions and makes no network requests, and its code is open for anyone to read.
 
-WHAT'S NEW IN 1.7.0
+WHAT'S NEW IN 1.7
 Select mode, saved lists, Group this site, optional automatic backups, favourites that stay after you close the tab, a list that holds still while tabs change, and a tooltip on every button.
 ```
 

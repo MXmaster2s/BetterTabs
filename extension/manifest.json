@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "BetterTabs: Side Panel Tab Manager",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "Tab manager in Chrome's side panel: group tabs by site, search, suspend and save them. Private, no account.",
   "homepage_url": "https://github.com/MXmaster2s/BetterTabs",
   "minimum_chrome_version": "121",
