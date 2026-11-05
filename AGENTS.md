@@ -4,7 +4,7 @@ This repository is **BetterTabs**: a Chrome extension (Manifest V3) that opens i
 
 ## Start here, every session
 
-1. Read this file fully.
+1. Read this file fully, then `MEMORY.md` (what state the project is in). Agents that load skills also get `.claude/skills/bettertabs/`, which routes each kind of work to the right part of this file and `docs/`.
 2. Find out which of these the owner wants:
    - **Install it** in their Chrome: see [Install in Chrome](#install-in-chrome).
    - **Change it**: read the rules below, then [Build and test](#build-and-test).
