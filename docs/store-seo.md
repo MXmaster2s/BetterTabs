@@ -59,7 +59,7 @@ Each image answers a pain people raised most in the Reddit research (`docs/resea
 | 4 | Privacy, local only (about 16) | Nothing leaves your browser. | The five permissions and "no host permissions" |
 | 5 | Hundreds of tabs, duplicates (about 7) | Hundreds of tabs, under control. | The Sites view with Close duplicates |
 
-The images are made outside this repository, in the film project at `~/Developer/BetterTabs-video` (three small Playwright scripts), from the real panel on fake tabs.
+The images are made in a separate film project outside this repository (three small Playwright scripts), from the real panel on fake tabs.
 
 ### Promo tile and marquee text
 
@@ -69,7 +69,7 @@ The images are made outside this repository, in the film project at `~/Developer
 ## Outside the Store
 
 - **Google Search**: Google sometimes shows Store listings, but Store pages cannot be submitted to Search Console, and developers report no way to force indexing. Own the website for the same phrases: `bettertabs.fyi`, with pages on "tab manager", "close duplicate tabs" and "save tabs". Link to the Store listing from every page.
-- **First installs**: the posts in `~/Developer/BetterTabs-research/leader-plan.md` (Show HN, r/chrome_extensions, Product Hunt) link to the Store page, which makes the first installs and the first reviews.
+- **First installs**: the launch posts (Show HN, r/chrome_extensions, Product Hunt) link to the Store page, which makes the first installs and the first reviews.
 - **Measure**: the Store dashboard shows impressions, installs and uninstalls. Check the exact-name search and the "tab manager" search weekly, and write down where it ranks.
 
 ## Sources
