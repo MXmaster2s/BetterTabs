@@ -4,19 +4,19 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>A private-first way to manage your browser tabs | BetterTabs</title>
-  <meta name="description" content="Why BetterTabs is built so you can check its privacy instead of trusting it: five permissions, no host access, no network, open source.">
+  <meta name="description" content="Why BetterTabs is built so you can check its privacy instead of trusting it: six permissions, no host access, no network, open source.">
   <link rel="canonical" href="https://bettertabs.fyi/blog/private-first-tabs.html">
   <meta name="theme-color" content="#ffe45c">
   <link rel="icon" type="image/png" href="../assets/icon.png">
   <link rel="apple-touch-icon" href="../assets/icon.png">
   <meta property="og:site_name" content="BetterTabs">
   <meta property="og:title" content="A private-first way to manage your browser tabs">
-  <meta property="og:description" content="Why BetterTabs is built so you can check its privacy instead of trusting it: five permissions, no host access, no network, open source.">
+  <meta property="og:description" content="Why BetterTabs is built so you can check its privacy instead of trusting it: six permissions, no host access, no network, open source.">
   <meta property="og:url" content="https://bettertabs.fyi/blog/private-first-tabs.html">
   <meta property="og:type" content="article">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="A private-first way to manage your browser tabs">
-  <meta name="twitter:description" content="Why BetterTabs is built so you can check its privacy instead of trusting it: five permissions, no host access, no network, open source.">
+  <meta name="twitter:description" content="Why BetterTabs is built so you can check its privacy instead of trusting it: six permissions, no host access, no network, open source.">
   <link rel="stylesheet" href="../assets/site.css">
 </head>
 <body>
@@ -42,9 +42,9 @@
     <h2>What BetterTabs does instead</h2>
     <p>BetterTabs shows every open tab, from every window, in Chrome's side panel, grouped by website. It is built so that you do not have to take its privacy on trust:</p>
     <ul>
-      <li><strong>It cannot read your pages.</strong> It asks Chrome for five permissions (<code>tabs</code>, <code>tabGroups</code>, <code>sidePanel</code>, <code>storage</code> and <code>favicon</code>), no host permissions and no content scripts. It sees the title and address Chrome shows for each tab, and has no way to look inside a page.</li>
+      <li><strong>It cannot read your pages.</strong> It asks Chrome for six permissions (<code>tabs</code>, <code>tabGroups</code>, <code>sidePanel</code>, <code>storage</code>, <code>favicon</code> and <code>history</code>), no host permissions and no content scripts. It sees the title and address Chrome shows for each tab, and has no way to look inside a page.</li>
       <li><strong>It makes no network requests.</strong> There is no server, account or analytics. The code contains no <code>fetch</code>, <code>XMLHttpRequest</code> or <code>WebSocket</code>.</li>
-      <li><strong>It stores almost nothing.</strong> Your view, collapsed folders and settings stay on your computer. Names are remembered under a short hash of the page address, never the address itself, and favourites and the lists you save keep their titles and addresses until you remove them, because you chose to keep them. It keeps no history of pages you visited. The one other exception is recent tabs: copies of your open tabs, kept on your computer for about half a day so you can reopen them after a crash, which you can delete at any time.</li>
+      <li><strong>It stores almost nothing.</strong> Your view, collapsed folders and settings stay on your computer. Names are remembered under a short hash of the page address, never the address itself, and favourites and the lists you save keep their titles and addresses until you remove them, because you chose to keep them. It keeps no history of pages you visited: the <code>history</code> permission is used only to answer a search for a tab that is not open, and the matches are shown and dropped. The one other exception is recent tabs: copies of your open tabs, kept on your computer for about half a day so you can reopen them after a crash, which you can delete at any time.</li>
       <li><strong>You choose when anything leaves.</strong> Save backup to a file writes a file you keep, only when you click it.</li>
       <li><strong>It is open source.</strong> The code is MIT licensed on GitHub, small, with no build step, so the files Chrome loads are the files you can read. If the project changed hands, anyone could see what changed, and anyone could keep the old version going.</li>
     </ul>
@@ -55,7 +55,7 @@
 
     <h2>Check it yourself</h2>
     <ol>
-      <li>Open <code>extension/manifest.json</code> and read the permissions. There are five, and no host permissions.</li>
+      <li>Open <code>extension/manifest.json</code> and read the permissions. There are six, and no host permissions.</li>
       <li>Search the extension's JavaScript for <code>fetch</code>, <code>XMLHttpRequest</code> and <code>WebSocket</code>. You will find none.</li>
       <li>Run <code>node scripts/check.mjs</code> in the repository. It fails if a permission is used without being justified in the store listing.</li>
     </ol>

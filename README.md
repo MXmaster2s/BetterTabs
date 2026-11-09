@@ -28,7 +28,7 @@ After changing a file, click the reload arrow on the extension's card.
 - Pinned and playing tabs are labelled.
 
 **Find**
-- Search by name, page title or address as you type. `Alt+Shift+F` opens the panel with the search box ready.
+- Search by name, page title or address as you type. `Alt+Shift+F` opens the panel with the search box ready. Pages you closed are found too: matches from your Chrome history appear under the open tabs, and a click opens one.
 - **Show current tab**: the target button next to the search box scrolls the list to the tab you're on. It clears a search or expands a folder if either is hiding it.
 - Click any tab to switch to it, even if it's in another window.
 

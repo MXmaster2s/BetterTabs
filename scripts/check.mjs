@@ -59,6 +59,7 @@ const usage = {
   sidePanel: /chrome\.sidePanel\b/,
   storage: /chrome\.storage\b/,
   favicon: /_favicon/,
+  history: /chrome\.history\b/,
 };
 const requested = new Set(manifest.permissions ?? []);
 for (const [permission, pattern] of Object.entries(usage)) {

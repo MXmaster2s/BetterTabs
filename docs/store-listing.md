@@ -29,7 +29,7 @@ Built for too many tabs, including the ones AI assistants and browser agents ope
 
 WHAT YOU CAN DO
 • See your tabs by site, by window, by when you last used them, or by Chrome tab group
-• Search tabs by title or address as you type (Alt+Shift+F opens the panel with search ready)
+• Search tabs by title or address as you type (Alt+Shift+F opens the panel with search ready), and find closed pages from your Chrome history
 • Close duplicate tabs in one click, keeping the one you are on
 • Select several tabs, then close, suspend or group them together
 • Group all of a site's tabs into one Chrome tab group in one click
@@ -73,6 +73,10 @@ Needed to show the tab list in Chrome's side panel, and to open it when the tool
 
 Needed to remember the selected view, which folders the user collapsed and their settings, the names the user gives their tabs, the pages the user favourites, and the lists of tabs the user saves by name. Everything is saved locally in the browser. Names are filed under a short hash of the page address, never the address, so they come back when the page is open again after a restart. A favourite keeps the page's title and address until the user removes it, so its icon stays after the tab is closed and a click can open the page again. A saved list keeps the title and address of each tab the user put in it until the user deletes the list. It also keeps copies of the open tabs' titles and addresses there automatically (about half a day's worth), so they can be reopened after a crash. The user can delete them from the panel.
 
+### `history`
+
+Needed so that when the user searches for a tab that is not open, BetterTabs can list matching pages from Chrome's history and open one in a new tab when clicked. History is read only to answer that search; it is not stored, copied or transmitted.
+
 ### `favicon`
 
 Needed to show each site's icon next to its tabs, using Chrome's own favicon cache.
@@ -87,7 +91,7 @@ No. All code ships inside the extension package.
 
 ## Data usage
 
-- Collects: nothing. Tab titles and addresses are read to display them and are never transmitted. Names the user types are saved under a hash of the page address. What is kept is what the user chooses to keep: each page they favourite and each list of tabs they save (the titles and addresses, on the user's own computer, until the user removes them). The titles and addresses of the open tabs are also kept automatically as recent tabs, for about half a day, on the user's own computer (Chrome's local extension storage, never synced), until the user deletes them. On the Web Store's privacy tab, this is web history that is stored locally and never transmitted.
+- Collects: nothing. Tab titles and addresses are read to display them and are never transmitted. Names the user types are saved under a hash of the page address. What is kept is what the user chooses to keep: each page they favourite and each list of tabs they save (the titles and addresses, on the user's own computer, until the user removes them). The titles and addresses of the open tabs are also kept automatically as recent tabs, for about half a day, on the user's own computer (Chrome's local extension storage, never synced), until the user deletes them. When the user searches, matching pages from Chrome's history are shown for that search and not kept. On the Web Store's privacy tab, this is web history that is stored locally and never transmitted.
 - Sells or transfers user data: no.
 - Uses data for anything unrelated to the single purpose: no.
 

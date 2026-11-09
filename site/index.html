@@ -222,7 +222,7 @@
         <div class="privacy">
           <div class="section-head">
             <h2>It never looks at your pages.</h2>
-            <p>BetterTabs reads the title and address of each tab to draw the list, and nothing else. There is no account, no server and no analytics, and it asks for five permissions.</p>
+            <p>BetterTabs reads the title and address of each tab to draw the list, and nothing else. There is no account, no server and no analytics, and it asks for six permissions.</p>
             <p class="privacy-note">Read the whole <a href="privacy.html">privacy policy</a>, or the <a href="https://github.com/MXmaster2s/BetterTabs/blob/main/docs/store-listing.md">longer explanation of each permission</a>.</p>
           </div>
           <ul class="permissions">
@@ -231,6 +231,7 @@
             <li><code>sidePanel</code><span>Show the list in Chrome's side panel and open it from the toolbar icon.</span></li>
             <li><code>storage</code><span>Remember your view, collapsed folders, settings, tab names, your favourite pages and your saved lists. Names are kept under a short hash, never as an address. It also keeps copies of your open tabs on your computer, so you can reopen them after a crash.</span></li>
             <li><code>favicon</code><span>Show each site's icon from Chrome's own cache.</span></li>
+            <li><code>history</code><span>When you search for a tab that is not open, list matching pages from your Chrome history so you can reopen one. It reads history only to answer a search and keeps none of it.</span></li>
           </ul>
         </div>
       </div>
@@ -279,7 +280,7 @@
           </details>
           <details>
             <summary>Can it see the pages I visit?</summary>
-            <p>No. It has no host permissions and no content scripts, so it cannot read or change a page. It sees only the title and address Chrome shows for each tab, and it never sends them anywhere.</p>
+            <p>No. It has no host permissions and no content scripts, so it cannot read or change a page. It sees only the title and address Chrome shows for each tab, and it never sends them anywhere. When you search for a tab that is not open, it also looks in your Chrome history for that name, on your computer, and keeps none of it.</p>
           </details>
           <details>
             <summary>Why does Chrome say "Proceed with caution" when I install it?</summary>

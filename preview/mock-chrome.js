@@ -130,6 +130,19 @@
         return { ...tab };
       },
     },
+    history: {
+      search: async ({ text }) => {
+        const words = text.toLowerCase().split(/\s+/).filter(Boolean);
+        return [
+          ['Quarterly report - Google Sheets', 'https://docs.google.com/spreadsheets/d/abc/edit', 3 * 86400e3],
+          ['Pricing | Acme', 'https://acme.example/pricing', 60e3],
+          ['Flight to Lisbon - Skyscanner', 'https://www.skyscanner.net/transport/flights/lond/lis/', 12 * 86400e3],
+          ['Lisbon travel guide', 'https://example.com/lisbon', 40 * 86400e3],
+        ]
+          .filter(([title, url]) => words.every((w) => `${title} ${url}`.toLowerCase().includes(w)))
+          .map(([title, url, age]) => ({ title, url, lastVisitTime: Date.now() - age }));
+      },
+    },
     tabGroups: {
       query: async () => groups,
       update: async (id, props) => {

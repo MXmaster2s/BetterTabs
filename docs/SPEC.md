@@ -12,7 +12,7 @@ Single purpose: show and organise your open tabs.
 
 - Chrome 121 or later, Manifest V3.
 - Plain JavaScript, HTML and CSS. No build step. No dependencies.
-- Permissions: `tabs`, `tabGroups`, `sidePanel`, `storage`, `favicon`. Nothing else, no host permissions.
+- Permissions: `tabs`, `tabGroups`, `sidePanel`, `storage`, `favicon`, `history`. Nothing else, no host permissions.
 
 ## Pieces
 
@@ -44,6 +44,10 @@ The toolbar (items 1 to 5) stays pinned to the top while the list scrolls.
 ## Views
 
 Every view produces folders. Tabs inside a folder keep the order given by the view.
+
+### Searching history
+
+While the search box has text, the panel also asks `chrome.history.search({ text, maxResults: 100, startTime: 0 })` (about 150 ms after the last keystroke; `startTime: 0` because the API's default is only the last day). Matches that are not http(s) pages, duplicate addresses, and addresses that are open in a tab are dropped, and up to 30 remain. They appear under a "From your history" heading below the open-tab results, each with the site icon, title, site name and how long ago it was visited. A click opens the page in a new tab (`chrome.tabs.create`) and says "Opened <title>". Nothing from history is stored; it is held in memory for the current search and dropped when the box is cleared. With no open match the empty state reads "No open tabs match “…”." above the history list. The permission is `history`; nothing else uses it.
 
 ### Keeping the order
 

@@ -32,6 +32,7 @@ const MAX_LISTS = 100;
 const state = {
   view: 'site',
   query: '',
+  history: { query: '', items: [] }, // pages from Chrome's history that match the search and are not open
   collapsed: new Set(),
   tabs: [],
   groups: new Map(),
@@ -542,7 +543,7 @@ function render() {
   tidy.hidden = sameOrder(all, foldersFor(state.tabs, null));
   state.layout = layoutOf(all);
   const folders = words.length ? stabilise(foldersFor(shown, state.layout), state.layout) : all;
-  list.replaceChildren(...(folders.length ? folders.map(renderFolder) : [renderEmpty()]));
+  list.replaceChildren(...(folders.length ? folders.map(renderFolder) : [renderEmpty()]), ...renderHistory());
 
   const rows = visibleRows();
   if (pendingFocus != null) {
@@ -899,9 +900,81 @@ function renderEmpty() {
   return h(
     'div',
     { class: 'empty' },
-    h('p', null, `No tabs match “${state.query}”.`),
+    h('p', null, `No open tabs match “${state.query}”.`),
     h('button', { class: 'text-button', type: 'button', onclick: () => setQuery('') }, 'Clear search'),
   );
+}
+
+// Pages from Chrome's history that match the search and are not open now.
+function renderHistory() {
+  if (!state.query || state.history.query !== state.query) return [];
+  const open = new Set(state.tabs.map(urlOf));
+  const items = state.history.items.filter((item) => !open.has(item.url));
+  if (!items.length) return [];
+  return [
+    h(
+      'section',
+      { class: 'history', 'aria-label': 'From your history' },
+      h('h2', { class: 'history-head' }, 'From your history'),
+      h(
+        'ul',
+        { class: 'history-list' },
+        items.map((item) =>
+          h(
+            'li',
+            null,
+            h(
+              'button',
+              {
+                class: 'history-row',
+                type: 'button',
+                title: `Open this page in a new tab:\n${item.url}`,
+                onclick: () => {
+                  chrome.tabs.create({ url: item.url });
+                  announce(`Opened ${item.title || item.url}`);
+                },
+              },
+              favicon(item.url),
+              h(
+                'span',
+                { class: 'tab-text' },
+                h('span', { class: 'tab-title' }, h('span', null, item.title || item.url)),
+                h('span', { class: 'tab-detail' }, `${siteOf(item.url).label} · ${item.lastVisitTime ? ago(item.lastVisitTime) : 'visited'}`),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  ];
+}
+
+let historyTimer;
+function searchHistory() {
+  clearTimeout(historyTimer);
+  const query = state.query;
+  if (!query || !chrome.history) {
+    state.history = { query: '', items: [] };
+    return;
+  }
+  historyTimer = setTimeout(async () => {
+    let found = [];
+    try {
+      // startTime 0 searches all of it; the API's default is only the last day.
+      found = await chrome.history.search({ text: query, maxResults: 100, startTime: 0 });
+    } catch (error) {
+      console.error(error);
+    }
+    if (state.query !== query) return;
+    const seen = new Set();
+    const items = found
+      .filter((v) => /^https?:/i.test(v.url) && !seen.has(v.url) && seen.add(v.url))
+      .slice(0, 30);
+    state.history = { query, items };
+    render();
+    const shown = renderHistory().length ? state.history.items.length : 0;
+    if (shown) announce(`${plural(shown, 'page')} from your history`);
+  }, 150);
 }
 
 function visibleRows() {
@@ -1468,6 +1541,7 @@ function setQuery(value) {
   search.value = value;
   state.query = value.trim();
   render();
+  searchHistory();
   if (state.query) announce(count.textContent);
 }
 
