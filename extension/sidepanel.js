@@ -1562,14 +1562,38 @@ deleteBackups.addEventListener('click', async () => {
 });
 
 saveEverything.addEventListener('click', () => saveEverythingFile().catch(console.error));
-restoreFile.addEventListener('click', () => restoreInput.click());
-restoreInput.addEventListener('change', () => {
-  const [file] = restoreInput.files;
-  restoreInput.value = '';
+function restoreFrom(file) {
   if (file) restoreEverythingFile(file).catch((error) => {
     console.error(error);
     announce('Could not read that file');
   });
+}
+// Three ways in, because a native file dialog can fail in a side panel:
+// the file chooser API, the plain file input, or dropping the file on the panel.
+restoreFile.addEventListener('click', async () => {
+  if (window.showOpenFilePicker) {
+    try {
+      const [handle] = await window.showOpenFilePicker({
+        types: [{ description: 'BetterTabs backup', accept: { 'application/json': ['.json'] } }],
+      });
+      restoreFrom(await handle.getFile());
+      return;
+    } catch (error) {
+      if (error.name === 'AbortError') return;
+      console.error(error);
+    }
+  }
+  restoreInput.click();
+});
+restoreInput.addEventListener('change', () => {
+  const [file] = restoreInput.files;
+  restoreInput.value = '';
+  restoreFrom(file);
+});
+backupsPanel.addEventListener('dragover', (e) => e.preventDefault());
+backupsPanel.addEventListener('drop', (e) => {
+  e.preventDefault();
+  restoreFrom(e.dataTransfer.files[0]);
 });
 
 selectToggle.addEventListener('click', () => setSelecting(!state.selecting));
