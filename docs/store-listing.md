@@ -34,8 +34,8 @@ WHAT YOU CAN DO
 • Select several tabs, then close, suspend or group them together
 • Group all of a site's tabs into one Chrome tab group in one click
 • Suspend tabs you are not using to free memory; they stay in the list and reload when you click them
-• Save tabs as a named list and open it again later, or export every open tab as a bookmarks file
-• Favourite a tab and keep it one click away, even after you close it
+• Save tabs as a named list and open it again later, or save a list as a bookmarks file
+• Favourite a tab, or a whole site, and keep it one click away, even after you close it
 • Rename any tab so you recognise it
 • Recent tabs are kept for you automatically, so a crash or a restart does not lose your tabs: reopen them from the Restore screen
 • Save a backup of your favourites, lists, names and settings to one file you keep, and restore it after a reinstall
@@ -45,14 +45,14 @@ WHAT YOU CAN DO
 PRIVATE BY DESIGN
 No account, no server, no analytics. BetterTabs has no host permissions, so it cannot read or change the pages you visit. It is open source (MIT): github.com/MXmaster2s/BetterTabs
 
-WHY DOES CHROME SAY "READ YOUR BROWSING HISTORY"?
-Chrome shows that warning for every extension that can see tab titles and addresses. BetterTabs uses that only to draw your tab list. Nothing leaves your computer.
+WHY DOES CHROME SAY "READ AND CHANGE YOUR BROWSING HISTORY"?
+Chrome shows that warning for extensions that can see tab titles and addresses or search your history. BetterTabs uses tabs only to draw your tab list, and your history only to find a page when you search for a tab that is not open. It never changes your history, and nothing leaves your computer.
 
 IF CHROME SAYS "PROCEED WITH CAUTION"
 People who use Enhanced Safe Browsing see that message for any extension from a new developer. BetterTabs has no host permissions and makes no network requests, and its code is open for anyone to read.
 
 WHAT'S NEW IN 1.7
-Select mode, saved lists, Group this site, recent tabs kept automatically, a backup file for everything you save, favourites that stay after you close the tab, a list that holds still while tabs change, and a tooltip on every button.
+Select mode, saved lists, Group this site, recent tabs kept automatically, a backup file for everything you save, favourites that stay after you close the tab (and for a whole site), search that also finds pages in your Chrome history, a list that holds still while tabs change, a redone Settings page with shortcuts written for your computer, and a tooltip on every button.
 ```
 
 ## Permission justifications

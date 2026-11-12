@@ -53,11 +53,11 @@ Each image answers a pain people raised most in the Reddit research (`docs/resea
 
 | # | Pain (threads out of 64) | Headline | Shows |
 | --- | --- | --- | --- |
-| 1 | Lost tabs after a crash or restart (about 30) | Never lose your tabs. | Saved lists and the backups popover |
+| 1 | Lost tabs after a crash or restart (about 30) | Never lose your tabs. | The Saved lists page and the Settings backup buttons |
 | 2 | Memory, Chrome slowing down (about 17) | Too many tabs slowing Chrome? | Tabs marked Suspended, still in the list |
-| 3 | Search across windows (about 14) | Find any tab in any window. | A search with its matches |
+| 3 | Search across windows (about 14) | Find any tab. | A search with its matches, and one that finds a closed page in history |
 | 4 | Privacy, local only (about 16) | Nothing leaves your browser. | The six permissions and "no host permissions" |
-| 5 | Hundreds of tabs, duplicates (about 7) | Hundreds of tabs, under control. | The Sites view with Close duplicates |
+| 5 | Hundreds of tabs, duplicates (about 7) | Hundreds of tabs, under control. | The Sites view, and the favourites row with a whole-site favourite |
 
 The images are made outside this repository, in the film project at `~/Developer/BetterTabs-video` (three small Playwright scripts), from the real panel on fake tabs.
 

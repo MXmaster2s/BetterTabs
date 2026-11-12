@@ -10,7 +10,7 @@ It is built for heavy tab use, including the hundreds of tabs that AI assistants
 
 **From the Chrome Web Store (recommended):** open the [BetterTabs page](https://chromewebstore.google.com/detail/bettertabs/gghmnehinhdlfcppjgaaokgiloppniep) and click **Add to Chrome**. Chrome keeps it up to date. Chrome 121 or later.
 
-The Store has version 1.6.0. Newer changes on `main` (Select mode, saved lists, Group, recent tabs) reach the Store once a new version is reviewed. To use them now, or to read and change the code, load the source. There is no build step.
+The Store has version 1.7.0. Newer changes on `main` (history in search, whole-site favourites, a list that holds still, the new Settings page, the backup file) reach the Store once a new version is reviewed. To use them now, or to read and change the code, load the source. There is no build step.
 
 1. Download this repository (**Code → Download ZIP**, then unzip it) or clone it.
 2. Open `chrome://extensions` and turn on **Developer mode** (top right).
