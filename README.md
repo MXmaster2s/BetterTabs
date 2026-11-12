@@ -33,6 +33,7 @@ After changing a file, click the reload arrow on the extension's card.
 - Click any tab to switch to it, even if it's in another window.
 
 **Favourites**
+- Right-click a site's folder (Sites view) and choose **Add site to favourites** to keep a whole site: its icon stays lit while any page on the site is open, so it does not go dim when a page changes address, and a click opens the site's home page if nothing is open.
 - Right-click a tab and choose **Add to favourites**. Its site icon appears in a row above the search box, and one click takes you to that tab, even in another window. Clicking it also scrolls the list to that tab. Closing the tab does not remove the favourite: its icon stays, faded with a dashed edge, and a click opens the page again. Right-click the icon and choose **Remove from favourites** to take it off. Favourite tabs are badged in the list. A favourite keeps the page's title and address on your computer until you remove it.
 
 **longbook**

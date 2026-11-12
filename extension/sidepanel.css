@@ -123,6 +123,12 @@ button {
   font-size: 0.75rem;
 }
 
+/* A favourite for a whole site: a small tab-stack corner mark, so it reads as "every page" without colour. */
+.fav-site {
+  position: relative;
+  box-shadow: 0.1875rem 0.1875rem 0 -0.0625rem var(--field), 0.1875rem 0.1875rem 0 0 var(--rule);
+}
+
 /* The tab you are looking at, the same highlighter as in the list. */
 .fav[aria-current] {
   border-color: transparent;

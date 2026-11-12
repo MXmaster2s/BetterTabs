@@ -22,6 +22,31 @@ const BILLING_HOST = /^(billing|pricing|checkout)\./i;
 // longbook is a Mac and iPhone app; Chrome extensions only exist on desktop, so this is the Mac button.
 const IS_MAC = /mac/i.test(navigator.userAgentData?.platform ?? navigator.platform ?? '');
 const REOPEN = IS_MAC ? 'Cmd+Shift+T' : 'Ctrl+Shift+T';
+
+// A shortcut the way the platform writes it: Alt+Shift+B is ⌥⇧B on a Mac. Chrome already gives
+// Mac symbols there; this also covers the plain names.
+function keyLabel(shortcut) {
+  if (!shortcut) return 'Not set';
+  if (!IS_MAC) return shortcut;
+  const symbols = { Alt: '⌥', Option: '⌥', Shift: '⇧', Ctrl: '⌃', MacCtrl: '⌃', Control: '⌃', Command: '⌘', Cmd: '⌘' };
+  return shortcut
+    .split('+')
+    .map((part) => symbols[part] ?? part)
+    .join('');
+}
+
+// The keys inside the panel, written for the platform you are on.
+const PANEL_KEYS = [
+  ['Jump to the search box', '/'],
+  ['Move between tabs', '↑ ↓'],
+  ['Go to the tab', 'Enter'],
+  ['Rename the tab', 'F2'],
+  ['Close the tab', IS_MAC ? '⌫' : 'Delete'],
+  ['Select several tabs', IS_MAC ? '⌘-click' : 'Ctrl-click'],
+  ['Select a range', 'Shift-click'],
+  ['Leave Select mode or clear the search', 'Esc'],
+  ['Reopen a closed tab', IS_MAC ? '⌘⇧T' : 'Ctrl+Shift+T'],
+];
 const SECOND_LEVEL = new Set(['co', 'com', 'org', 'net', 'gov', 'edu', 'ac']);
 // Only real pages are remembered by address: every new tab shares one address.
 const REMEMBERABLE = /^(https?|file):/i;
@@ -40,13 +65,14 @@ const state = {
   duplicates: new Set(),
   extraCopies: [],
   names: new Map(), // tab id -> name typed by the user
-  favourites: [], // favourite pages { url, title }, in the order they were added; kept until removed
+  favourites: [], // favourites { url, title, site? }, in the order they were added; kept until removed. With `site` (a host such as github.com) it stands for every page on that site
   prints: new Map(), // page address -> short hash of it, for pages that can be remembered
   remembered: { names: {} }, // names by hash, kept across restarts
   editing: null, // id of the tab whose name is being edited
   lists: [], // saved lists { id, name, at, tabs: [{ title, url }] }, newest first; kept until deleted
   menuTab: null, // id of the tab the context menu is open for (null on a closed favourite)
-  menuFavourite: null, // address of the favourite icon the menu is open on, if it was opened on one
+  menuFavourite: null, // key (see favKey) of the favourite icon the menu is open on, if it was opened on one
+  menuSite: null, // host of the site folder the menu is open on, if it was opened on one
   layout: null, // the order the list was last drawn in (see stabilise); null sorts it afresh
   selecting: false, // whether the list is in Select mode
   selected: new Set(), // ids of the selected tabs
@@ -517,7 +543,7 @@ function sameOrder(a, b) {
 
 function render() {
   const focusedId = document.activeElement?.closest?.('.tab')?.dataset.id;
-  const focusedFavourite = document.activeElement?.closest?.('.fav')?.dataset.url;
+  const focusedFavourite = document.activeElement?.closest?.('.fav')?.dataset.key;
   const words = state.query.toLowerCase().split(/\s+/).filter(Boolean);
   const shown = words.length
     ? state.tabs.filter((t) => {
@@ -552,7 +578,7 @@ function render() {
   } else if (focusedId) {
     list.querySelector(`.tab[data-id="${focusedId}"] .tab-main`)?.focus();
   } else if (focusedFavourite) {
-    [...strip.children].find((b) => b.dataset.url === focusedFavourite)?.focus();
+    [...strip.children].find((b) => b.dataset.key === focusedFavourite)?.focus();
   }
 }
 
@@ -630,7 +656,7 @@ async function actOnSelected(action) {
 
 // The open tab that stands for a favourite: the one you are on, else one in this window, else the first.
 function tabForFavourite(fav) {
-  const open = state.tabs.filter((t) => urlOf(t) === fav.url);
+  const open = state.tabs.filter((t) => (fav.site ? siteOf(urlOf(t)).key === fav.site : urlOf(t) === fav.url));
   return (
     open.find((t) => t.active && t.windowId === state.windowId) ??
     open.find((t) => t.active) ??
@@ -640,26 +666,32 @@ function tabForFavourite(fav) {
 }
 
 function favouriteFor(tab) {
-  return state.favourites.find((f) => f.url === urlOf(tab) && tabForFavourite(f)?.id === tab.id);
+  return state.favourites.find((f) => !f.site && f.url === urlOf(tab) && tabForFavourite(f)?.id === tab.id);
 }
 
-// The favourites: one icon per page, above the search box. A click goes to the tab, or opens
+// What tells favourites apart: the page address, or the host for a whole site.
+const favKey = (fav) => (fav.site ? `site:${fav.site}` : fav.url);
+
+// The favourites: one icon per page or site, above the search box. A click goes to the tab, or opens
 // the page again if you closed it. The icon stays until you remove it.
 function renderFavourites() {
   strip.hidden = state.favourites.length === 0;
   strip.replaceChildren(
     ...state.favourites.map((fav) => {
       const tab = tabForFavourite(fav);
-      const title = tab ? labelOf(tab) : fav.title;
+      const title = fav.site ? fav.site : tab ? labelOf(tab) : fav.title;
+      const what = fav.site ? 'Favourite site' : 'Favourite';
       return h(
         'button',
         {
-          class: tab ? 'fav' : 'fav fav-closed',
+          class: `${tab ? 'fav' : 'fav fav-closed'}${fav.site ? ' fav-site' : ''}`,
           type: 'button',
-          'data-url': fav.url,
+          'data-key': favKey(fav),
           style: `--base: hsl(${hueOf(siteOf(fav.url).key)} 62% 50%)`,
-          title: `${title}\n${fav.url}\n${tab ? 'Favourite: click to go to this tab' : 'Favourite, closed: click to open it again'}\nRight-click to remove it`,
-          'aria-label': tab ? title : `${title}, closed`,
+          title: fav.site
+            ? `${fav.site}: every page on this site\n${tab ? 'Favourite site: click to go to a tab on it' : `Favourite site, none open: click to open ${fav.url}`}\nRight-click to remove it`
+            : `${title}\n${fav.url}\n${tab ? 'Favourite: click to go to this tab' : 'Favourite, closed: click to open it again'}\nRight-click to remove it`,
+          'aria-label': fav.site ? `${what} ${title}${tab ? '' : ', none open'}` : tab ? title : `${title}, closed`,
           'aria-current': tab?.active && tab.windowId === state.windowId ? 'true' : null,
           onclick: () => openFavourite(fav),
         },
@@ -792,7 +824,7 @@ function renderTab(tab) {
           url,
           state.selecting
             ? 'Click to tick or untick this tab. Shift-click ticks a range.'
-            : 'Click to switch to this tab. F2 renames it. Ctrl or Cmd-click to select several.',
+            : `Click to switch to this tab. F2 renames it. ${IS_MAC ? '⌘' : 'Ctrl'}-click to select several.`,
         ]
           .filter(Boolean)
           .join('\n'),
@@ -845,7 +877,7 @@ function renderTab(tab) {
         class: 'tab-close',
         type: 'button',
         'aria-label': `Close ${title}`,
-        title: 'Close tab (Delete key). It closes straight away.',
+        title: `Close tab (${IS_MAC ? '⌫ Delete' : 'Delete'} key). It closes straight away.`,
         onclick: (e) => closeTabs([tab.id], visibleRows().indexOf(e.currentTarget.closest('.tab').querySelector('.tab-main'))),
       },
       svg(ICON_CLOSE),
@@ -1055,9 +1087,25 @@ function addFavourite(tab) {
   announce('Added to favourites');
 }
 
-function removeFavourite(url, { fromStrip = false } = {}) {
-  const tab = tabForFavourite({ url });
-  state.favourites = state.favourites.filter((f) => f.url !== url);
+function addSiteFavourite(host) {
+  if (state.favourites.length >= MAX_FAVOURITES) {
+    announce(`You can have up to ${MAX_FAVOURITES} favourites`);
+    return;
+  }
+  // The home page of the site is what a click opens when no tab on it is open.
+  const open = state.tabs.filter((t) => siteOf(urlOf(t)).key === host && /^https?:/i.test(urlOf(t)));
+  const sample = open.find((t) => urlOf(t).startsWith('https:')) ?? open[0];
+  if (!sample) return;
+  state.favourites = [...state.favourites, { url: `${new URL(urlOf(sample)).origin}/`, title: host, site: host }];
+  saveFavourites();
+  render();
+  announce(`Added ${host} to favourites: every page on the site`);
+}
+
+function removeFavourite(key, { fromStrip = false } = {}) {
+  const fav = state.favourites.find((f) => favKey(f) === key);
+  const tab = fav && tabForFavourite(fav);
+  state.favourites = state.favourites.filter((f) => favKey(f) !== key);
   saveFavourites();
   render();
   // The icon that was just removed can't keep focus; hand it to the tab's row.
@@ -1079,7 +1127,7 @@ function refreshFavouriteTitles() {
   let changed = false;
   state.favourites = state.favourites.map((fav) => {
     const tab = tabForFavourite(fav);
-    if (!tab || labelOf(tab) === fav.title) return fav;
+    if (fav.site || !tab || labelOf(tab) === fav.title) return fav;
     changed = true;
     return { ...fav, title: labelOf(tab) };
   });
@@ -1099,27 +1147,38 @@ function addToLongbook(tab) {
 
 // ----- Context menu -----
 
-// `row` is a tab row or a favourite icon. Favourite icons can only be removed.
+// `row` is a tab row, a favourite icon or a site folder's header. Favourite icons and site folders
+// only offer the favourite item.
 function openMenu(row, x, y) {
   const fromStrip = row.classList.contains('fav');
-  const id = fromStrip ? null : Number(row.dataset.id);
+  const fromHead = row.classList.contains('folder-head');
+  const id = fromStrip || fromHead ? null : Number(row.dataset.id);
   const tab = state.tabs.find((t) => t.id === id) ?? {};
+  const host = fromHead ? row.closest('.folder').dataset.folder.slice(state.view.length + 1) : null;
+  const siteFav = fromStrip ? state.favourites.find((f) => favKey(f) === row.dataset.key)?.site : null;
   state.menuTab = id;
-  state.menuFavourite = fromStrip ? row.dataset.url : null;
-  renameItem.hidden = fromStrip;
-  resetName.hidden = fromStrip || !state.names.has(id);
-  const starred = fromStrip || state.favourites.some((f) => f.url === urlOf(tab));
-  favouriteItem.hidden = !fromStrip && !canFavourite(tab);
-  favouriteItem.textContent = starred ? 'Remove from favourites' : 'Add to favourites';
-  favouriteItem.title = starred
-    ? 'Take this page off the favourites row'
-    : 'Keep this page in the row above the search box, even after you close the tab';
-  longbookItem.hidden = !offersLongbook(tab);
+  state.menuFavourite = fromStrip ? row.dataset.key : null;
+  state.menuSite = host;
+  const bare = fromStrip || fromHead;
+  renameItem.hidden = bare;
+  resetName.hidden = bare || !state.names.has(id);
+  const starred = fromStrip || (fromHead ? state.favourites.some((f) => f.site === host) : state.favourites.some((f) => !f.site && f.url === urlOf(tab)));
+  const site = fromHead || !!siteFav;
+  favouriteItem.hidden = !bare && !canFavourite(tab);
+  favouriteItem.textContent = `${starred ? 'Remove' : 'Add'}${site ? ' site' : ''} ${starred ? 'from' : 'to'} favourites`;
+  favouriteItem.title = site
+    ? starred
+      ? 'Take this site off the favourites row'
+      : 'Keep this whole site in the row above the search box: a click goes to a tab on it, or opens its home page. It stays even when a page changes address.'
+    : starred
+      ? 'Take this page off the favourites row'
+      : 'Keep this page in the row above the search box, even after you close the tab';
+  longbookItem.hidden = bare || !offersLongbook(tab);
   menuGetLongbook.hidden = longbookItem.hidden;
-  suspendItem.hidden = !canSuspend(tab);
+  suspendItem.hidden = bare || !canSuspend(tab);
 
   // Focus the row first so focus returns to it when the menu closes.
-  (fromStrip ? row : row.querySelector('button.tab-main'))?.focus();
+  (fromStrip ? row : row.querySelector(fromHead ? 'button' : 'button.tab-main'))?.focus();
   menu.showPopover();
 
   // Keyboard-opened menus have no pointer position, so sit under the row instead.
@@ -1315,6 +1374,17 @@ const cleanTabs = (tabs, keep) =>
     .slice(0, 5000)
     .map((t) => ({ title: clip(t.title, 200) || clip(t.url, 200), url: clip(t.url, 2000), ...(t.pinned === true && { pinned: true }) }));
 
+// Favourites from a file: titles and addresses checked like tabs, and `site` kept only when it matches the address.
+const cleanFavourites = (items) =>
+  (Array.isArray(items) ? items : [])
+    .slice(0, MAX_FAVOURITES)
+    .flatMap((f) => {
+      const [tab] = cleanTabs([f], REMEMBERABLE);
+      if (!tab) return [];
+      const site = typeof f.site === 'string' && f.site === siteOf(tab.url).key && /^https?:/i.test(tab.url) ? f.site : null;
+      return [{ title: tab.title, url: tab.url, ...(site && { site }) }];
+    });
+
 async function restoreEverythingFile(file) {
   if (file.size > MAX_FILE_BYTES) return announce('That file is too big to be a BetterTabs file');
   let data;
@@ -1326,10 +1396,10 @@ async function restoreEverythingFile(file) {
   if (data?.format !== FILE_FORMAT || data.version !== 1) return announce('That is not a BetterTabs file');
 
   // Favourites and lists the user does not have yet; the ones they have stay.
-  const haveUrls = new Set(state.favourites.map((f) => f.url));
+  const haveKeys = new Set(state.favourites.map(favKey));
   const favourites = [
     ...state.favourites,
-    ...cleanTabs(data.favourites, REMEMBERABLE).filter((f) => !haveUrls.has(f.url)),
+    ...cleanFavourites(data.favourites).filter((f) => !haveKeys.has(favKey(f))),
   ].slice(0, MAX_FAVOURITES);
   const haveIds = new Set(state.lists.map((l) => l.id));
   const lists = [
@@ -1574,8 +1644,11 @@ async function loadShortcuts() {
 
 // The keys Chrome has for the two commands, and the version, shown on the Settings page.
 function showShortcuts() {
-  document.getElementById('key-open-panel').textContent = state.shortcuts['open-panel'] || 'Not set';
-  document.getElementById('key-search-tabs').textContent = state.shortcuts['search-tabs'] || 'Not set';
+  document.getElementById('key-open-panel').textContent = keyLabel(state.shortcuts['open-panel']);
+  document.getElementById('key-search-tabs').textContent = keyLabel(state.shortcuts['search-tabs']);
+  document.getElementById('panel-keys').replaceChildren(
+    ...PANEL_KEYS.map(([what, key]) => h('div', { class: 'row' }, h('span', { class: 'row-title' }, what), h('kbd', null, key))),
+  );
   document.getElementById('about-version').textContent = `Version ${chrome.runtime.getManifest().version}`;
 }
 
@@ -1595,7 +1668,7 @@ async function restore() {
   state.remembered = { names: names && typeof names === 'object' ? names : {} };
   state.favourites = (Array.isArray(saved.favourites) ? saved.favourites : [])
     .filter((f) => typeof f?.url === 'string')
-    .map((f) => ({ url: f.url, title: String(f.title || f.url) }))
+    .map((f) => ({ url: f.url, title: String(f.title || f.url), ...(f.site && f.site === siteOf(f.url).key && { site: f.site }) }))
     .slice(0, MAX_FAVOURITES);
   state.lists = (Array.isArray(saved.lists) ? saved.lists : [])
     .filter((l) => typeof l?.id === 'string' && Array.isArray(l.tabs))
@@ -1716,7 +1789,9 @@ locate.addEventListener('click', showCurrentTab);
 
 for (const area of [list, strip]) {
   area.addEventListener('contextmenu', (e) => {
-    const row = e.target.closest('.tab, .fav');
+    let row = e.target.closest('.tab, .fav, .folder-head');
+    // A folder header offers the menu only in the Sites view, for a real website.
+    if (row?.classList.contains('folder-head') && !(state.view === 'site' && !row.closest('.folder').dataset.folder.slice(5).startsWith('~'))) row = null;
     // While a name is being edited, leave the browser's own menu (copy, paste) alone.
     if (!row || row.classList.contains('tab-editing')) return;
     e.preventDefault();
@@ -1731,8 +1806,10 @@ menu.addEventListener('click', (e) => {
   menu.hidePopover();
   if (action === 'rename') startEdit(id);
   else if (action === 'favourite') {
-    const url = state.menuFavourite ?? urlOf(state.tabs.find((t) => t.id === id) ?? {});
-    if (state.favourites.some((f) => f.url === url)) removeFavourite(url, { fromStrip: state.menuFavourite != null });
+    const host = state.menuSite;
+    const key = host ? `site:${host}` : (state.menuFavourite ?? urlOf(state.tabs.find((t) => t.id === id) ?? {}));
+    if (state.favourites.some((f) => favKey(f) === key)) removeFavourite(key, { fromStrip: state.menuFavourite != null });
+    else if (host) addSiteFavourite(host);
     else addFavourite(state.tabs.find((t) => t.id === id));
   }
   else if (action === 'longbook') addToLongbook(state.tabs.find((t) => t.id === id));
@@ -1795,7 +1872,7 @@ document.addEventListener('keydown', (e) => {
   } else if (e.key === 'F2') {
     e.preventDefault();
     startEdit(Number(rows[i].closest('.tab').dataset.id));
-  } else if (e.key === 'Delete') {
+  } else if (e.key === 'Delete' || (IS_MAC && e.key === 'Backspace')) {
     e.preventDefault();
     const id = Number(rows[i].closest('.tab').dataset.id);
     // On a ticked tab, Delete closes every ticked tab, as the Close button does.

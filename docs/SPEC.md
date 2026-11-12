@@ -130,7 +130,8 @@ Two tabs are duplicates only if their URLs are exactly equal (including `#` frag
 - The tab a favourite stands for shows a **Favourite** badge in the list.
 - Closing the tab does not remove the favourite. Its icon stays, faded with a dashed border and named "<title>, closed", until the user removes it. While a tab is open, the favourite's stored title follows the tab's name, so a closed favourite shows the last title seen. Navigating a tab to another address makes it stop standing for the favourite.
 - Added and removed are announced ("Added to favourites", "Removed from favourites").
-- Favourites are stored in `chrome.storage.local` under `favourites`, as an array of `{ url, title }`.
+- A favourite can also be a **whole site**: `{ url, title, site }`, where `site` is the host without `www.` (as the Sites view groups it) and `url` the site's home page (`https://host/`). In the Sites view, right-clicking a folder header for a website (not Chrome pages, files or Other) offers **Add site to favourites** / **Remove site from favourites**. A site favourite matches every open tab on that host, so it does not go dim when a page changes address: it is faded and dashed only when no tab on the site is open. Its tooltip says "every page on this site"; its icon has a small stacked-card edge so it differs from a page favourite without relying on colour; its accessible name is "Favourite site <host>" (", none open" when closed). A click goes to the tab on the site (the one you are on, else one in this window, else the first), or opens the home page when none is open. It gets no **Favourite** badge in the list, and its title does not change. Page and site favourites are told apart by a key (`favKey`: the address, or `site:<host>`).
+- Favourites are stored in `chrome.storage.local` under `favourites`, as an array of `{ url, title, site? }`.
 
 ### Selecting several tabs
 
@@ -179,7 +180,8 @@ A **Settings** icon button sits fixed at the bottom right of the panel (`aria-la
 - **Panel**: **Open the panel in** (a select: the view I used last, Sites, Windows, Recent, Groups) and **Add to longbook button** (a switch, with a hint and a "Get longbook" link).
 - **Your tabs**: **Saved lists**, a row with a chevron that opens the Saved lists page.
 - **Backup**: a hint saying that one file holds favourites, saved lists, tab names, settings and recent tabs and survives removing or reinstalling BetterTabs, and two buttons side by side, **Save backup to a file** (`#save-everything`, filled) and **Restore from a file** (`#open-backups`). There is no backup setting and no other backup button: the recent tabs (below) are kept automatically.
-- **Keyboard shortcuts**: the keys Chrome has for Open BetterTabs and Search your tabs (from `chrome.commands.getAll`, "Not set" when empty) and **Change shortcuts**, which opens `chrome://extensions/shortcuts` in a new tab.
+- **Open from anywhere**: the keys Chrome has for Open BetterTabs and Search your tabs (from `chrome.commands.getAll`, "Not set" when empty, written with Mac symbols such as ⌥⇧B on a Mac) and **Change shortcuts**, which opens `chrome://extensions/shortcuts` in a new tab.
+- **Inside the panel**: the keys the panel itself handles, written for the platform (on a Mac: ⌫ closes a tab, ⌘-click selects, ⌘⇧T reopens a closed tab; elsewhere Delete, Ctrl-click, Ctrl+Shift+T). On a Mac the Backspace key (⌫, which is what the Delete key sends on a Mac keyboard) closes the tab you are on in the list, like Delete.
 - **About**: the version (`chrome.runtime.getManifest().version`), **Privacy policy** and **Report a problem** (links that open in a new tab).
 
 Saved lists and Restore are pages of the same kind, each with a back button that returns to Settings. **Save as a list** (from Select mode) stays a small popover above the Settings button.
