@@ -1572,6 +1572,13 @@ async function loadShortcuts() {
   search.title = `Search tabs by name, title or address. Press / to jump here${find ? `, or ${find} from any page to open BetterTabs with this box ready` : ''}.`;
 }
 
+// The keys Chrome has for the two commands, and the version, shown on the Settings page.
+function showShortcuts() {
+  document.getElementById('key-open-panel').textContent = state.shortcuts['open-panel'] || 'Not set';
+  document.getElementById('key-search-tabs').textContent = state.shortcuts['search-tabs'] || 'Not set';
+  document.getElementById('about-version').textContent = `Version ${chrome.runtime.getManifest().version}`;
+}
+
 async function restore() {
   loadShortcuts();
   const saved = await chrome.storage.local.get(['view', 'collapsed', 'settings', 'remembered', 'favourites', 'lists']);
@@ -1609,7 +1616,18 @@ for (const input of document.querySelectorAll('input[name="view"]')) {
 closeDupes.addEventListener('click', () => closeTabs(state.extraCopies));
 
 settingsPanel.addEventListener('toggle', (e) => {
-  if (e.newState === 'open') settingLongbook.focus();
+  if (e.newState !== 'open') return;
+  showShortcuts();
+  document.getElementById('settings-title').focus();
+});
+for (const back of document.querySelectorAll('[data-back="settings"]')) {
+  back.addEventListener('click', () => {
+    back.closest('[popover]').hidePopover();
+    settingsPanel.showPopover();
+  });
+}
+document.getElementById('change-shortcuts').addEventListener('click', () => {
+  chrome.tabs.create({ url: 'chrome://extensions/shortcuts' });
 });
 settingLongbook.addEventListener('change', () => {
   state.settings.showLongbook = settingLongbook.checked;

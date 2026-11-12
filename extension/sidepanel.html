@@ -46,45 +46,92 @@
       <button id="selection-done" class="text-button" type="button" title="Stop selecting (Esc)">Done</button>
     </div>
   </div>
-  <button id="settings-button" class="icon-button settings-button" type="button" popovertarget="settings" aria-label="Settings" title="Settings: backup, saved lists, the starting view and more">
+  <button id="settings-button" class="icon-button settings-button" type="button" popovertarget="settings" aria-label="Settings" title="Settings: backup, saved lists, shortcuts and more">
     <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4.5h12M2 11.5h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="10.5" cy="4.5" r="1.9" fill="var(--field)" stroke="currentColor" stroke-width="1.6"/><circle cx="5.5" cy="11.5" r="1.9" fill="var(--field)" stroke="currentColor" stroke-width="1.6"/></svg>
   </button>
-  <section id="settings" popover aria-labelledby="settings-title">
-    <h2 id="settings-title">Settings</h2>
-    <label class="setting" title="Shows the Add to longbook button on billing and price pages. Needs the longbook app on your Mac.">
-      <input id="setting-longbook" type="checkbox">
-      <span>Show Add to longbook on billing and price pages</span>
-    </label>
-    <p class="setting-hint">Needs the longbook app on your Mac. <a title="Open longbook.app in a new tab" href="https://longbook.app/?utm_source=bettertabs&amp;utm_medium=extension&amp;utm_campaign=add-to-longbook" target="_blank" rel="noopener">Get longbook</a></p>
-    <label class="setting-field" title="Which view the panel shows when it opens">
-      <span>Open the panel in</span>
-      <select id="setting-view">
-        <option value="last">The view I used last</option>
-        <option value="site">Sites</option>
-        <option value="window">Windows</option>
-        <option value="recent">Recent</option>
-        <option value="group">Groups</option>
-      </select>
-    </label>
-    <div class="setting-action">
-      <button id="open-lists" class="text-button" type="button" title="Open, download or delete the lists of tabs you saved by name">Saved lists</button>
-      <p class="setting-hint">Tabs you saved by name to open again later. Select some tabs, then choose Save list.</p>
-    </div>
-    <div class="setting-action">
-      <button id="save-everything" class="text-button" type="button" title="Save your favourites, saved lists, tab names, settings and recent tabs to one file you keep">Save backup to a file</button>
-      <button id="open-backups" class="text-button" type="button" title="Bring back a backup file, or reopen tabs from the last few hours. Nothing you have now is deleted.">Restore from a file</button>
-      <p class="setting-hint">One file with your favourites, saved lists, tab names, settings and recent tabs. Keep it somewhere safe: it survives removing or reinstalling BetterTabs.</p>
+  <section id="settings" class="page" popover aria-labelledby="settings-title">
+    <header class="page-head">
+      <button class="icon-button page-back" type="button" popovertarget="settings" popovertargetaction="hide" aria-label="Back to your tabs" title="Back to your tabs (Esc)"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <h2 id="settings-title" tabindex="-1">Settings</h2>
+    </header>
+    <div class="page-body">
+      <h3 class="group-title">Panel</h3>
+      <div class="group">
+        <div class="row">
+          <label class="row-text" for="setting-view" title="Which view the panel shows when it opens"><span class="row-title">Open the panel in</span></label>
+          <select id="setting-view">
+            <option value="last">The view I used last</option>
+            <option value="site">Sites</option>
+            <option value="window">Windows</option>
+            <option value="recent">Recent</option>
+            <option value="group">Groups</option>
+          </select>
+        </div>
+        <div class="row">
+          <div class="row-text">
+            <label class="row-title" for="setting-longbook" title="Shows the Add to longbook button on billing and price pages. Needs the longbook app on your Mac.">Add to longbook button</label>
+            <span class="row-hint">On billing and price pages. Needs the longbook app on your Mac. <a title="Open longbook.app in a new tab" href="https://longbook.app/?utm_source=bettertabs&amp;utm_medium=extension&amp;utm_campaign=add-to-longbook" target="_blank" rel="noopener">Get longbook</a></span>
+          </div>
+          <input id="setting-longbook" class="switch" type="checkbox" role="switch">
+        </div>
+      </div>
+
+      <h3 class="group-title">Your tabs</h3>
+      <div class="group">
+        <button id="open-lists" class="row row-link" type="button" title="Open, download or delete the lists of tabs you saved by name">
+          <span class="row-text"><span class="row-title">Saved lists</span><span class="row-hint">Tabs you saved by name. Select some tabs, then choose Save list.</span></span>
+          <svg class="row-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+
+      <h3 class="group-title">Backup</h3>
+      <div class="group">
+        <div class="row row-stack">
+          <p class="row-hint">One file with your favourites, saved lists, tab names, settings and recent tabs. Keep it somewhere safe: it survives removing or reinstalling BetterTabs.</p>
+          <div class="row-buttons">
+            <button id="save-everything" class="page-button page-button-main" type="button" title="Save your favourites, saved lists, tab names, settings and recent tabs to one file you keep">Save backup to a file</button>
+            <button id="open-backups" class="page-button" type="button" title="Bring back a backup file, or reopen tabs from the last few hours. Nothing you have now is deleted.">Restore from a file</button>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="group-title">Keyboard shortcuts</h3>
+      <div class="group">
+        <div class="row"><span class="row-title">Open BetterTabs</span><kbd id="key-open-panel">Not set</kbd></div>
+        <div class="row"><span class="row-title">Search your tabs</span><kbd id="key-search-tabs">Not set</kbd></div>
+        <button id="change-shortcuts" class="row row-link" type="button" title="Open Chrome's page for setting extension shortcuts">
+          <span class="row-title row-action">Change shortcuts</span>
+          <svg class="row-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+
+      <h3 class="group-title">About</h3>
+      <div class="group">
+        <div class="row"><span class="row-title">BetterTabs</span><span id="about-version" class="row-value"></span></div>
+        <a class="row row-link" href="https://bettertabs.fyi/privacy.html" target="_blank" rel="noopener" title="Open the privacy policy in a new tab"><span class="row-title row-action">Privacy policy</span><svg class="row-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <a class="row row-link" href="https://github.com/MXmaster2s/BetterTabs/issues" target="_blank" rel="noopener" title="Report a problem or suggest something on GitHub"><span class="row-title row-action">Report a problem</span><svg class="row-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      </div>
     </div>
   </section>
-  <section id="backups" popover aria-labelledby="backups-title">
-    <h2 id="backups-title" tabindex="-1">Restore</h2>
-    <button id="restore-file" class="text-button" type="button" title="Choose a file saved with Save backup to a file. Nothing you have now is deleted.">Choose a backup file</button>
-    <p class="setting-hint">Or drop the file here.</p>
-    <input id="restore-input" type="file" accept=".json,application/json" hidden>
-    <h3 class="backups-sub">Recent tabs</h3>
-    <p id="backups-note" class="setting-hint"></p>
-    <ul id="backup-list" class="backup-list"></ul>
-    <button id="delete-backups" class="text-button" type="button" title="Delete the recent-tab copies from this computer" hidden>Delete recent tabs</button>
+  <section id="backups" class="page" popover aria-labelledby="backups-title">
+    <header class="page-head">
+      <button class="icon-button page-back" type="button" data-back="settings" aria-label="Back to Settings" title="Back to Settings"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <h2 id="backups-title" tabindex="-1">Restore</h2>
+    </header>
+    <div class="page-body">
+      <h3 class="group-title">From a backup file</h3>
+      <div class="group">
+        <div class="row row-stack drop-zone">
+          <button id="restore-file" class="page-button page-button-main" type="button" title="Choose a file saved with Save backup to a file. Nothing you have now is deleted.">Choose a backup file</button>
+          <p class="row-hint">Or drop the file here. Nothing you have now is deleted.</p>
+        </div>
+      </div>
+      <input id="restore-input" type="file" accept=".json,application/json" hidden>
+      <h3 class="group-title">Recent tabs</h3>
+      <p id="backups-note" class="setting-hint"></p>
+      <ul id="backup-list" class="backup-list"></ul>
+      <button id="delete-backups" class="page-button" type="button" title="Delete the recent-tab copies from this computer" hidden>Delete recent tabs</button>
+    </div>
   </section>
   <section id="save-list" popover aria-labelledby="save-list-title">
     <h2 id="save-list-title">Save as a list</h2>
@@ -102,10 +149,15 @@
       <button id="list-cancel" class="text-button" type="button" title="Close this without saving">Cancel</button>
     </form>
   </section>
-  <section id="lists" popover aria-labelledby="lists-title">
-    <h2 id="lists-title" tabindex="-1">Saved lists</h2>
-    <p id="lists-note" class="setting-hint"></p>
-    <ul id="list-items" class="backup-list"></ul>
+  <section id="lists" class="page" popover aria-labelledby="lists-title">
+    <header class="page-head">
+      <button class="icon-button page-back" type="button" data-back="settings" aria-label="Back to Settings" title="Back to Settings"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <h2 id="lists-title" tabindex="-1">Saved lists</h2>
+    </header>
+    <div class="page-body">
+      <p id="lists-note" class="setting-hint"></p>
+      <ul id="list-items" class="backup-list"></ul>
+    </div>
   </section>
   <div id="menu" popover role="menu" aria-label="Tab actions">
     <button type="button" role="menuitem" data-action="rename" title="Give this tab a name you will recognise (F2)">Edit name</button>
