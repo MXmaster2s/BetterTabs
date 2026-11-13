@@ -1,3 +1,5 @@
+importScripts('tabnav.js'); // back and forward through the tabs you were on
+
 // Clicking the toolbar icon opens the side panel instead of a popup.
 chrome.sidePanel
   .setPanelBehavior({ openPanelOnActionClick: true })
