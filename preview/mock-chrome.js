@@ -83,7 +83,7 @@
 
   window.chrome = {
     tabs: {
-      query: async ({ windowId } = {}) => tabs.filter((t) => windowId == null || t.windowId === windowId).map((t) => ({ ...t })),
+      query: async ({ windowId, active } = {}) => tabs.filter((t) => (windowId == null || t.windowId === windowId) && (active == null || t.active === active)).map((t) => ({ ...t })),
       update: async (id, props = {}) => {
         const tab = tabs.find((t) => t.id === id);
         if ('pinned' in props) {
@@ -229,6 +229,8 @@
     },
     runtime: {
       getManifest: () => ({ version: 'preview' }),
+      onInstalled: { addListener: () => {} },
+      onStartup: { addListener: () => {} },
       onMessage: { addListener: (fn) => messageListeners.push(fn) },
       sendMessage: (message) => new Promise((resolve) => messageListeners.forEach((fn) => fn(message, {}, resolve))),
     },

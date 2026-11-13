@@ -713,6 +713,8 @@ const navForward = document.getElementById('nav-forward');
 async function renderNav() {
   const { tabNav = {} } = await chrome.storage.session.get('tabNav');
   const s = tabNav[state.windowId];
+  // Nothing recorded for this window yet (just installed or reloaded): record the tab you are on.
+  if (!s && state.windowId != null) chrome.runtime.sendMessage({ type: 'tab-seed', windowId: state.windowId }).catch(() => {});
   navBack.disabled = !s || s.at < 1;
   navForward.disabled = !s || s.at >= s.ids.length - 1;
 }

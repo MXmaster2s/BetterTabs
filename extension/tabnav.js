@@ -77,7 +77,28 @@ async function navGo(windowId, direction) {
   }
 }
 
+// The tab you are on when recording starts (install, reload, Chrome starting, the panel opening)
+// is the first step, so the first Back has somewhere to go. Windows already recorded are left alone.
+async function navSeed(windowId) {
+  const tabNav = await navRead();
+  const active = await chrome.tabs.query(windowId == null ? { active: true } : { active: true, windowId });
+  let changed = false;
+  for (const tab of active) {
+    if (tabNav[tab.windowId]) continue;
+    tabNav[tab.windowId] = { ids: [tab.id], at: 0 };
+    changed = true;
+  }
+  if (changed) await navWrite(tabNav);
+}
+
+chrome.runtime.onInstalled.addListener(() => navDo(() => navSeed()));
+chrome.runtime.onStartup.addListener(() => navDo(() => navSeed()));
+
 chrome.runtime.onMessage.addListener((message, _sender, reply) => {
+  if (message?.type === 'tab-seed') {
+    navDo(() => navSeed(message.windowId)).then(() => reply({ ok: true }));
+    return true;
+  }
   if (message?.type !== 'tab-nav' || ![-1, 1].includes(message.direction)) return false;
   navDo(() => navGo(message.windowId, message.direction)).then(() => reply({ ok: true }));
   return true;
