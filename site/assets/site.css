@@ -843,6 +843,11 @@ footer .credit {
   flex-basis: 100%;
 }
 
+footer .ph-badge {
+  flex-basis: 100%;
+  line-height: 0;
+}
+
 footer nav {
   display: flex;
   flex-wrap: wrap;
