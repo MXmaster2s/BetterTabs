@@ -2,9 +2,9 @@
 
 What changed in BetterTabs, newest first. The version being worked on is in `extension/manifest.json`.
 
-## Unreleased
+## 1.8.0
 
-- **Status bar.** A strip at the bottom of the panel shows how many tabs are open, how many are on claude.ai (with a Claude mascot that breathes, blinks and does a trick when clicked; a second number counts tabs in a tab group Claude is working in), and how much memory and processor the computer is using. Chrome gives extensions the figures for the whole computer, not for Chrome alone. Turn it off in Settings. This adds the `system.cpu` and `system.memory` permissions, which Chrome installs without a warning.
+- **Status bar.** A strip at the bottom of the panel shows how many tabs are open, how many are on claude.ai (with a Claude mascot that breathes, blinks and does a trick when clicked; a second number counts tabs in a tab group Claude is working in), and how much memory and processor the computer is using. Chrome gives extensions the figures for the whole computer, not for Chrome alone. Click the memory or CPU figure for where Chrome's own Task Manager is (an extension cannot open it). Turn the bar off in Settings. This adds the `system.cpu` and `system.memory` permissions, which Chrome installs without a warning.
 
 ## 1.7.1
 

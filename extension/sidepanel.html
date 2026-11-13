@@ -47,9 +47,15 @@
       </button>
       <span id="stat-claude-text"></span>
     </span>
-    <span class="stat" id="stat-memory" title="Memory in use on this computer. Chrome does not share its own figure with extensions." hidden></span>
-    <span class="stat" id="stat-cpu" title="Processor in use on this computer. Chrome does not share its own figure with extensions." hidden></span>
+    <button class="stat stat-button" id="stat-memory" type="button" popovertarget="taskman" title="Memory in use on this computer. Chrome does not share its own figure with extensions. Click to see where Chrome's Task Manager is." hidden></button>
+    <button class="stat stat-button" id="stat-cpu" type="button" popovertarget="taskman" title="Processor in use on this computer. Chrome does not share its own figure with extensions. Click to see where Chrome's Task Manager is." hidden></button>
   </footer>
+  <div id="taskman" class="taskman" popover aria-labelledby="taskman-title">
+    <h2 id="taskman-title">Memory and CPU for Chrome</h2>
+    <p>The bar shows your whole computer. Chrome's Task Manager lists what each tab and extension uses.</p>
+    <p id="taskman-how"></p>
+    <p class="taskman-note">Chrome does not let an extension open it for you.</p>
+  </div>
   <div id="selection-bar" class="selection-bar" role="region" aria-label="Selected tabs" hidden>
     <p id="selection-count"></p>
     <div class="selection-actions">

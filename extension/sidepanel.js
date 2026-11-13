@@ -600,6 +600,11 @@ async function sampleUsage() {
   }
   renderStatusbar();
 }
+// Chrome offers no way to open its Task Manager from an extension, so say where it is.
+document.getElementById('taskman-how').textContent = IS_MAC
+  ? 'On a Mac, choose Window, then Task Manager, in Chrome\u2019s menu bar.'
+  : 'Press Shift+Esc in Chrome, or open the \u22EE menu, then More tools, then Task Manager.';
+
 // Each click picks the next trick.
 const TRICKS = ['spin', 'hop', 'wiggle', 'squish'];
 let trick = 0;
