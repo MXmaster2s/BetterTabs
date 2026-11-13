@@ -77,6 +77,10 @@ Needed to remember the selected view, which folders the user collapsed and their
 
 Needed so that when the user searches for a tab that is not open, BetterTabs can list matching pages from Chrome's history and open one in a new tab when clicked. History is read only to answer that search; it is not stored, copied or transmitted.
 
+### `system.cpu` and `system.memory`
+
+Needed only for the status bar at the bottom of the panel, which shows how much of the computer's memory and processor is in use. Chrome reports these for the whole computer, not for the extension or for Chrome alone. The numbers are read every few seconds while the panel is open, shown, and not stored or transmitted. Chrome shows no install warning for these two. The user can turn the status bar off in Settings.
+
 ### `favicon`
 
 Needed to show each site's icon next to its tabs, using Chrome's own favicon cache.

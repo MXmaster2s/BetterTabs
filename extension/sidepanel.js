@@ -80,7 +80,7 @@ const state = {
   shownIds: new Set(), // ids of the tabs the list shows right now (a search can hide some)
   found: null, // id of the tab whose row is pulsing after Show current tab or a favourite click
   shortcuts: {}, // the keys Chrome has for the two commands, by command name
-  settings: { showLongbook: true, startView: 'last' },
+  settings: { showLongbook: true, showStatus: true, startView: 'last' },
 };
 
 const list = document.getElementById('list');
@@ -94,6 +94,8 @@ const menu = document.getElementById('menu');
 const settingsPanel = document.getElementById('settings');
 const settingLongbook = document.getElementById('setting-longbook');
 const settingView = document.getElementById('setting-view');
+const settingStatus = document.getElementById('setting-status');
+const statusbar = document.getElementById('statusbar');
 const saveEverything = document.getElementById('save-everything');
 const restoreFile = document.getElementById('restore-file');
 const restoreInput = document.getElementById('restore-input');
@@ -539,6 +541,193 @@ function sameOrder(a, b) {
   return a.length === b.length && a.every((f, i) => f.key === b[i].key && f.tabs.length === b[i].tabs.length && f.tabs.every((t, j) => t.id === b[i].tabs[j].id));
 }
 
+// ---------- Status bar ----------
+
+// One small line: tabs, Claude, memory, processor, connection. Each is an icon and a value, with
+// the name in a tip that shows at once. What does not fit takes its turn every 5 seconds.
+// Tabs and Claude come from the tab list. Memory and processor come from Chrome's system.* APIs,
+// which report the whole computer: Chrome keeps its own per-process figures from extensions.
+const usage = { memory: null, cpu: null, lastCpu: null };
+const ROLL_MS = 5000;
+const stat = (id) => document.getElementById(id);
+const statTip = document.getElementById('stat-tip');
+const statNote = document.getElementById('stat-note');
+let statPage = 0;
+let statPages = 1;
+let statNoteTimer = 0;
+
+const isClaudeTab = (tab) => /^https:\/\/([\w-]+\.)*claude\.ai(\/|$)/.test(tab.url ?? '');
+const gigabytes = (bytes) => {
+  const gb = bytes / 2 ** 30;
+  return gb.toFixed(gb < 10 ? 1 : 0);
+};
+
+function setStat(id, text, tip) {
+  const el = stat(id);
+  el.toggleAttribute('data-off', text == null);
+  if (text == null) return;
+  el.lastElementChild.textContent = text;
+  el.dataset.tip = tip;
+  el.setAttribute('aria-label', tip);
+}
+
+function renderStatusbar() {
+  statusbar.hidden = !state.settings.showStatus;
+  if (statusbar.hidden) return;
+
+  setStat('stat-tabs', String(state.tabs.length), `${plural(state.tabs.length, 'tab')} open in all your Chrome windows`);
+
+  const claudeTabs = state.tabs.filter(isClaudeTab).length;
+  // Claude in Chrome keeps the tabs it drives in a tab group named Claude.
+  const driven = state.tabs.filter((t) => !isClaudeTab(t) && /\bclaude\b/i.test(state.groups.get(t.groupId)?.title ?? '')).length;
+  setStat(
+    'stat-claude',
+    claudeTabs + driven ? (driven ? `${claudeTabs}+${driven}` : String(claudeTabs)) : null,
+    `${plural(claudeTabs, 'tab')} on claude.ai` + (driven ? `, ${driven} more in a tab group Claude is working in` : '') + '. Click Clawd.',
+  );
+
+  const memory = usage.memory;
+  setStat('stat-memory', memory && `${gigabytes(memory.used)}/${gigabytes(memory.total)} GB`, memory && `Memory in use: ${gigabytes(memory.used)} GB of ${gigabytes(memory.total)} GB on this computer. Click for Chrome's own figures.`);
+  setStat('stat-cpu', usage.cpu != null ? `${usage.cpu}%` : null, `Processor in use on this computer: ${usage.cpu}%. Click for Chrome's own figures.`);
+  stat('stat-cpu').classList.toggle('stat-hot', usage.cpu >= 80);
+
+  const c = navigator.connection;
+  if (c && typeof c.downlink === 'number') {
+    const speed = c.downlink >= 10 ? '10+ Mbps' : `${c.downlink} Mbps`;
+    setStat('stat-net', speed, `Chrome's estimate of this connection: about ${speed} down, ${c.rtt ?? '?'} ms round trip. It is what the network can carry, not what is in use; Chrome stops counting at 10 Mbps. Chrome shares no upload or download use with extensions.`);
+  } else setStat('stat-net', null);
+
+  layoutStatusbar();
+}
+
+// Pack the items into pages that fit the width, then show one page.
+function layoutStatusbar() {
+  if (statusbar.hidden) return;
+  const items = [...statusbar.querySelectorAll('.stat:not([data-off])')];
+  for (const el of items) el.hidden = false;
+  const style = getComputedStyle(statusbar);
+  const gap = parseFloat(style.columnGap) || 0;
+  const room = statusbar.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+  const pages = [[]];
+  let used = 0;
+  for (const el of items) {
+    const w = el.getBoundingClientRect().width;
+    if (pages.at(-1).length && used + gap + w > room) {
+      pages.push([]);
+      used = 0;
+    }
+    pages.at(-1).push(el);
+    used += (used ? gap : 0) + w;
+  }
+  pages.forEach((page, i) => page.forEach((el) => (el.dataset.page = i)));
+  statPages = pages.length;
+  statPage %= statPages;
+  showStatPage(items);
+}
+
+function showStatPage(items = statusbar.querySelectorAll('.stat:not([data-off])')) {
+  for (const el of items) el.hidden = Number(el.dataset.page) !== statPage;
+}
+
+setInterval(() => {
+  if (statPages < 2 || document.hidden || statusbar.dataset.noted != null || !statTip.hidden) return;
+  statPage = (statPage + 1) % statPages;
+  showStatPage();
+}, ROLL_MS);
+new ResizeObserver(layoutStatusbar).observe(statusbar);
+navigator.connection?.addEventListener('change', renderStatusbar);
+
+// The tip is one element moved to the item under the pointer, so it appears with no delay.
+function showStatTip(e) {
+  const el = e.target.closest?.('.stat');
+  if (!el?.dataset.tip) return;
+  statTip.textContent = el.dataset.tip;
+  statTip.hidden = false;
+  const box = el.getBoundingClientRect();
+  statTip.style.left = `${Math.max(8, Math.min(box.left, innerWidth - statTip.offsetWidth - 8))}px`;
+  statTip.style.bottom = `${innerHeight - box.top + 4}px`;
+}
+const hideStatTip = () => (statTip.hidden = true);
+statusbar.addEventListener('pointerover', showStatTip);
+statusbar.addEventListener('focusin', showStatTip);
+statusbar.addEventListener('pointerleave', hideStatTip);
+statusbar.addEventListener('focusout', hideStatTip);
+
+// A line in place of the items for a few seconds.
+function noteInStatusbar(text) {
+  statNote.textContent = text;
+  statNote.hidden = false;
+  statusbar.dataset.noted = '';
+  hideStatTip();
+  clearTimeout(statNoteTimer);
+  statNoteTimer = setTimeout(() => {
+    statNote.hidden = true;
+    delete statusbar.dataset.noted;
+  }, ROLL_MS);
+}
+
+// Chrome offers no way to open its Task Manager from an extension, so say where it is.
+for (const id of ['stat-memory', 'stat-cpu']) {
+  stat(id).addEventListener('click', () => noteInStatusbar(IS_MAC ? 'Chrome’s own figures: Window menu, then Task Manager' : 'Chrome’s own figures: press Shift+Esc'));
+}
+
+// Clawd: each click plays the next trick.
+const TRICKS = ['spin', 'hop', 'wiggle', 'squish'];
+let trick = 0;
+const clawd = stat('stat-claude');
+clawd.addEventListener('click', () => {
+  delete clawd.dataset.trick;
+  void clawd.getBoundingClientRect(); // restart the animation if one is still running
+  clawd.dataset.trick = TRICKS[trick++ % TRICKS.length];
+});
+clawd.addEventListener('animationend', (e) => {
+  if (e.animationName.startsWith('mascot-') && clawd.dataset.trick) delete clawd.dataset.trick;
+});
+
+async function sampleUsage() {
+  if (!state.settings.showStatus || document.hidden || !chrome.system) return;
+  try {
+    const memory = await chrome.system.memory.getInfo();
+    usage.memory = { used: memory.capacity - memory.availableCapacity, total: memory.capacity };
+    const { processors } = await chrome.system.cpu.getInfo();
+    const now = processors.reduce((sum, p) => ({ busy: sum.busy + p.usage.total - p.usage.idle, total: sum.total + p.usage.total }), { busy: 0, total: 0 });
+    // The counters only ever grow: the share in use is the change since the last look.
+    if (usage.lastCpu && now.total > usage.lastCpu.total) {
+      usage.cpu = Math.round((100 * (now.busy - usage.lastCpu.busy)) / (now.total - usage.lastCpu.total));
+    }
+    usage.lastCpu = now;
+  } catch {
+    usage.memory = usage.cpu = null;
+  }
+  renderStatusbar();
+}
+setInterval(sampleUsage, 3000);
+document.addEventListener('visibilitychange', sampleUsage);
+
+// ---------- Back and forward through tabs ----------
+
+// background.js (tabnav.js) keeps the tabs you were on, per window. These buttons step through them.
+const navBack = document.getElementById('nav-back');
+const navForward = document.getElementById('nav-forward');
+
+async function renderNav() {
+  const { tabNav = {} } = await chrome.storage.session.get('tabNav');
+  const s = tabNav[state.windowId];
+  // Nothing recorded for this window yet (just installed or reloaded): record the tab you are on.
+  if (!s && state.windowId != null) chrome.runtime.sendMessage({ type: 'tab-seed', windowId: state.windowId }).catch(() => {});
+  navBack.disabled = !s || s.at < 1;
+  navForward.disabled = !s || s.at >= s.ids.length - 1;
+}
+
+function stepTabs(direction) {
+  chrome.runtime.sendMessage({ type: 'tab-nav', direction, windowId: state.windowId }).catch(() => {});
+}
+navBack.addEventListener('click', () => stepTabs(-1));
+navForward.addEventListener('click', () => stepTabs(1));
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === 'session' && changes.tabNav) renderNav();
+});
+
 // ---------- Drawing the list ----------
 
 function render() {
@@ -563,6 +752,8 @@ function render() {
 
   renderFavourites();
   renderSelection();
+  renderStatusbar();
+  renderNav();
 
   // Order every tab first, so the layout covers the ones a search hides too.
   const all = stabilise(foldersFor(state.tabs, state.layout), state.layout);
@@ -849,6 +1040,7 @@ function renderTab(tab) {
         h(
           'span',
           { class: 'tab-detail' },
+          isClaudeTab(tab) && svg('<svg class="tab-claude" viewBox="0 0 47 38" role="img" aria-label="Claude"><title>On claude.ai</title><use href="#clawd"/></svg>'),
           detail,
           renamed && h('span', { class: 'badge' }, 'Renamed'),
           favouriteFor(tab) && h('span', { class: 'badge' }, 'Favourite'),
@@ -1431,6 +1623,7 @@ async function restoreEverythingFile(file) {
 
   const settings = { ...state.settings };
   if (typeof data.settings?.showLongbook === 'boolean') settings.showLongbook = data.settings.showLongbook;
+  if (typeof data.settings?.showStatus === 'boolean') settings.showStatus = data.settings.showStatus;
   if (VIEWS.includes(data.settings?.startView)) settings.startView = data.settings.startView;
 
   try {
@@ -1449,6 +1642,7 @@ async function restoreEverythingFile(file) {
   state.remembered = { names };
   state.settings = settings;
   settingLongbook.checked = settings.showLongbook;
+  settingStatus.checked = settings.showStatus;
   settingView.value = settings.startView;
   backupsPanel.hidePopover();
   await load(); // open pages take their remembered names, and the favourites strip draws again
@@ -1657,11 +1851,13 @@ async function restore() {
   const saved = await chrome.storage.local.get(['view', 'collapsed', 'settings', 'remembered', 'favourites', 'lists']);
   if (VIEWS.includes(saved.view)) state.view = saved.view;
   state.settings.showLongbook = saved.settings?.showLongbook !== false;
+  state.settings.showStatus = saved.settings?.showStatus !== false;
   if (VIEWS.includes(saved.settings?.startView)) {
     state.settings.startView = saved.settings.startView;
     state.view = saved.settings.startView;
   }
   settingLongbook.checked = state.settings.showLongbook;
+  settingStatus.checked = state.settings.showStatus;
   settingView.value = state.settings.startView;
   state.collapsed = new Set(saved.collapsed ?? []);
   const names = saved.remembered?.names;
@@ -1706,6 +1902,11 @@ settingLongbook.addEventListener('change', () => {
   state.settings.showLongbook = settingLongbook.checked;
   saveSettings();
   render();
+});
+settingStatus.addEventListener('change', () => {
+  state.settings.showStatus = settingStatus.checked;
+  saveSettings();
+  renderStatusbar();
 });
 settingView.addEventListener('change', () => {
   state.settings.startView = settingView.value;
@@ -1915,4 +2116,4 @@ chrome.storage.onChanged.addListener((changes, area) => {
   if (area === 'session' && changes.focusSearch?.newValue) focusSearchIfAsked();
 });
 
-restore().then(load).then(focusSearchIfAsked);
+restore().then(load).then(focusSearchIfAsked).then(sampleUsage);

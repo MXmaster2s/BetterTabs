@@ -54,7 +54,12 @@
     { id: 11, title: 'Launch', color: 'green', windowId: 1 },
   ];
 
+  let cpuTicks = 0;
   const listeners = [];
+  const activatedListeners = [];
+  const removedListeners = [];
+  const changeListeners = [];
+  const messageListeners = [];
   const event = () => ({ addListener: (fn) => listeners.push(fn) });
   const fire = () => listeners.forEach((fn) => fn());
   // Like Chrome: what is saved to disk (local) survives a reload, and memory (session) does not.
@@ -78,7 +83,7 @@
 
   window.chrome = {
     tabs: {
-      query: async ({ windowId } = {}) => tabs.filter((t) => windowId == null || t.windowId === windowId).map((t) => ({ ...t })),
+      query: async ({ windowId, active } = {}) => tabs.filter((t) => (windowId == null || t.windowId === windowId) && (active == null || t.active === active)).map((t) => ({ ...t })),
       update: async (id, props = {}) => {
         const tab = tabs.find((t) => t.id === id);
         if ('pinned' in props) {
@@ -89,7 +94,14 @@
         for (const t of tabs) if (t.windowId === tab.windowId) t.active = false;
         tab.active = true;
         tab.lastAccessed = Date.now();
+        activatedListeners.forEach((fn) => fn({ tabId: id, windowId: tab.windowId }));
         fire();
+        return { ...tab };
+      },
+      get: async (id) => {
+        const tab = tabs.find((t) => t.id === id);
+        if (!tab) throw new Error('No tab with id');
+        return { ...tab };
       },
       group: async ({ tabIds }) => {
         const id = Math.max(...groups.map((g) => g.id)) + 1;
@@ -111,13 +123,14 @@
       remove: async (ids) => {
         ids = [].concat(ids);
         tabs = tabs.filter((t) => !ids.includes(t.id));
+        ids.forEach((id) => removedListeners.forEach((fn) => fn(id)));
         reindex();
         fire();
       },
       onCreated: event(),
-      onRemoved: event(),
+      onRemoved: { addListener: (fn) => { removedListeners.push(fn); listeners.push(() => {}); } },
       onUpdated: { addListener: (fn) => listeners.push(() => fn(0, { title: '' })) },
-      onActivated: event(),
+      onActivated: { addListener: (fn) => activatedListeners.push(fn) },
       onMoved: event(),
       onAttached: event(),
       onDetached: event(),
@@ -154,6 +167,16 @@
       onUpdated: event(),
       onMoved: event(),
     },
+    system: {
+      memory: { getInfo: async () => ({ capacity: 16 * 2 ** 30, availableCapacity: 6.2 * 2 ** 30 }) },
+      cpu: {
+        // Counters that only grow, as Chrome's do: about a quarter of the time busy.
+        getInfo: async () => {
+          cpuTicks += 1000;
+          return { processors: [{ usage: { user: 0, kernel: 0, idle: cpuTicks * 0.75, total: cpuTicks } }] };
+        },
+      },
+    },
     windows: {
       getCurrent: async () => ({ id: 1 }),
       create: async ({ url }) => {
@@ -189,10 +212,14 @@
       },
       session: {
         get: async () => ({ ...sessionStore }),
-        set: async (values) => Object.assign(sessionStore, values),
+        set: async (values) => {
+          const changes = Object.fromEntries(Object.entries(values).map(([k, v]) => [k, { newValue: v }]));
+          Object.assign(sessionStore, JSON.parse(JSON.stringify(values)));
+          changeListeners.forEach((fn) => fn(changes, 'session'));
+        },
         remove: async (key) => delete sessionStore[key],
       },
-      onChanged: { addListener: () => {} },
+      onChanged: { addListener: (fn) => changeListeners.push(fn) },
     },
     commands: {
       getAll: async () => [
@@ -200,6 +227,12 @@
         { name: 'search-tabs', shortcut: 'Alt+Shift+F' },
       ],
     },
-    runtime: { getManifest: () => ({ version: 'preview' }) },
+    runtime: {
+      getManifest: () => ({ version: 'preview' }),
+      onInstalled: { addListener: () => {} },
+      onStartup: { addListener: () => {} },
+      onMessage: { addListener: (fn) => messageListeners.push(fn) },
+      sendMessage: (message) => new Promise((resolve) => messageListeners.forEach((fn) => fn(message, {}, resolve))),
+    },
   };
 })();

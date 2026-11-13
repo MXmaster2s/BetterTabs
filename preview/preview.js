@@ -9,7 +9,7 @@
   document.body.replaceChildren(...panel.body.childNodes);
 
   // The mock must exist before the panel script runs.
-  for (const src of ['mock-chrome.js', '../extension/sidepanel.js']) {
+  for (const src of ['mock-chrome.js', '../extension/tabnav.js', '../extension/sidepanel.js']) {
     await new Promise((resolve, reject) => {
       document.body.append(Object.assign(document.createElement('script'), { src, onload: resolve, onerror: reject }));
     });
