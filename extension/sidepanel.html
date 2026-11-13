@@ -36,6 +36,20 @@
     </div>
   </header>
   <main id="list"></main>
+  <footer id="statusbar" class="statusbar" aria-label="Browser status" hidden>
+    <span class="stat" id="stat-tabs" title="Tabs open in every Chrome window"></span>
+    <span class="stat stat-claude" id="stat-claude" hidden>
+      <button id="mascot" class="mascot" type="button" title="">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <g class="mascot-body"><path fill="currentColor" d="M12 1.5 13.9 9l6.4-4.3L16 11.1l7.5.9-7.2 2.7 5 5.9-6.9-3.2-.9 7.6-2-7.4-5.4 5.1 2.6-7.2L1.5 12l7.4-.9L4.5 5.3 11 9.6z"/>
+          <g class="mascot-eyes" fill="#2a1409"><ellipse cx="9.6" cy="11.4" rx="1.05" ry="1.5"/><ellipse cx="14.4" cy="11.4" rx="1.05" ry="1.5"/></g></g>
+        </svg>
+      </button>
+      <span id="stat-claude-text"></span>
+    </span>
+    <span class="stat" id="stat-memory" title="Memory in use on this computer. Chrome does not share its own figure with extensions." hidden></span>
+    <span class="stat" id="stat-cpu" title="Processor in use on this computer. Chrome does not share its own figure with extensions." hidden></span>
+  </footer>
   <div id="selection-bar" class="selection-bar" role="region" aria-label="Selected tabs" hidden>
     <p id="selection-count"></p>
     <div class="selection-actions">
@@ -73,6 +87,13 @@
             <span class="row-hint">On billing and price pages. Needs the longbook app on your Mac. <a title="Open longbook.app in a new tab" href="https://longbook.app/?utm_source=bettertabs&amp;utm_medium=extension&amp;utm_campaign=add-to-longbook" target="_blank" rel="noopener">Get longbook</a></span>
           </div>
           <input id="setting-longbook" class="switch" type="checkbox" role="switch">
+        </div>
+        <div class="row">
+          <div class="row-text">
+            <label class="row-title" for="setting-status" title="A strip at the bottom of the panel with your tab count, Claude tabs, and this computer's memory and processor use">Status bar</label>
+            <span class="row-hint">Tabs open, Claude tabs, and your computer's memory and processor use.</span>
+          </div>
+          <input id="setting-status" class="switch" type="checkbox" role="switch">
         </div>
       </div>
 

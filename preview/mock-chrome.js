@@ -54,6 +54,7 @@
     { id: 11, title: 'Launch', color: 'green', windowId: 1 },
   ];
 
+  let cpuTicks = 0;
   const listeners = [];
   const event = () => ({ addListener: (fn) => listeners.push(fn) });
   const fire = () => listeners.forEach((fn) => fn());
@@ -153,6 +154,16 @@
       onRemoved: event(),
       onUpdated: event(),
       onMoved: event(),
+    },
+    system: {
+      memory: { getInfo: async () => ({ capacity: 16 * 2 ** 30, availableCapacity: 6.2 * 2 ** 30 }) },
+      cpu: {
+        // Counters that only grow, as Chrome's do: about a quarter of the time busy.
+        getInfo: async () => {
+          cpuTicks += 1000;
+          return { processors: [{ usage: { user: 0, kernel: 0, idle: cpuTicks * 0.75, total: cpuTicks } }] };
+        },
+      },
     },
     windows: {
       getCurrent: async () => ({ id: 1 }),

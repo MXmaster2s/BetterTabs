@@ -2,6 +2,10 @@
 
 What changed in BetterTabs, newest first. The version being worked on is in `extension/manifest.json`.
 
+## Unreleased
+
+- **Status bar.** A strip at the bottom of the panel shows how many tabs are open, how many are on claude.ai (with a Claude mascot that breathes, blinks and does a trick when clicked; a second number counts tabs in a tab group Claude is working in), and how much memory and processor the computer is using. Chrome gives extensions the figures for the whole computer, not for Chrome alone. Turn it off in Settings. This adds the `system.cpu` and `system.memory` permissions, which Chrome installs without a warning.
+
 ## 1.7.1
 
 - **Backups made simple.** Settings now has two buttons for backup: **Save backup to a file** (favourites, saved lists, tab names, settings and recent tabs in one file you keep) and **Restore from a file**, which merges it back without deleting anything you have, and also lists your recent tabs. The file survives removing or reinstalling the extension, which Chrome otherwise wipes.

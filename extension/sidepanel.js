@@ -80,7 +80,7 @@ const state = {
   shownIds: new Set(), // ids of the tabs the list shows right now (a search can hide some)
   found: null, // id of the tab whose row is pulsing after Show current tab or a favourite click
   shortcuts: {}, // the keys Chrome has for the two commands, by command name
-  settings: { showLongbook: true, startView: 'last' },
+  settings: { showLongbook: true, showStatus: true, startView: 'last' },
 };
 
 const list = document.getElementById('list');
@@ -94,6 +94,9 @@ const menu = document.getElementById('menu');
 const settingsPanel = document.getElementById('settings');
 const settingLongbook = document.getElementById('setting-longbook');
 const settingView = document.getElementById('setting-view');
+const settingStatus = document.getElementById('setting-status');
+const statusbar = document.getElementById('statusbar');
+const mascot = document.getElementById('mascot');
 const saveEverything = document.getElementById('save-everything');
 const restoreFile = document.getElementById('restore-file');
 const restoreInput = document.getElementById('restore-input');
@@ -539,6 +542,78 @@ function sameOrder(a, b) {
   return a.length === b.length && a.every((f, i) => f.key === b[i].key && f.tabs.length === b[i].tabs.length && f.tabs.every((t, j) => t.id === b[i].tabs[j].id));
 }
 
+// ---------- Status bar ----------
+
+// Tabs and Claude come from the tab list. Memory and processor use come from Chrome's system.*
+// APIs, which report the whole computer: Chrome keeps its own per-process figures from extensions.
+const usage = { memory: null, cpu: null, lastCpu: null };
+
+const isClaudeTab = (tab) => /^https:\/\/([\w-]+\.)*claude\.ai(\/|$)/.test(tab.url ?? '');
+
+function formatGB(bytes) {
+  const gb = bytes / 2 ** 30;
+  return `${gb.toFixed(gb < 10 ? 1 : 0)} GB`;
+}
+
+function renderStatusbar() {
+  statusbar.hidden = !state.settings.showStatus;
+  if (statusbar.hidden) return;
+
+  document.getElementById('stat-tabs').textContent = plural(state.tabs.length, 'tab');
+
+  const claudeTabs = state.tabs.filter(isClaudeTab);
+  // Claude in Chrome keeps the tabs it drives in a tab group named Claude.
+  const driven = state.tabs.filter((t) => !isClaudeTab(t) && /\bclaude\b/i.test(state.groups.get(t.groupId)?.title ?? ''));
+  const claude = document.getElementById('stat-claude');
+  claude.hidden = claudeTabs.length + driven.length === 0;
+  document.getElementById('stat-claude-text').textContent = driven.length ? `${claudeTabs.length} + ${driven.length}` : String(claudeTabs.length);
+  const tip = `${plural(claudeTabs.length, 'tab')} on claude.ai` + (driven.length ? `, and ${plural(driven.length, 'tab')} in a tab group Claude is working in` : '') + '. Chrome cannot tell whether one is mid-reply.';
+  claude.title = tip;
+  mascot.title = `${tip} Click the mascot.`;
+  mascot.setAttribute('aria-label', tip);
+
+  const memory = document.getElementById('stat-memory');
+  memory.hidden = usage.memory == null;
+  if (usage.memory != null) memory.textContent = `Memory ${formatGB(usage.memory.used)} of ${formatGB(usage.memory.total)}`;
+  const cpu = document.getElementById('stat-cpu');
+  cpu.hidden = usage.cpu == null;
+  if (usage.cpu != null) {
+    cpu.textContent = `CPU ${usage.cpu}%`;
+    cpu.classList.toggle('stat-hot', usage.cpu >= 80);
+  }
+}
+
+async function sampleUsage() {
+  if (!state.settings.showStatus || document.hidden || !chrome.system) return;
+  try {
+    const memory = await chrome.system.memory.getInfo();
+    usage.memory = { used: memory.capacity - memory.availableCapacity, total: memory.capacity };
+    const { processors } = await chrome.system.cpu.getInfo();
+    const now = processors.reduce((sum, p) => ({ busy: sum.busy + p.usage.total - p.usage.idle, total: sum.total + p.usage.total }), { busy: 0, total: 0 });
+    // The counters only ever grow: the share in use is the change since the last look.
+    if (usage.lastCpu && now.total > usage.lastCpu.total) {
+      usage.cpu = Math.round((100 * (now.busy - usage.lastCpu.busy)) / (now.total - usage.lastCpu.total));
+    }
+    usage.lastCpu = now;
+  } catch {
+    usage.memory = usage.cpu = null;
+  }
+  renderStatusbar();
+}
+// Each click picks the next trick.
+const TRICKS = ['spin', 'hop', 'wiggle', 'squish'];
+let trick = 0;
+mascot.addEventListener('click', () => {
+  mascot.dataset.trick = '';
+  void mascot.getBoundingClientRect(); // restart the animation if one is still running
+  mascot.dataset.trick = TRICKS[trick++ % TRICKS.length];
+});
+mascot.addEventListener('animationend', (e) => {
+  if (e.animationName.startsWith('mascot-') && mascot.dataset.trick) delete mascot.dataset.trick;
+});
+setInterval(sampleUsage, 3000);
+document.addEventListener('visibilitychange', sampleUsage);
+
 // ---------- Drawing the list ----------
 
 function render() {
@@ -563,6 +638,7 @@ function render() {
 
   renderFavourites();
   renderSelection();
+  renderStatusbar();
 
   // Order every tab first, so the layout covers the ones a search hides too.
   const all = stabilise(foldersFor(state.tabs, state.layout), state.layout);
@@ -1431,6 +1507,7 @@ async function restoreEverythingFile(file) {
 
   const settings = { ...state.settings };
   if (typeof data.settings?.showLongbook === 'boolean') settings.showLongbook = data.settings.showLongbook;
+  if (typeof data.settings?.showStatus === 'boolean') settings.showStatus = data.settings.showStatus;
   if (VIEWS.includes(data.settings?.startView)) settings.startView = data.settings.startView;
 
   try {
@@ -1449,6 +1526,7 @@ async function restoreEverythingFile(file) {
   state.remembered = { names };
   state.settings = settings;
   settingLongbook.checked = settings.showLongbook;
+  settingStatus.checked = settings.showStatus;
   settingView.value = settings.startView;
   backupsPanel.hidePopover();
   await load(); // open pages take their remembered names, and the favourites strip draws again
@@ -1657,11 +1735,13 @@ async function restore() {
   const saved = await chrome.storage.local.get(['view', 'collapsed', 'settings', 'remembered', 'favourites', 'lists']);
   if (VIEWS.includes(saved.view)) state.view = saved.view;
   state.settings.showLongbook = saved.settings?.showLongbook !== false;
+  state.settings.showStatus = saved.settings?.showStatus !== false;
   if (VIEWS.includes(saved.settings?.startView)) {
     state.settings.startView = saved.settings.startView;
     state.view = saved.settings.startView;
   }
   settingLongbook.checked = state.settings.showLongbook;
+  settingStatus.checked = state.settings.showStatus;
   settingView.value = state.settings.startView;
   state.collapsed = new Set(saved.collapsed ?? []);
   const names = saved.remembered?.names;
@@ -1706,6 +1786,11 @@ settingLongbook.addEventListener('change', () => {
   state.settings.showLongbook = settingLongbook.checked;
   saveSettings();
   render();
+});
+settingStatus.addEventListener('change', () => {
+  state.settings.showStatus = settingStatus.checked;
+  saveSettings();
+  renderStatusbar();
 });
 settingView.addEventListener('change', () => {
   state.settings.startView = settingView.value;
@@ -1915,4 +2000,4 @@ chrome.storage.onChanged.addListener((changes, area) => {
   if (area === 'session' && changes.focusSearch?.newValue) focusSearchIfAsked();
 });
 
-restore().then(load).then(focusSearchIfAsked);
+restore().then(load).then(focusSearchIfAsked).then(sampleUsage);

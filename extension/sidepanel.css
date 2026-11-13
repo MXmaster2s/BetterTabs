@@ -305,7 +305,7 @@ button {
 .selection-bar {
   position: fixed;
   right: 3rem;
-  bottom: 0.5rem;
+  bottom: var(--lift, 0.5rem);
   left: 0.5rem;
   padding: 0.25rem 0.5rem;
   border: 1px solid var(--rule);
@@ -339,13 +339,13 @@ button {
 }
 
 .selecting main {
-  padding-bottom: 6rem;
+  padding-bottom: calc(var(--lift, 0.5rem) + 5.5rem);
 }
 
 /* Folders: one per website, window, time span or tab group */
 
 main {
-  padding: 0.875rem 0.5rem 3.5rem;
+  padding: 0.875rem 0.5rem calc(var(--lift, 0.5rem) + 3rem);
 }
 
 .folder {
@@ -673,12 +673,174 @@ main {
   display: none;
 }
 
+/* Status bar: a strip at the very bottom. With it on, everything fixed above it moves up by --lift. */
+
+body:has(#statusbar:not([hidden])) {
+  --lift: 2.25rem;
+}
+
+.statusbar {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.125rem 0.75rem;
+  min-height: 1.75rem;
+  padding: 0.25rem 0.75rem;
+  border-top: 1px solid var(--rule);
+  background: var(--paper);
+  color: var(--muted);
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.statusbar[hidden],
+.statusbar [hidden] {
+  display: none;
+}
+
+.stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  white-space: nowrap;
+}
+
+.stat-claude {
+  color: #b5502c;
+}
+
+.mascot {
+  display: grid;
+  place-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.mascot svg {
+  width: 1.125rem;
+  height: 1.125rem;
+  overflow: visible;
+}
+
+.mascot-body,
+.mascot-eyes {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* Alive while it sits there: it breathes, and blinks now and then. A click makes it do a trick. */
+@media (prefers-reduced-motion: no-preference) {
+  .mascot-body {
+    animation: mascot-breathe 3s ease-in-out infinite;
+  }
+
+  .mascot-eyes {
+    animation: mascot-blink 4.5s infinite;
+  }
+
+  .mascot[data-trick='spin'] .mascot-body {
+    animation: mascot-spin 0.9s cubic-bezier(0.3, 0.7, 0.3, 1);
+  }
+
+  .mascot[data-trick='hop'] .mascot-body {
+    animation: mascot-hop 0.8s cubic-bezier(0.3, 0.7, 0.4, 1);
+  }
+
+  .mascot[data-trick='wiggle'] .mascot-body {
+    animation: mascot-wiggle 0.8s ease-in-out;
+  }
+
+  .mascot[data-trick='squish'] .mascot-body {
+    animation: mascot-squish 0.8s ease-out;
+  }
+}
+
+@keyframes mascot-breathe {
+  50% {
+    transform: scale(1.12) rotate(6deg);
+  }
+}
+
+@keyframes mascot-blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  96% {
+    transform: scaleY(0.1);
+  }
+}
+
+@keyframes mascot-spin {
+  to {
+    transform: rotate(360deg) scale(1.2);
+  }
+}
+
+@keyframes mascot-hop {
+  30% {
+    transform: translateY(-0.45rem) scale(1.15);
+  }
+  55% {
+    transform: translateY(0) scale(1.25, 0.8);
+  }
+  75% {
+    transform: translateY(-0.15rem);
+  }
+}
+
+@keyframes mascot-wiggle {
+  15%,
+  55% {
+    transform: rotate(-18deg);
+  }
+  35%,
+  75% {
+    transform: rotate(18deg);
+  }
+}
+
+@keyframes mascot-squish {
+  25% {
+    transform: scale(1.4, 0.6);
+  }
+  55% {
+    transform: scale(0.7, 1.35);
+  }
+  80% {
+    transform: scale(1.1, 0.95);
+  }
+}
+
+.stat-hot {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+@media (prefers-color-scheme: dark) {
+  .stat-claude {
+    color: #e8946f;
+  }
+}
+
 /* Settings: a button fixed at the bottom right that opens a popover above it. */
 
 .settings-button {
   position: fixed;
   right: 0.5rem;
-  bottom: 0.5rem;
+  bottom: var(--lift, 0.5rem);
   box-shadow: 0 0.125rem 0.5rem rgb(0 0 0 / 0.16);
 }
 
@@ -686,7 +848,7 @@ main {
 
 #save-list {
   position: fixed;
-  inset: auto 0.5rem 3rem auto;
+  inset: auto 0.5rem calc(var(--lift, 0.5rem) + 2.5rem) auto;
   width: min(17rem, calc(100vw - 1rem));
   margin: 0;
   padding: 0.75rem;

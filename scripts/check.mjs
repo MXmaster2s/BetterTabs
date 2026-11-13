@@ -60,6 +60,8 @@ const usage = {
   storage: /chrome\.storage\b/,
   favicon: /_favicon/,
   history: /chrome\.history\b/,
+  'system.cpu': /chrome\.system\.cpu\b/,
+  'system.memory': /chrome\.system\.memory\b/,
 };
 const requested = new Set(manifest.permissions ?? []);
 for (const [permission, pattern] of Object.entries(usage)) {
