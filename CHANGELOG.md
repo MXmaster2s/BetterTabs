@@ -4,6 +4,7 @@ What changed in BetterTabs, newest first. The version being worked on is in `ext
 
 ## 1.8.0
 
+- **Opens in Chrome's tab order.** The first time you open BetterTabs, tabs are listed in the same order as Chrome's tab strip, so the list looks the way you remember it. The Windows view is now called **Tab order**. Choose it again, or press **Tidy up**, to put the list back in that order. If you already picked a view, it stays.
 - **Back and forward between tabs.** Two arrow buttons beside the search box step back to the tab you were on before this one, and forward again, like a browser's back button but for tab switches, not for a page's own history. It keeps up to 50 tabs per window, until Chrome closes, and nothing is stored on disk.
 - **Status bar.** One small gray line at the bottom of the panel with an icon and a value for each of: tabs open, tabs on claude.ai (with Clawd, Claude's mascot, who breathes and does a trick when clicked), memory and processor in use on the computer, and Chrome's connection estimate. Point at an icon to see its name at once. If they do not all fit, they take turns every 5 seconds. Click memory or processor for where Chrome's own Task Manager is. Tabs on claude.ai also show a small Clawd in the list. Chrome gives extensions the memory and processor figures for the whole computer, not for Chrome alone, and no upload or download figure. Turn the bar off in Settings. This adds the `system.cpu` and `system.memory` permissions, which Chrome installs without a warning.
 

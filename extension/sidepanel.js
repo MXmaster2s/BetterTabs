@@ -55,7 +55,7 @@ const MAX_FAVOURITES = 100;
 const MAX_LISTS = 100;
 
 const state = {
-  view: 'site',
+  view: 'window', // Tab order: what a first-time user sees, the same order as Chrome's tab strip
   query: '',
   history: { query: '', items: [] }, // pages from Chrome's history that match the search and are not open
   collapsed: new Set(),

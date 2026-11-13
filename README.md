@@ -23,7 +23,7 @@ After changing a file, click the reload arrow on the extension's card.
 
 **Organise**
 - **Sites** (the default) groups tabs by website, busiest first, each site in its own colour. Chrome's own pages and local files get their own folders at the end.
-- **Windows**, **Recent** and **Groups** show the same tabs by window, by when you last used them (last hour, earlier today, this week, older), or by Chrome tab group with Chrome's group colours.
+- **Tab order** (what you see the first time you open BetterTabs), **Recent** and **Groups** show the same tabs in the same order as Chrome's tab strip (one folder for each window), by when you last used them (last hour, earlier today, this week, older), or by Chrome tab group with Chrome's group colours.
 - Folders collapse, and BetterTabs remembers which ones you collapsed and which view you chose.
 - Pinned and playing tabs are labelled.
 
@@ -51,7 +51,7 @@ After changing a file, click the reload arrow on the extension's card.
 - Close a tab with its × button, or close every tab in a folder with **Close all**. Closing happens straight away, and Chrome's **Reopen closed tab** (`Ctrl/Cmd+Shift+T`) undoes it.
 
 **Settings**
-- The icon button at the bottom right opens the settings: hide the **Add to longbook** button, and choose which view the panel opens in (the one you used last, or always Sites, Windows, Recent or Groups). Settings are saved on your computer and take effect at once.
+- The icon button at the bottom right opens the settings: hide the **Add to longbook** button, and choose which view the panel opens in (the one you used last, or always Sites, Tab order, Recent or Groups). Settings are saved on your computer and take effect at once.
 - **Save backup to a file** keeps your favourites, saved lists, tab names, settings and recent tabs in one file you choose to keep. It survives removing or reinstalling BetterTabs: **Restore from a file** brings it all back and deletes nothing you have now.
 - **Recent tabs** are kept for you automatically: BetterTabs keeps a copy of your open tabs' titles and addresses on your computer, a new one about every five minutes while your tabs change, every copy of the last hour, then one an hour for about half a day. **Restore from a file** also lists them: **Restore** opens each saved window, skips pages you already have open, and loads only the first tab of each window so hundreds of tabs don't load at once, **Save as bookmarks** exports a copy, and **Delete recent tabs** removes them. Nothing leaves your computer.
 

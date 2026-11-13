@@ -26,7 +26,7 @@ From top to bottom:
 1. A visually hidden `<h1>` "Open tabs".
 2. A row of favourite icons (see Favourites), shown only when there is at least one favourite.
 3. A row with a search box (`type="search"`, label "Search tabs") and, to its right, a square icon button (a target symbol) labelled **Show current tab**.
-4. A four-way view switch (radio group): **Sites**, **Windows**, **Recent**, **Groups**.
+4. A four-way view switch (radio group): **Sites**, **Tab order**, **Recent**, **Groups**. **Tab order** is the default the first time the panel opens: tabs in the same order as Chrome's tab strip, one folder per window (the radio value stays `window`, so saved settings and backups keep working). Choosing it again, or **Tidy up**, puts the list back in that order.
 5. A summary row: the tab count on the left; on the right, a "Close N duplicates" text button shown only when duplicates exist, **Tidy up** (`#tidy`, shown only when the list is not in the order a fresh sort would give; see Keeping the order) and **Select** (`#select-toggle`, `aria-pressed`; it reads **Done** while Select mode is on).
 6. The list: a column of folders. Each folder has a header (`<h2>` wrapping a toggle button with the folder name and its tab count, plus a "Close all" button) and a `<ul>` of tab rows.
 7. A visually hidden `role="status"` element for screen reader announcements.
@@ -177,7 +177,7 @@ Chrome keeps a suspended (discarded) tab in the strip and reloads it when it is 
 
 A **Settings** icon button sits fixed at the bottom right of the panel (`aria-label` "Settings"; the list has extra bottom padding so it never covers a row). It opens the **Settings page**, which fills the whole panel (a popover with `inset: 0`) under a sticky header with a back button (`Esc` or the button returns to the tab list) and the title, whose heading takes focus. Changes apply and are saved at once; there is no save button. The page is grouped, each group a rounded card of rows, with a short title above it:
 
-- **Panel**: **Open the panel in** (a select: the view I used last, Sites, Windows, Recent, Groups) and **Add to longbook button** (a switch, with a hint and a "Get longbook" link).
+- **Panel**: **Open the panel in** (a select: the view I used last, Sites, Tab order, Recent, Groups) and **Add to longbook button** (a switch, with a hint and a "Get longbook" link).
 - **Your tabs**: **Saved lists**, a row with a chevron that opens the Saved lists page.
 - **Backup**: a hint saying that one file holds favourites, saved lists, tab names, settings and recent tabs and survives removing or reinstalling BetterTabs, and two buttons side by side, **Save backup to a file** (`#save-everything`, filled) and **Restore from a file** (`#open-backups`). There is no backup setting and no other backup button: the recent tabs (below) are kept automatically.
 - **Open from anywhere**: the keys Chrome has for Open BetterTabs and Search your tabs (from `chrome.commands.getAll`, "Not set" when empty, written with Mac symbols such as ⌥⇧B on a Mac) and **Change shortcuts**, which opens `chrome://extensions/shortcuts` in a new tab.

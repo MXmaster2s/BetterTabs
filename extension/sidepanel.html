@@ -28,8 +28,8 @@
     </div>
     <fieldset class="views">
       <legend class="visually-hidden">Organise tabs by</legend>
-      <label title="Group tabs by website, busiest site first"><input type="radio" name="view" value="site" checked><span>Sites</span></label>
-      <label title="Show tabs by browser window"><input type="radio" name="view" value="window"><span>Windows</span></label>
+      <label title="Group tabs by website, busiest site first"><input type="radio" name="view" value="site"><span>Sites</span></label>
+      <label title="Show tabs in the same order as Chrome's tab strip, one folder for each window. Choose it again any time to put the list back in that order."><input type="radio" name="view" value="window" checked><span>Tab order</span></label>
       <label title="Show tabs by when you last used them"><input type="radio" name="view" value="recent"><span>Recent</span></label>
       <label title="Show tabs by Chrome tab group"><input type="radio" name="view" value="group"><span>Groups</span></label>
     </fieldset>
@@ -37,7 +37,7 @@
       <p id="count"></p>
       <div class="summary-actions">
         <button id="close-dupes" class="text-button" type="button" title="Close extra copies of tabs with the same address. Keeps the one you are on." hidden></button>
-        <button id="tidy" class="text-button" type="button" title="Sort the list again: busiest sites first, tabs in Chrome's order. The list keeps its order while you work, so rows do not move under your mouse." hidden>Tidy up</button>
+        <button id="tidy" class="text-button" type="button" title="Sort the list again: in Tab order, the same order as Chrome's tab strip; in Sites, busiest first. The list keeps its order while you work, so rows do not move under your mouse." hidden>Tidy up</button>
         <button id="select-toggle" class="text-button" type="button" aria-pressed="false" title="Pick several tabs, then close, suspend or group them together. Ctrl or Cmd-click a tab does the same.">Select</button>
       </div>
     </div>
@@ -78,7 +78,7 @@
           <select id="setting-view">
             <option value="last">The view I used last</option>
             <option value="site">Sites</option>
-            <option value="window">Windows</option>
+            <option value="window">Tab order</option>
             <option value="recent">Recent</option>
             <option value="group">Groups</option>
           </select>
