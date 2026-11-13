@@ -572,6 +572,7 @@ function renderStatusbar() {
   mascot.title = `${tip} Click the mascot.`;
   mascot.setAttribute('aria-label', tip);
 
+  renderNet();
   const memory = document.getElementById('stat-memory');
   memory.hidden = usage.memory == null;
   if (usage.memory != null) memory.textContent = `Memory ${formatGB(usage.memory.used)} of ${formatGB(usage.memory.total)}`;
@@ -582,6 +583,19 @@ function renderStatusbar() {
     cpu.classList.toggle('stat-hot', usage.cpu >= 80);
   }
 }
+
+// Chrome's own estimate of the connection (navigator.connection, no permission needed). It is
+// Chrome's guess at what the network can carry, not what is moving now, and Chrome caps it at 10 Mbps.
+function renderNet() {
+  const net = document.getElementById('stat-net');
+  const c = navigator.connection;
+  net.hidden = statusbar.hidden || !c || typeof c.downlink !== 'number';
+  if (net.hidden) return;
+  const speed = c.downlink >= 10 ? '10+ Mbps' : `${c.downlink} Mbps`;
+  net.textContent = `Net ${speed}${c.rtt ? `, ${c.rtt} ms` : ''}`;
+  net.title = `Chrome's estimate of this connection: about ${speed} down, ${c.rtt ?? '?'} ms round trip. It shows what the network can carry, not what is being used now; Chrome stops counting at 10 Mbps. Chrome does not share upload or download use with extensions.`;
+}
+navigator.connection?.addEventListener('change', renderNet);
 
 async function sampleUsage() {
   if (!state.settings.showStatus || document.hidden || !chrome.system) return;
