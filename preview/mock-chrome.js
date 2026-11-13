@@ -225,6 +225,8 @@
       getAll: async () => [
         { name: 'open-panel', shortcut: 'Alt+Shift+B' },
         { name: 'search-tabs', shortcut: 'Alt+Shift+F' },
+        { name: 'tab-back', shortcut: 'Alt+Shift+Comma' },
+        { name: 'tab-forward', shortcut: 'Alt+Shift+Period' },
       ],
     },
     runtime: {

@@ -17,6 +17,12 @@ chrome.commands
 // The keyboard shortcuts (change them at chrome://extensions/shortcuts). Opening comes first:
 // Chrome only allows it while the key press still counts as the user's action.
 chrome.commands.onCommand.addListener(async (command, tab) => {
+  // Back and forward through the tabs you were on: no panel needed (see tabnav.js).
+  if (command === 'tab-back' || command === 'tab-forward') {
+    const windowId = tab?.windowId ?? (await chrome.windows.getLastFocused()).id;
+    await navDo(() => navGo(windowId, command === 'tab-back' ? -1 : 1));
+    return;
+  }
   if (command !== 'open-panel' && command !== 'search-tabs') return;
   const opened = chrome.sidePanel.open({ windowId: tab.windowId });
   // The panel reads this note when it opens, or at once if it is already open.

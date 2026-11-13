@@ -180,7 +180,7 @@ A **Settings** icon button sits fixed at the bottom right of the panel (`aria-la
 - **Panel**: **Open the panel in** (a select: the view I used last, Sites, Tab order, Recent, Groups) and **Add to longbook button** (a switch, with a hint and a "Get longbook" link).
 - **Your tabs**: **Saved lists**, a row with a chevron that opens the Saved lists page.
 - **Backup**: a hint saying that one file holds favourites, saved lists, tab names, settings and recent tabs and survives removing or reinstalling BetterTabs, and two buttons side by side, **Save backup to a file** (`#save-everything`, filled) and **Restore from a file** (`#open-backups`). There is no backup setting and no other backup button: the recent tabs (below) are kept automatically.
-- **Open from anywhere**: the keys Chrome has for Open BetterTabs and Search your tabs (from `chrome.commands.getAll`, "Not set" when empty, written with Mac symbols such as ⌥⇧B on a Mac) and **Change shortcuts**, which opens `chrome://extensions/shortcuts` in a new tab.
+- **Shortcuts from anywhere**: the keys Chrome has for Open BetterTabs, Search your tabs, Back to the previous tab and Forward to the next tab (from `chrome.commands.getAll`, "Not set" when empty, written with Mac symbols such as ⌥⇧B on a Mac) and **Change shortcuts**, which opens `chrome://extensions/shortcuts` in a new tab.
 - **Inside the panel**: the keys the panel itself handles, written for the platform (on a Mac: ⌫ closes a tab, ⌘-click selects, ⌘⇧T reopens a closed tab; elsewhere Delete, Ctrl-click, Ctrl+Shift+T). On a Mac the Backspace key (⌫, which is what the Delete key sends on a Mac keyboard) closes the tab you are on in the list, like Delete.
 - **About**: the version (`chrome.runtime.getManifest().version`), **Privacy policy** and **Report a problem** (links that open in a new tab).
 
@@ -259,7 +259,7 @@ The list redraws (debounced by 60 ms) when tabs are created, removed, moved, att
 | `F2` (on a tab) | Rename the tab |
 | `Delete` (on a tab) | Close the tab |
 
-Two shortcuts are declared in the manifest as `commands` and handled by the service worker, which opens the panel with `chrome.sidePanel.open` before doing anything else, so the key press still counts as the user's action. `Alt+Shift+B` (`open-panel`) opens the panel. `Alt+Shift+F` (`search-tabs`) opens it and leaves a `focusSearch` note in session storage; the panel focuses and selects the search box when it reads a note under five seconds old, and removes the note. Users can change both at `chrome://extensions/shortcuts`.
+Four shortcuts are declared in the manifest as `commands` (`tab-back` is `Alt+Shift+Comma` and `tab-forward` is `Alt+Shift+Period`: the service worker steps through the tab history of the focused window, as the panel buttons do, and does not open the panel). The other two open the panel from the service worker, which opens the panel with `chrome.sidePanel.open` before doing anything else, so the key press still counts as the user's action. `Alt+Shift+B` (`open-panel`) opens the panel. `Alt+Shift+F` (`search-tabs`) opens it and leaves a `focusSearch` note in session storage; the panel focuses and selects the search box when it reads a note under five seconds old, and removes the note. Users can change both at `chrome://extensions/shortcuts`.
 
 ## Visual design
 
@@ -267,8 +267,8 @@ Two shortcuts are declared in the manifest as `commands` and handled by the serv
 - Light and dark themes via `prefers-color-scheme`.
 - Folders look like file-folder tabs: a tinted tab sitting on a tinted underline.
 - Interactive targets are at least 24 CSS px tall.
-- Focus: 2 px outline with `:focus-visible`.
-- The only motion is the folder chevron rotating; it is disabled under `prefers-reduced-motion`.
+- Four states on every control: normal, hover (`--hover`), pressed (`:active`, `--press`, a step darker than hover) and keyboard focus (2 px outline with `:focus-visible`). Disabled controls do not react. The block "Interaction states" at the end of `sidepanel.css` holds the pressed rules and any hover that a control lacked; a new control needs all four.
+- Motion: the folder chevron rotating, a 0.1 s colour fade on hover and press, and a small shrink while an icon button is pressed; all disabled under `prefers-reduced-motion`.
 
 ## Accessibility
 

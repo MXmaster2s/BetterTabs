@@ -722,6 +722,12 @@ async function renderNav() {
 function stepTabs(direction) {
   chrome.runtime.sendMessage({ type: 'tab-nav', direction, windowId: state.windowId }).catch(() => {});
 }
+// The buttons' tooltips name the keys, whatever the user set them to.
+function titleNavButtons() {
+  const named = (text, command) => (state.shortcuts[command] ? `${text} (${state.shortcuts[command]})` : text);
+  navBack.title = named('Back to the tab you were on before this one', 'tab-back');
+  navForward.title = named('Forward to the tab you came back from', 'tab-forward');
+}
 navBack.addEventListener('click', () => stepTabs(-1));
 navForward.addEventListener('click', () => stepTabs(1));
 chrome.storage.onChanged.addListener((changes, area) => {
@@ -1833,6 +1839,7 @@ async function loadShortcuts() {
     // Without them the tooltips just leave the shortcut out.
   }
   const find = state.shortcuts['search-tabs'];
+  titleNavButtons();
   search.title = `Search tabs by name, title or address. Press / to jump here${find ? `, or ${find} from any page to open BetterTabs with this box ready` : ''}.`;
 }
 
@@ -1840,6 +1847,8 @@ async function loadShortcuts() {
 function showShortcuts() {
   document.getElementById('key-open-panel').textContent = keyLabel(state.shortcuts['open-panel']);
   document.getElementById('key-search-tabs').textContent = keyLabel(state.shortcuts['search-tabs']);
+  document.getElementById('key-tab-back').textContent = keyLabel(state.shortcuts['tab-back']);
+  document.getElementById('key-tab-forward').textContent = keyLabel(state.shortcuts['tab-forward']);
   document.getElementById('panel-keys').replaceChildren(
     ...PANEL_KEYS.map(([what, key]) => h('div', { class: 'row' }, h('span', { class: 'row-title' }, what), h('kbd', null, key))),
   );

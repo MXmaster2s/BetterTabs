@@ -8,6 +8,7 @@
   --muted: #586472;
   --rule: #d2d9e1;
   --hover: #e0e6ed;
+  --press: #ccd4de;
   --mark: #ffe45c;
   --mark-ink: #18222e;
   --focus: #2f6feb;
@@ -25,6 +26,7 @@
     --muted: #97a3b0;
     --rule: #29313b;
     --hover: #212932;
+    --press: #2d3947;
     --mark: #5e5114;
     --mark-ink: #fff6c2;
     --focus: #7aa7ff;
@@ -1318,4 +1320,159 @@ kbd {
 #delete-backups {
   margin-left: 0;
   width: 100%;
+}
+
+/* Interaction states. Every control has four: normal, hover (pointer over it), pressed (:active, while
+   the button is held down) and keyboard focus (:focus-visible, the 2px ring set at the top). Hover is
+   --hover, pressed is the darker --press. Disabled controls do not react. */
+
+.fav:active,
+.icon-button:active,
+.text-button:active,
+.row-link:active,
+.history-row:active,
+.page-button:active,
+.tab-longbook:active,
+#menu button:active,
+#menu a:active,
+button.stat:active {
+  background: var(--press);
+}
+
+.tab:has(.tab-main:active) {
+  background: var(--press);
+}
+
+.tab-close:active {
+  background: var(--muted);
+  color: var(--field);
+}
+
+.text-button:disabled:hover,
+.text-button:disabled:active {
+  background: none;
+}
+
+.icon-button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.icon-button:disabled:hover,
+.icon-button:disabled:active {
+  background: var(--field);
+}
+
+.search input:hover:not(:focus-visible) {
+  border-color: var(--muted);
+}
+
+.views label:hover input:not(:checked) + span {
+  background: var(--rule);
+  color: var(--ink);
+}
+
+.views label:active input:not(:checked) + span {
+  background: var(--press);
+  color: var(--ink);
+}
+
+.views label:active input:checked + span {
+  box-shadow: inset 0 1px 2px rgb(24 34 46 / 0.2);
+}
+
+.folder-tab:hover {
+  background: color-mix(in srgb, var(--tint), var(--ink) 8%);
+}
+
+.folder-tab:active {
+  background: color-mix(in srgb, var(--tint), var(--ink) 16%);
+}
+
+.close-all:hover {
+  background: var(--hover);
+  color: var(--ink);
+}
+
+button.stat:hover {
+  background: var(--hover);
+}
+
+.close-all:hover:active,
+button.stat:hover:active {
+  background: var(--press);
+}
+
+.switch:hover {
+  border-color: var(--ink);
+}
+
+.switch:checked:hover {
+  filter: brightness(0.92);
+}
+
+.switch:active::before {
+  width: 1.125rem;
+}
+
+.switch:checked:active::before {
+  left: calc(100% - 1.3125rem);
+}
+
+.switch:focus-visible {
+  outline-offset: 2px;
+}
+
+.row select {
+  cursor: pointer;
+}
+
+.row select:hover {
+  border-color: var(--muted);
+  background: var(--hover);
+}
+
+.row select:active {
+  background: var(--press);
+}
+
+.row-hint a:hover {
+  text-decoration: none;
+  background: var(--hover);
+}
+
+.row-hint a:active {
+  background: var(--press);
+}
+
+.page-button-main:active {
+  background: var(--focus);
+  filter: brightness(0.82);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .fav,
+  .icon-button,
+  .text-button,
+  .row-link,
+  .history-row,
+  .page-button,
+  .tab,
+  .tab-close,
+  .tab-longbook,
+  .close-all,
+  .folder-tab,
+  .views span,
+  .switch,
+  .row select,
+  button.stat,
+  #menu button,
+  #menu a {
+    transition: background-color 0.1s, border-color 0.1s, color 0.1s, filter 0.1s;
+  }
+
+  .icon-button:active:not(:disabled),
+  .fav:active {
+    scale: 0.94;
+  }
 }

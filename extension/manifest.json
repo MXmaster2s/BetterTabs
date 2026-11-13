@@ -20,6 +20,14 @@
     "search-tabs": {
       "suggested_key": { "default": "Alt+Shift+F" },
       "description": "Open BetterTabs and search your tabs"
+    },
+    "tab-back": {
+      "suggested_key": { "default": "Alt+Shift+Comma" },
+      "description": "Go back to the tab you were on before this one"
+    },
+    "tab-forward": {
+      "suggested_key": { "default": "Alt+Shift+Period" },
+      "description": "Go forward to the tab you came back from"
     }
   },
   "action": {
