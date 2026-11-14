@@ -1,4 +1,5 @@
 importScripts('tabnav.js'); // back and forward through the tabs you were on
+importScripts('idle.js'); // suspend or close tabs you have not used for a while (off until turned on)
 
 // Clicking the toolbar icon opens the side panel instead of a popup.
 chrome.sidePanel

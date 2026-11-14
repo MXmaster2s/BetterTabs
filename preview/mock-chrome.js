@@ -60,6 +60,7 @@
   const removedListeners = [];
   const changeListeners = [];
   const messageListeners = [];
+  const alarms = {};
   const event = () => ({ addListener: (fn) => listeners.push(fn) });
   const fire = () => listeners.forEach((fn) => fn());
   // Like Chrome: what is saved to disk (local) survives a reload, and memory (session) does not.
@@ -103,13 +104,30 @@
         if (!tab) throw new Error('No tab with id');
         return { ...tab };
       },
-      group: async ({ tabIds }) => {
-        const id = Math.max(...groups.map((g) => g.id)) + 1;
+      group: async ({ tabIds, groupId }) => {
+        const id = groupId ?? Math.max(...groups.map((g) => g.id)) + 1;
         const windowId = tabs.find((t) => t.id === tabIds[0]).windowId;
-        groups.push({ id, title: '', color: 'grey', windowId });
+        if (groupId == null) groups.push({ id, title: '', color: 'grey', windowId });
         for (const t of tabs) if (tabIds.includes(t.id)) t.groupId = id;
         fire();
         return id;
+      },
+      ungroup: async (ids) => {
+        for (const t of tabs) if ([].concat(ids).includes(t.id)) t.groupId = -1;
+        fire();
+      },
+      move: async (ids, { windowId, index }) => {
+        ids = [].concat(ids);
+        const moving = tabs.filter((t) => ids.includes(t.id));
+        tabs = tabs.filter((t) => !ids.includes(t.id));
+        const w = windowId ?? moving[0].windowId;
+        moving.forEach((t) => (t.windowId = w));
+        const inWindow = tabs.filter((t) => t.windowId === w);
+        const before = index >= 0 && index < inWindow.length ? inWindow[index] : null;
+        tabs.splice(before ? tabs.indexOf(before) : tabs.length, 0, ...moving);
+        reindex();
+        fire();
+        return moving.map((t) => ({ ...t }));
       },
       create: async ({ url }) => {
         const tab = { id: 2000 + tabs.length, windowId: 1, title: url, url, groupId: -1, index: 0, active: false, pinned: false, audible: false, lastAccessed: Date.now() };
@@ -202,7 +220,9 @@
           }
         },
         set: async (values) => {
+          const changes = Object.fromEntries(Object.entries(values).map(([k, v]) => [k, { newValue: v }]));
           Object.assign(store, values);
+          changeListeners.forEach((fn) => fn(changes, 'local'));
           try {
             sessionStorage.setItem('mock-local', JSON.stringify(store));
           } catch {
@@ -220,6 +240,12 @@
         remove: async (key) => delete sessionStore[key],
       },
       onChanged: { addListener: (fn) => changeListeners.push(fn) },
+    },
+    alarms: {
+      create: async (name, info) => { alarms[name] = info; },
+      get: async (name) => alarms[name],
+      clear: async (name) => delete alarms[name],
+      onAlarm: { addListener: () => {} },
     },
     commands: {
       getAll: async () => [

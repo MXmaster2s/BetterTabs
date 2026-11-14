@@ -741,6 +741,27 @@ button.stat {
   font-weight: 600;
 }
 
+.notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.125rem 0.125rem 0.125rem 0.625rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.5rem;
+  background: var(--field);
+  font-size: 0.75rem;
+}
+
+.notice[hidden] {
+  display: none;
+}
+
+.notice-actions {
+  display: flex;
+  flex: none;
+}
+
 .stat-note {
   color: var(--ink);
 }
@@ -1327,6 +1348,7 @@ kbd {
    --hover, pressed is the darker --press. Disabled controls do not react. */
 
 .fav:active,
+.notice .text-button:active,
 .icon-button:active,
 .text-button:active,
 .row-link:active,
@@ -1475,4 +1497,25 @@ button.stat:hover:active {
   .fav:active {
     scale: 0.94;
   }
+}
+
+/* Dragging tabs: the row being dragged fades, a line shows where it will land, a folder outlines when
+   a drop goes into it. */
+
+.tab.dragging {
+  opacity: 0.45;
+}
+
+.tab.drop-before {
+  box-shadow: 0 -2px 0 var(--focus);
+}
+
+.tab.drop-after {
+  box-shadow: 0 2px 0 var(--focus);
+}
+
+.folder.drop-into {
+  outline: 2px dashed var(--focus);
+  outline-offset: 2px;
+  border-radius: 0.4375rem;
 }

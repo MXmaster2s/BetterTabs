@@ -81,6 +81,10 @@ Needed so that when the user searches for a tab that is not open, BetterTabs can
 
 Needed only for the status bar at the bottom of the panel, which shows how much of the computer's memory and processor is in use. Chrome reports these for the whole computer, not for the extension or for Chrome alone. The numbers are read every few seconds while the panel is open, shown, and not stored or transmitted. Chrome shows no install warning for these two. The user can turn the status bar off in Settings.
 
+### `alarms`
+
+Needed only for the optional idle-tabs feature, which is off until the user turns it on in Settings. When it is on, one alarm wakes the extension every ten minutes to suspend or close tabs the user has not used for the time they chose. Chrome shows no install warning for this permission. No alarm exists while the feature is off.
+
 ### `favicon`
 
 Needed to show each site's icon next to its tabs, using Chrome's own favicon cache.

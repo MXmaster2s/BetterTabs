@@ -2,6 +2,7 @@
 
 const VIEWS = ['site', 'window', 'recent', 'group'];
 const NO_GROUP = -1;
+const IDLE_CHOICES = [1, 4, 24, 72, 168]; // the same list as IDLE_HOURS in idle.js
 
 // Chrome's own tab group colours, so the Groups view matches the tab strip.
 const GROUP_COLOURS = {
@@ -41,6 +42,7 @@ const PANEL_KEYS = [
   ['Move between tabs', '↑ ↓'],
   ['Go to the tab', 'Enter'],
   ['Rename the tab', 'F2'],
+  ['Move the tab up or down (Tab order)', IS_MAC ? '⌥↑ ⌥↓' : 'Alt+↑ ↓'],
   ['Close the tab', IS_MAC ? '⌫' : 'Delete'],
   ['Select several tabs', IS_MAC ? '⌘-click' : 'Ctrl-click'],
   ['Select a range', 'Shift-click'],
@@ -55,6 +57,7 @@ const MAX_FAVOURITES = 100;
 const MAX_LISTS = 100;
 
 const state = {
+  siteSort: 'busiest', // Sites view order: 'busiest' (most tabs first) or 'recent' (the site you used last first)
   view: 'window', // Tab order: what a first-time user sees, the same order as Chrome's tab strip
   query: '',
   history: { query: '', items: [] }, // pages from Chrome's history that match the search and are not open
@@ -80,7 +83,7 @@ const state = {
   shownIds: new Set(), // ids of the tabs the list shows right now (a search can hide some)
   found: null, // id of the tab whose row is pulsing after Show current tab or a favourite click
   shortcuts: {}, // the keys Chrome has for the two commands, by command name
-  settings: { showLongbook: true, showStatus: true, startView: 'last' },
+  settings: { showLongbook: true, showStatus: true, startView: 'last', idle: { on: false, hours: 24, action: 'suspend' } },
 };
 
 const list = document.getElementById('list');
@@ -93,6 +96,12 @@ const locate = document.getElementById('locate');
 const menu = document.getElementById('menu');
 const settingsPanel = document.getElementById('settings');
 const settingLongbook = document.getElementById('setting-longbook');
+const settingIdle = document.getElementById('setting-idle');
+const settingIdleHours = document.getElementById('setting-idle-hours');
+const settingIdleAction = document.getElementById('setting-idle-action');
+const idleHint = document.getElementById('idle-hint');
+const idleNow = document.getElementById('idle-now');
+const idleBanner = document.getElementById('idle-banner');
 const settingView = document.getElementById('setting-view');
 const settingStatus = document.getElementById('setting-status');
 const statusbar = document.getElementById('statusbar');
@@ -101,6 +110,7 @@ const restoreFile = document.getElementById('restore-file');
 const restoreInput = document.getElementById('restore-input');
 const selectToggle = document.getElementById('select-toggle');
 const tidy = document.getElementById('tidy');
+const sortSites = document.getElementById('sort-sites');
 const selectionBar = document.getElementById('selection-bar');
 const selectionCount = document.getElementById('selection-count');
 const selectionSave = document.getElementById('selection-save');
@@ -434,10 +444,12 @@ function bySite(tabs) {
     }
     folders.get(site.key).tabs.push(tab);
   }
-  // Busiest sites first; Chrome pages, files and other leftovers last.
+  // Busiest sites first (or the most recently used, if chosen); Chrome pages, files and other leftovers last.
+  const lastUsed = (folder) => Math.max(0, ...folder.tabs.map((t) => t.lastAccessed ?? 0));
   return [...folders.values()].sort(
     (a, b) =>
       a.key.startsWith('~') - b.key.startsWith('~') ||
+      (state.siteSort === 'recent' && lastUsed(b) - lastUsed(a)) ||
       b.tabs.length - a.tabs.length ||
       a.label.localeCompare(b.label),
   );
@@ -764,6 +776,8 @@ function render() {
   // Order every tab first, so the layout covers the ones a search hides too.
   const all = stabilise(foldersFor(state.tabs, state.layout), state.layout);
   tidy.hidden = sameOrder(all, foldersFor(state.tabs, null));
+  sortSites.hidden = state.view !== 'site';
+  sortSites.setAttribute('aria-pressed', String(state.siteSort === 'recent'));
   state.layout = layoutOf(all);
   const folders = words.length ? stabilise(foldersFor(shown, state.layout), state.layout) : all;
   list.replaceChildren(...(folders.length ? folders.map(renderFolder) : [renderEmpty()]), ...renderHistory());
@@ -776,6 +790,130 @@ function render() {
     list.querySelector(`.tab[data-id="${focusedId}"] .tab-main`)?.focus();
   } else if (focusedFavourite) {
     [...strip.children].find((b) => b.dataset.key === focusedFavourite)?.focus();
+  }
+}
+
+// ---------- Dragging tabs ----------
+// Tab order: drop a tab between two others to move it, or onto another window's folder to send it there.
+// Groups: drop a tab onto a folder to put it in that Chrome tab group (Not in a group takes it out).
+// Ticked tabs travel together. Sites and Recent are worked out from the tabs, so they cannot be reordered.
+
+let drag = null; // { ids } while a drag is under way
+
+const canDrag = () => !state.query && (state.view === 'window' || state.view === 'group');
+
+function clearDropMarks() {
+  for (const el of list.querySelectorAll('.drop-before, .drop-after, .drop-into')) el.classList.remove('drop-before', 'drop-after', 'drop-into');
+}
+
+// Where would a drop at this pointer position land?
+function dropTarget(event) {
+  const row = event.target.closest?.('.tab');
+  const folder = event.target.closest?.('.folder');
+  if (!folder) return null;
+  const key = folder.dataset.folder.slice(state.view.length + 1);
+  if (state.view === 'window' && row) {
+    const box = row.getBoundingClientRect();
+    return { kind: 'between', row, key, tabId: Number(row.dataset.id), before: event.clientY < box.top + box.height / 2 };
+  }
+  return { kind: 'folder', folder, key };
+}
+
+function markDrop(target) {
+  clearDropMarks();
+  if (!target) return;
+  if (target.kind === 'between') target.row.classList.add(target.before ? 'drop-before' : 'drop-after');
+  else target.folder.classList.add('drop-into');
+}
+
+async function dropTabs(target) {
+  const moved = new Set(drag.ids);
+  const tabs = state.tabs.filter((t) => moved.has(t.id));
+  try {
+    if (state.view === 'group') {
+      const ids = tabs.filter((t) => !t.pinned).map((t) => t.id); // pinned tabs cannot be in a group
+      if (!ids.length) return announce('Pinned tabs cannot be put in a group');
+      if (target.key === 'none') await chrome.tabs.ungroup(ids);
+      else await chrome.tabs.group({ tabIds: ids, groupId: Number(target.key.slice(1)) });
+      announce(`Moved ${plural(ids.length, 'tab')} ${target.key === 'none' ? 'out of their group' : 'into the group'}`);
+    } else {
+      // Pinned tabs stay at the front of a window and the rest behind them, so a mixed drop moves the loose tabs.
+      const loose = tabs.filter((t) => !t.pinned);
+      const going = loose.length === tabs.length || !loose.length ? tabs : loose;
+      const goingIds = new Set(going.map((t) => t.id));
+      let windowId;
+      let index = -1;
+      if (target.kind === 'between') {
+        const over = state.tabs.find((t) => t.id === target.tabId);
+        windowId = over.windowId;
+        const others = state.tabs.filter((t) => t.windowId === windowId && !goingIds.has(t.id)).sort((a, b) => a.index - b.index);
+        const at = others.findIndex((t) => t.id === over.id);
+        if (at === -1) return;
+        index = at + (target.before ? 0 : 1);
+        const pinned = others.filter((t) => t.pinned).length;
+        index = going.every((t) => t.pinned) ? Math.min(index, pinned) : Math.max(index, pinned);
+      } else {
+        windowId = Number(target.key.slice(1));
+      }
+      await chrome.tabs.move(going.map((t) => t.id), { windowId, index });
+      announce(`Moved ${plural(going.length, 'tab')}`);
+    }
+  } catch (error) {
+    console.error(error);
+    announce('Chrome would not move these tabs');
+  }
+  state.layout = null;
+  refresh();
+}
+
+list.addEventListener('dragstart', (e) => {
+  const row = e.target.closest?.('.tab');
+  if (!row || !canDrag()) return;
+  const id = Number(row.dataset.id);
+  const ids = state.selecting && state.selected.has(id) ? state.tabs.filter((t) => state.selected.has(t.id)).map((t) => t.id) : [id];
+  drag = { ids };
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', ids.length > 1 ? `${ids.length} tabs` : row.textContent.trim());
+  requestAnimationFrame(() => row.classList.add('dragging'));
+});
+list.addEventListener('dragover', (e) => {
+  if (!drag) return;
+  const target = dropTarget(e);
+  if (!target || (target.kind === 'between' && drag.ids.includes(target.tabId))) return markDrop(null);
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  markDrop(target);
+});
+list.addEventListener('dragleave', (e) => {
+  if (!list.contains(e.relatedTarget)) clearDropMarks();
+});
+list.addEventListener('drop', (e) => {
+  if (!drag) return;
+  e.preventDefault();
+  const target = dropTarget(e);
+  clearDropMarks();
+  if (target && !(target.kind === 'between' && drag.ids.includes(target.tabId))) dropTabs(target);
+});
+list.addEventListener('dragend', () => {
+  drag = null;
+  clearDropMarks();
+  for (const row of list.querySelectorAll('.dragging')) row.classList.remove('dragging');
+});
+
+// Alt+Up and Alt+Down move the focused tab one place in its window (Tab order, no search).
+async function moveTabBy(id, step) {
+  const tab = state.tabs.find((t) => t.id === id);
+  if (!tab || state.view !== 'window' || state.query) return;
+  const inWindow = state.tabs.filter((t) => t.windowId === tab.windowId).sort((a, b) => a.index - b.index);
+  const at = inWindow.findIndex((t) => t.id === id);
+  const next = inWindow[at + step];
+  if (!next || next.pinned !== tab.pinned) return; // the edge of the window, or of the pinned tabs
+  state.layout = null;
+  try {
+    await chrome.tabs.move(id, { index: next.index });
+    announce(`Moved ${step < 0 ? 'up' : 'down'}, position ${next.index + 1} of ${inWindow.length}`);
+  } catch (error) {
+    console.error(error);
   }
 }
 
@@ -1009,7 +1147,7 @@ function renderTab(tab) {
 
   return h(
     'li',
-    rowProps,
+    { ...rowProps, draggable: canDrag() ? 'true' : null },
     h(
       'button',
       {
@@ -1628,6 +1766,7 @@ async function restoreEverythingFile(file) {
     .slice(0, MAX_BACKUPS);
 
   const settings = { ...state.settings };
+  settings.idle = cleanIdle(data.settings?.idle, settings.idle);
   if (typeof data.settings?.showLongbook === 'boolean') settings.showLongbook = data.settings.showLongbook;
   if (typeof data.settings?.showStatus === 'boolean') settings.showStatus = data.settings.showStatus;
   if (VIEWS.includes(data.settings?.startView)) settings.startView = data.settings.startView;
@@ -1650,6 +1789,7 @@ async function restoreEverythingFile(file) {
   settingLongbook.checked = settings.showLongbook;
   settingStatus.checked = settings.showStatus;
   settingView.value = settings.startView;
+  showIdleSettings();
   backupsPanel.hidePopover();
   await load(); // open pages take their remembered names, and the favourites strip draws again
   announce(`Restored ${plural(gained.favourites, 'favourite')}, ${plural(gained.lists, 'list')}, ${plural(gained.names, 'name')} and ${plural(gained.backups, 'recent-tab copy', 'recent-tab copies')}`);
@@ -1824,7 +1964,7 @@ function setView(view) {
 }
 
 function save() {
-  chrome.storage.local.set({ view: state.view, collapsed: [...state.collapsed] });
+  chrome.storage.local.set({ view: state.view, siteSort: state.siteSort, collapsed: [...state.collapsed] });
 }
 
 function saveSettings() {
@@ -1857,8 +1997,9 @@ function showShortcuts() {
 
 async function restore() {
   loadShortcuts();
-  const saved = await chrome.storage.local.get(['view', 'collapsed', 'settings', 'remembered', 'favourites', 'lists']);
+  const saved = await chrome.storage.local.get(['view', 'siteSort', 'collapsed', 'settings', 'remembered', 'favourites', 'lists']);
   if (VIEWS.includes(saved.view)) state.view = saved.view;
+  if (saved.siteSort === 'recent') state.siteSort = 'recent';
   state.settings.showLongbook = saved.settings?.showLongbook !== false;
   state.settings.showStatus = saved.settings?.showStatus !== false;
   if (VIEWS.includes(saved.settings?.startView)) {
@@ -1868,6 +2009,8 @@ async function restore() {
   settingLongbook.checked = state.settings.showLongbook;
   settingStatus.checked = state.settings.showStatus;
   settingView.value = state.settings.startView;
+  state.settings.idle = cleanIdle(saved.settings?.idle, state.settings.idle);
+  showIdleSettings();
   state.collapsed = new Set(saved.collapsed ?? []);
   const names = saved.remembered?.names;
   state.remembered = { names: names && typeof names === 'object' ? names : {} };
@@ -1917,6 +2060,83 @@ settingStatus.addEventListener('change', () => {
   saveSettings();
   renderStatusbar();
 });
+// ---------- Idle tabs ----------
+// idle.js (the service worker) does the work; here are the settings, the count and the note about
+// tabs it closed, which stays until the user reopens or dismisses them.
+
+function cleanIdle(value, fallback) {
+  return {
+    on: typeof value?.on === 'boolean' ? value.on : fallback.on,
+    hours: IDLE_CHOICES.includes(value?.hours) ? value.hours : fallback.hours,
+    action: value?.action === 'close' || value?.action === 'suspend' ? value.action : fallback.action,
+  };
+}
+
+function showIdleSettings() {
+  settingIdle.checked = state.settings.idle.on;
+  settingIdleHours.value = String(state.settings.idle.hours);
+  settingIdleAction.value = state.settings.idle.action;
+}
+
+async function showIdleCount() {
+  try {
+    const { count } = await chrome.runtime.sendMessage({ type: 'idle-peek' });
+    idleHint.textContent = count ? `${plural(count, 'tab')} idle right now.` : 'No tabs are idle right now.';
+    idleNow.disabled = !count;
+  } catch {
+    idleHint.textContent = '';
+    idleNow.disabled = true;
+  }
+}
+
+async function renderIdleNote() {
+  const { idleClosed } = await chrome.storage.local.get('idleClosed');
+  const tabs = Array.isArray(idleClosed?.tabs) ? idleClosed.tabs : [];
+  idleBanner.hidden = !tabs.length;
+  if (tabs.length) document.getElementById('idle-banner-text').textContent = `Closed ${plural(tabs.length, 'idle tab')}`;
+}
+
+function changeIdle() {
+  state.settings.idle = { on: settingIdle.checked, hours: Number(settingIdleHours.value), action: settingIdleAction.value };
+  saveSettings();
+  showIdleCount();
+}
+settingIdle.addEventListener('change', changeIdle);
+settingIdleHours.addEventListener('change', changeIdle);
+settingIdleAction.addEventListener('change', changeIdle);
+settingsPanel.addEventListener('toggle', (e) => {
+  if (e.newState === 'open') showIdleCount();
+});
+
+idleNow.addEventListener('click', async () => {
+  idleNow.disabled = true;
+  try {
+    const { done = 0, action } = await chrome.runtime.sendMessage({ type: 'idle-run' });
+    announce(done ? `${action === 'close' ? 'Closed' : 'Suspended'} ${plural(done, 'idle tab')}` : 'No tabs were idle');
+  } catch {
+    announce('Could not clean up idle tabs');
+  }
+  refresh();
+  showIdleCount();
+});
+
+document.getElementById('idle-reopen').addEventListener('click', async () => {
+  const { idleClosed } = await chrome.storage.local.get('idleClosed');
+  const tabs = (Array.isArray(idleClosed?.tabs) ? idleClosed.tabs : []).filter((t) => typeof t?.url === 'string').reverse();
+  await chrome.storage.local.remove('idleClosed');
+  for (const tab of tabs) await chrome.tabs.create({ url: tab.url, active: false });
+  announce(`Reopened ${plural(tabs.length, 'tab')}`);
+  renderIdleNote();
+  refresh();
+});
+document.getElementById('idle-dismiss').addEventListener('click', async () => {
+  await chrome.storage.local.remove('idleClosed');
+  renderIdleNote();
+});
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === 'local' && changes.idleClosed) renderIdleNote();
+});
+
 settingView.addEventListener('change', () => {
   state.settings.startView = settingView.value;
   saveSettings();
@@ -1972,6 +2192,13 @@ backupsPanel.addEventListener('drop', (e) => {
 });
 
 selectToggle.addEventListener('click', () => setSelecting(!state.selecting));
+sortSites.addEventListener('click', () => {
+  state.siteSort = state.siteSort === 'recent' ? 'busiest' : 'recent';
+  state.layout = null;
+  save();
+  render();
+  announce(state.siteSort === 'recent' ? 'Sites sorted by recent use' : 'Sites sorted by number of tabs');
+});
 tidy.addEventListener('click', () => {
   state.layout = null;
   render();
@@ -2073,7 +2300,10 @@ document.addEventListener('keydown', (e) => {
 
   const i = rows.indexOf(document.activeElement);
   if (i === -1) return;
-  if (e.key === 'ArrowDown') {
+  if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+    e.preventDefault();
+    moveTabBy(Number(rows[i].closest('.tab').dataset.id), e.key === 'ArrowUp' ? -1 : 1);
+  } else if (e.key === 'ArrowDown') {
     e.preventDefault();
     rows[i + 1]?.focus();
   } else if (e.key === 'ArrowUp') {
@@ -2125,4 +2355,4 @@ chrome.storage.onChanged.addListener((changes, area) => {
   if (area === 'session' && changes.focusSearch?.newValue) focusSearchIfAsked();
 });
 
-restore().then(load).then(focusSearchIfAsked).then(sampleUsage);
+restore().then(load).then(focusSearchIfAsked).then(sampleUsage).then(renderIdleNote);

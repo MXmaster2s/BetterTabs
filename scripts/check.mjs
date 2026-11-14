@@ -37,6 +37,7 @@ for (const file of new Set(referenced)) {
 const scripts = [
   'extension/background.js',
   'extension/sidepanel.js',
+  'extension/idle.js',
   'preview/preview.js',
   'preview/mock-chrome.js',
   'scripts/check.mjs',
@@ -52,7 +53,7 @@ for (const file of scripts) {
 }
 
 // Permissions line up with the code
-const code = ['background.js', 'sidepanel.js'].map((file) => readFileSync(join(extension, file), 'utf8')).join('\n');
+const code = ['background.js', 'tabnav.js', 'idle.js', 'sidepanel.js'].map((file) => readFileSync(join(extension, file), 'utf8')).join('\n');
 const usage = {
   tabs: /chrome\.tabs\b/,
   tabGroups: /chrome\.tabGroups\b/,
@@ -62,6 +63,7 @@ const usage = {
   history: /chrome\.history\b/,
   'system.cpu': /chrome\.system\.cpu\b/,
   'system.memory': /chrome\.system\.memory\b/,
+  alarms: /chrome\.alarms\b/,
 };
 const requested = new Set(manifest.permissions ?? []);
 for (const [permission, pattern] of Object.entries(usage)) {

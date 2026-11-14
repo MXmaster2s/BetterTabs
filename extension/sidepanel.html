@@ -38,8 +38,16 @@
       <div class="summary-actions">
         <button id="close-dupes" class="text-button" type="button" title="Close extra copies of tabs with the same address. Keeps the one you are on." hidden></button>
         <button id="tidy" class="text-button" type="button" title="Sort the list again: in Tab order, the same order as Chrome's tab strip; in Sites, busiest first. The list keeps its order while you work, so rows do not move under your mouse." hidden>Tidy up</button>
+        <button id="sort-sites" class="text-button" type="button" aria-pressed="false" title="Order the sites by when you last used a tab on them, newest first. Press again for busiest first." hidden>By recent use</button>
         <button id="select-toggle" class="text-button" type="button" aria-pressed="false" title="Pick several tabs, then close, suspend or group them together. Ctrl or Cmd-click a tab does the same.">Select</button>
       </div>
+    </div>
+    <div id="idle-banner" class="notice" role="status" hidden>
+      <span id="idle-banner-text"></span>
+      <span class="notice-actions">
+        <button id="idle-reopen" class="text-button" type="button" title="Open the tabs BetterTabs closed for being idle">Reopen</button>
+        <button id="idle-dismiss" class="text-button" type="button" title="Forget these tabs. Their titles and addresses are deleted from this computer.">Dismiss</button>
+      </span>
     </div>
   </header>
   <main id="list"></main>
@@ -114,6 +122,40 @@
           <div class="row-buttons">
             <button id="save-everything" class="page-button page-button-main" type="button" title="Save your favourites, saved lists, tab names, settings and recent tabs to one file you keep">Save backup to a file</button>
             <button id="open-backups" class="page-button" type="button" title="Bring back a backup file, or reopen tabs from the last few hours. Nothing you have now is deleted.">Restore from a file</button>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="group-title">Idle tabs</h3>
+      <div class="group">
+        <div class="row">
+          <div class="row-text">
+            <label class="row-title" for="setting-idle" title="Every ten minutes, suspend or close tabs you have not used for the time below">Clean up idle tabs</label>
+            <span class="row-hint">Off until you turn it on. Never touches pinned tabs, the tab you are on, tabs playing sound or favourites.</span>
+          </div>
+          <input id="setting-idle" class="switch" type="checkbox" role="switch">
+        </div>
+        <div class="row">
+          <label class="row-text" for="setting-idle-hours" title="How long a tab has to go unused before it counts as idle"><span class="row-title">Unused for</span></label>
+          <select id="setting-idle-hours">
+            <option value="1">1 hour</option>
+            <option value="4">4 hours</option>
+            <option value="24">1 day</option>
+            <option value="72">3 days</option>
+            <option value="168">1 week</option>
+          </select>
+        </div>
+        <div class="row">
+          <label class="row-text" for="setting-idle-action" title="Suspending frees memory and keeps the tab in the strip. Closing removes it, and the panel offers to reopen it."><span class="row-title">Then</span></label>
+          <select id="setting-idle-action">
+            <option value="suspend">Suspend them</option>
+            <option value="close">Close them (you can reopen)</option>
+          </select>
+        </div>
+        <div class="row row-stack">
+          <p class="row-hint" id="idle-hint"></p>
+          <div class="row-buttons">
+            <button id="idle-now" class="page-button" type="button" title="Suspend or close the idle tabs now, using the time and action above">Clean up now</button>
           </div>
         </div>
       </div>

@@ -27,7 +27,7 @@ From top to bottom:
 2. A row of favourite icons (see Favourites), shown only when there is at least one favourite.
 3. A row with a search box (`type="search"`, label "Search tabs") and, to its right, a square icon button (a target symbol) labelled **Show current tab**.
 4. A four-way view switch (radio group): **Sites**, **Tab order**, **Recent**, **Groups**. **Tab order** is the default the first time the panel opens: tabs in the same order as Chrome's tab strip, one folder per window (the radio value stays `window`, so saved settings and backups keep working). Choosing it again, or **Tidy up**, puts the list back in that order.
-5. A summary row: the tab count on the left; on the right, a "Close N duplicates" text button shown only when duplicates exist, **Tidy up** (`#tidy`, shown only when the list is not in the order a fresh sort would give; see Keeping the order) and **Select** (`#select-toggle`, `aria-pressed`; it reads **Done** while Select mode is on).
+5. A summary row: the tab count on the left; on the right, a "Close N duplicates" text button shown only when duplicates exist, **By recent use** (`#sort-sites`, `aria-pressed`, shown only in the Sites view; see Sites), **Tidy up** (`#tidy`, shown only when the list is not in the order a fresh sort would give; see Keeping the order) and **Select** (`#select-toggle`, `aria-pressed`; it reads **Done** while Select mode is on).
 6. The list: a column of folders. Each folder has a header (`<h2>` wrapping a toggle button with the folder name and its tab count, plus a "Close all" button) and a `<ul>` of tab rows.
 7. A visually hidden `role="status"` element for screen reader announcements.
 8. A context menu (`<div popover role="menu">`) holding **Edit name**, **Reset name** (renamed tabs only) and **Add to favourites** / **Remove from favourites**.
@@ -57,12 +57,14 @@ The list does not reorder itself while tabs open, close and change, so rows neve
 
 - One folder per hostname, with a leading `www.` removed. `http` and `https` only.
 - Other URLs fall into special folders, always listed last: **Chrome pages** (`chrome:`, `chrome-extension:`, `about:`, `edge:`, `devtools:`), **Files on this computer** (`file:`), **Other**.
-- Folders are sorted by tab count (most first), then by name.
+- Folders are sorted by tab count (most first), then by name. **By recent use** (`state.siteSort`, saved as `siteSort`, off by default) sorts them instead by the newest `lastAccessed` of any tab on the site, so the site you used last comes first; ties fall back to tab count. Special folders stay last either way. Pressing the button sorts afresh (like Tidy up); after that the list holds still as usual.
 - Each folder gets a colour derived from a hash of its hostname (`hsl(hash % 360, 62%, 50%)`), shown as a tinted header tab and underline. Special folders are grey.
 - The folder header shows the site's favicon.
 - Each row's second line shows the URL path (`Home page` when the path is `/`; a trailing `?…` when there is a query string).
 
 ### Windows
+
+Shown in the view switch as **Tab order**.
 
 - One folder per window: **This window** first, then **Window 2**, **Window 3** and so on.
 - Row second line: the site name.
@@ -90,6 +92,16 @@ The list does not reorder itself while tabs open, close and change, so rows neve
 - Hovering a row shows a tooltip with the name, the full URL and what a click and `F2` do.
 
 ## Behaviour
+
+### Dragging tabs
+
+Tab rows are draggable (`draggable="true"`) in **Tab order** and **Groups** when the search box is empty. Sites and Recent are worked out from the tabs, so they cannot be reordered and their rows are not draggable.
+
+- **Tab order.** Drop between two rows to move the tab there (a line shows where: `drop-before`, `drop-after`), in the same window or another one; or drop onto a window's folder to send it to the end of that window. Done with `chrome.tabs.move(ids, { windowId, index })`, where `index` counts only the tabs that are not moving, so a tab lands exactly where the line was. Pinned tabs stay in front of the others: a loose tab cannot go before them, a pinned tab cannot go behind them, and when pinned and loose tabs are dragged together only the loose ones move.
+- **Groups.** Drop onto a folder (a dashed outline shows it) to put the tab in that Chrome tab group (`chrome.tabs.group` with `groupId`; Chrome moves it to the group's window), or onto **Not in a group** to take it out (`chrome.tabs.ungroup`). Pinned tabs cannot join a group.
+- **Several tabs.** In Select mode, dragging a ticked tab moves every ticked tab, in strip order.
+- **Keyboard.** Alt+Up and Alt+Down on a focused row move that tab one place within its window (Tab order, no search). The row keeps focus and the move is announced ("Moved up, position 3 of 12"). It stops at the edge of the window and at the pinned boundary.
+- After a drop the list is sorted afresh (`state.layout = null`), so it shows Chrome's new order. If Chrome refuses, "Chrome would not move these tabs" is announced and the list redraws.
 
 ### Switching
 
@@ -180,6 +192,7 @@ A **Settings** icon button sits fixed at the bottom right of the panel (`aria-la
 - **Panel**: **Open the panel in** (a select: the view I used last, Sites, Tab order, Recent, Groups) and **Add to longbook button** (a switch, with a hint and a "Get longbook" link).
 - **Your tabs**: **Saved lists**, a row with a chevron that opens the Saved lists page.
 - **Backup**: a hint saying that one file holds favourites, saved lists, tab names, settings and recent tabs and survives removing or reinstalling BetterTabs, and two buttons side by side, **Save backup to a file** (`#save-everything`, filled) and **Restore from a file** (`#open-backups`). There is no backup setting and no other backup button: the recent tabs (below) are kept automatically.
+- **Idle tabs**: **Clean up idle tabs** (a switch, off by default), **Unused for** (1 hour, 4 hours, 1 day, 3 days, 1 week; default 1 day), **Then** (Suspend them, or Close them (you can reopen); default Suspend), a line saying how many tabs are idle right now, and **Clean up now**, which does it at once whatever the switch says. See Idle tabs below.
 - **Shortcuts from anywhere**: the keys Chrome has for Open BetterTabs, Search your tabs, Back to the previous tab and Forward to the next tab (from `chrome.commands.getAll`, "Not set" when empty, written with Mac symbols such as ⌥⇧B on a Mac) and **Change shortcuts**, which opens `chrome://extensions/shortcuts` in a new tab.
 - **Inside the panel**: the keys the panel itself handles, written for the platform (on a Mac: ⌫ closes a tab, ⌘-click selects, ⌘⇧T reopens a closed tab; elsewhere Delete, Ctrl-click, Ctrl+Shift+T). On a Mac the Backspace key (⌫, which is what the Delete key sends on a Mac keyboard) closes the tab you are on in the list, like Delete.
 - **About**: the version (`chrome.runtime.getManifest().version`), **Privacy policy** and **Report a problem** (links that open in a new tab).
@@ -246,6 +259,10 @@ The list redraws (debounced by 60 ms) when tabs are created, removed, moved, att
 ### Persistence
 
 `chrome.storage.local` holds `{ lists?: List[] (see Saved lists), view, collapsed: string[], settings: { showLongbook: boolean, startView: 'last' | 'site' | 'window' | 'recent' | 'group' }, remembered: { names: { [pageHash]: string } }, favourites: { url: string, title: string }[], backups?: Backup[] }` (`backups` are the recent-tab copies; see Recent tabs) where each collapsed id is `<view>:<folder key>`. `chrome.storage.session` holds `{ names: { [tabId]: string }, favourites: number[] }`, the custom tab names and the favourite tab ids for this run of Chrome, plus a short-lived `focusSearch` timestamp that the keyboard shortcut leaves for the panel. Nothing else is stored.
+
+### Idle tabs
+
+`idle.js`, loaded by the service worker, suspends or closes tabs that have not been used for a time the user chose. Settings are stored in `settings.idle` (`{ on, hours, action }`). While the switch is on, one alarm (`chrome.alarms`, permission `alarms`, no install warning) wakes the worker every 10 minutes, starting 10 minutes after it is turned on; turning it off clears the alarm. A tab is idle when its `lastAccessed` is at least `hours` old. Never touched: the tab shown in any window, pinned tabs, tabs playing sound, favourites (a favourite page by address, a favourite site by host), tabs that are not web or file pages, and, when suspending, tabs already suspended. Suspending uses `chrome.tabs.discard`. Closing first writes the tabs' titles and addresses to `idleClosed` (`{ at, tabs }`, newest first, at most 200) in `chrome.storage.local`, then closes them, so a tab is never closed without a way back. While `idleClosed` has tabs, a note under the search row says "Closed N idle tabs" with **Reopen** (opens each address in a background tab and deletes the list) and **Dismiss** (deletes the list). Messages from the panel: `idle-peek` (how many tabs are idle now) and `idle-run` (clean up now, ignoring the switch). A backup file carries the three settings; `idleClosed` is not backed up.
 
 ## Keyboard
 
