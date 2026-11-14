@@ -33,7 +33,7 @@
     <p class="updated">Applies to every version of BetterTabs.</p>
 
     <h2>The short version</h2>
-    <p>BetterTabs does not collect, store, share or transmit personal data. There is no account, no server and no analytics.</p>
+    <p>BetterTabs does not collect, store, share or transmit personal data. The extension has no account, no server and no analytics.</p>
 
     <h2>What it reads</h2>
     <p>To draw your tab list, BetterTabs reads the title, web address, window, group and state (pinned, playing) of your open tabs, and the names and colours of your tab groups. These stay in your browser. They are used only to show the list, and are never sent anywhere. The titles and addresses of your open tabs are also kept on your computer as recent tabs (see below).</p>
@@ -56,7 +56,12 @@
     <p>On a billing or price page, BetterTabs can open the longbook app on your Mac with the site's name. That link goes to your own computer, not over the internet. If longbook is not installed, BetterTabs shows a link to longbook.app, which opens only if you click it. A setting turns the button off.</p>
 
     <h2>This website</h2>
-    <p>This site is static pages. It sets no cookies and runs no analytics. The footer of the home page shows a Product Hunt badge, an image loaded from Product Hunt's server, which sees your address and browser as any image host does.</p>
+    <p>The extension sends nothing anywhere. This website, bettertabs.fyi, counts visits so I can see whether anyone finds it, and nothing more.</p>
+    <p>It counts: each page opened, and a click on a link to the Chrome Web Store or to GitHub. Each count carries the page, the website it came from, the campaign tag on the link if there is one (for example <code>utm_source</code>), your browser and operating system, and your time zone. Addresses are kept without anything after a <code>?</code> or <code>#</code>. It never records what you type, and it never sees your tabs.</p>
+    <p>It sets no cookies and keeps nothing in your browser. A visit is not tied to you or to any other visit: a daily-changing code made on PostHog's server separates one day's visitors from another's, and there are no profiles. The counts go to PostHog (US), who process them for me and do not use them for anything else. Your IP address reaches PostHog with the request, as with any website, and is used only to make that daily code.</p>
+    <p>Nothing is counted if your browser sends Global Privacy Control or Do Not Track, or if you switch it off here:</p>
+    <p><label><input type="checkbox" id="measure-switch" checked> Count my visits to this website</label></p>
+    <p>The switch is saved in this browser only, and only if you turn counting off. The footer of the home page also shows a Product Hunt badge, an image loaded from Product Hunt's server, which sees your address and browser as any image host does.</p>
 
     <h2>Questions</h2>
     <p>Open an issue on <a href="https://github.com/MXmaster2s/BetterTabs/issues">GitHub</a>. The permissions are explained one by one in the <a href="https://github.com/MXmaster2s/BetterTabs/blob/main/docs/store-listing.md">store listing</a>, and the code is open for you to read.</p>
@@ -73,5 +78,6 @@
       <p class="credit">Competitor research and lead generation by <a href="https://lighteningly.com/?utm_source=bettertabs&amp;utm_medium=website&amp;utm_campaign=research-credit" target="_blank" rel="noopener">Lighteningly</a>.</p>
     </div>
   </footer>
+  <script src="measure.js" defer></script>
 </body>
 </html>
