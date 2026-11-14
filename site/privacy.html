@@ -55,13 +55,19 @@
     <h2>Add to longbook</h2>
     <p>On a billing or price page, BetterTabs can open the longbook app on your Mac with the site's name. That link goes to your own computer, not over the internet. If longbook is not installed, BetterTabs shows a link to longbook.app, which opens only if you click it. A setting turns the button off.</p>
 
-    <h2>This website</h2>
-    <p>The extension sends nothing anywhere. This website, bettertabs.fyi, counts visits so I can see whether anyone finds it, and nothing more.</p>
-    <p>It counts: each page opened, and a click on a link to the Chrome Web Store or to GitHub. Each count carries the page, the website it came from, the campaign tag on the link if there is one (for example <code>utm_source</code>), your browser and operating system, and your time zone. Addresses are kept without anything after a <code>?</code> or <code>#</code>. It never records what you type, and it never sees your tabs.</p>
-    <p>It sets no cookies and keeps nothing in your browser. A visit is not tied to you or to any other visit: a daily-changing code made on PostHog's server separates one day's visitors from another's, and there are no profiles. The counts go to PostHog (US), who process them for me and do not use them for anything else. Your IP address reaches PostHog with the request, as with any website, and is used only to make that daily code.</p>
-    <p>Nothing is counted if your browser sends Global Privacy Control or Do Not Track, or if you switch it off here:</p>
-    <p><label><input type="checkbox" id="measure-switch" checked> Count my visits to this website</label></p>
-    <p>The switch is saved in this browser only, and only if you turn counting off. The footer of the home page also shows a Product Hunt badge, an image loaded from Product Hunt's server, which sees your address and browser as any image host does.</p>
+    <h2 id="website">This website</h2>
+    <p>The extension sends nothing anywhere. This website, bettertabs.fyi, is different: it uses PostHog to see how visitors find and use it.</p>
+    <p><strong>What it records.</strong> Each page you open, your clicks and how far you scroll, the website you came from and any campaign tag on the link, your browser, operating system, screen size and an approximate location from your IP address, and a screen recording of your visit: how the page looks and where you click and scroll. What you type into a form field is never recorded. It never sees your tabs, and nothing from the extension reaches it.</p>
+    <p><strong>Cookies.</strong> PostHog sets cookies and stores a small amount of data in this browser to tell your visits apart and join them into sessions. They carry a random code, not your name or email.</p>
+    <p><strong>Who receives it.</strong> PostHog (United States) processes the data for me and uses it for nothing else. It is used only to improve this website and the extension's listing.</p>
+    <p><strong>When it starts.</strong> If you are in the European Union, the rest of the European Economic Area, the United Kingdom or Switzerland, or your location cannot be told, a banner asks first and nothing is recorded unless you accept. Elsewhere it starts when the page opens, and you can stop it below. Nothing is recorded if your browser sends Global Privacy Control or Do Not Track.</p>
+    <p>Your choice is kept in this browser only. You can change it at any time:</p>
+    <p class="consent-controls">
+      <button type="button" class="button button-quiet" data-consent-set="denied">Turn off</button>
+      <button type="button" class="button button-quiet" data-consent-set="granted">Turn on</button>
+    </p>
+    <p id="consent-state" role="status"></p>
+    <p>The footer of the home page also shows a Product Hunt badge, an image loaded from Product Hunt's server, which sees your address and browser as any image host does.</p>
 
     <h2>Questions</h2>
     <p>Open an issue on <a href="https://github.com/MXmaster2s/BetterTabs/issues">GitHub</a>. The permissions are explained one by one in the <a href="https://github.com/MXmaster2s/BetterTabs/blob/main/docs/store-listing.md">store listing</a>, and the code is open for you to read.</p>
